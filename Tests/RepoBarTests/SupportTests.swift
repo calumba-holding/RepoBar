@@ -6,7 +6,7 @@ import Testing
 @MainActor
 struct RefreshAndBackoffTests {
     @Test
-    func forceRefreshTriggersTick() async throws {
+    func forceRefreshTriggersTick() {
         let scheduler = RefreshScheduler()
         var fired = false
         scheduler.configure(interval: 60, fireImmediately: false) {
@@ -18,9 +18,9 @@ struct RefreshAndBackoffTests {
     }
 
     @Test
-    func backoffTracksCooldown() async {
+    func backoffTracksCooldown() async throws {
         let tracker = BackoffTracker()
-        let url = URL(string: "https://example.com/path")!
+        let url = try #require(URL(string: "https://example.com/path"))
         let initial = await tracker.isCoolingDown(url: url)
         #expect(initial == false)
 

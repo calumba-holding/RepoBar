@@ -42,7 +42,7 @@ struct RepositoryMappingTests {
     }
 }
 
-// Reuse helper from MenuContentViewModelTests
+/// Reuse helper from MenuContentViewModelTests
 private enum TestableRepoGrid {
     static func sortedForTest(_ repos: [RepositoryDisplayModel]) -> [RepositoryDisplayModel] {
         repos.sorted { lhs, rhs in

@@ -98,7 +98,7 @@ struct LocalProjectsCommand: CommanderRunnableCommand {
     }
 }
 
-private struct LocalProjectsOutput: Codable, Sendable {
+private struct LocalProjectsOutput: Codable {
     let root: String
     let resolvedRoot: String
     let depth: Int
@@ -106,7 +106,7 @@ private struct LocalProjectsOutput: Codable, Sendable {
     let repositories: [LocalRepoOutput]
 }
 
-private struct LocalRepoOutput: Codable, Sendable {
+private struct LocalRepoOutput: Codable {
     let displayName: String
     let fullName: String?
     let branch: String

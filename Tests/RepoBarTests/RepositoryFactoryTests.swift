@@ -24,14 +24,14 @@ struct RepositoryFactoryTests {
         decoder.dateDecodingStrategy = .iso8601
         let item = try decoder.decode(RepoItem.self, from: Data(json.utf8))
 
-        let repo = Repository.from(
+        let repo = try Repository.from(
             item: item,
             openPulls: 3,
             issues: 5,
             ciStatus: .passing,
             ciRunCount: 11,
-            latestRelease: Release(name: "v1", tag: "v1.0", publishedAt: Date(), url: URL(string: "https://example.com")!),
-            latestActivity: ActivityEvent(title: "t", actor: "a", date: Date(), url: URL(string: "https://example.com")!),
+            latestRelease: Release(name: "v1", tag: "v1.0", publishedAt: Date(), url: #require(URL(string: "https://example.com"))),
+            latestActivity: ActivityEvent(title: "t", actor: "a", date: Date(), url: #require(URL(string: "https://example.com"))),
             activityEvents: [],
             traffic: TrafficStats(uniqueVisitors: 1, uniqueCloners: 2),
             heatmap: [HeatmapCell(date: Date(), count: 4)],

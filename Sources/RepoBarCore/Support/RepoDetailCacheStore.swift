@@ -1,6 +1,6 @@
 import Foundation
 
-struct RepoDetailCache: Codable, Sendable {
+struct RepoDetailCache: Codable {
     var openPulls: Int?
     var openPullsFetchedAt: Date?
     var ciDetails: CIStatusDetails?

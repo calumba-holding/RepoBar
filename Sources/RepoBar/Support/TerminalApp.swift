@@ -25,7 +25,9 @@ enum TerminalApp: String, CaseIterable {
         }
     }
 
-    var displayName: String { self.rawValue }
+    var displayName: String {
+        self.rawValue
+    }
 
     private static let logger = RepoBarLogging.logger("terminal")
 

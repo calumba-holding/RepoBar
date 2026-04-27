@@ -9,13 +9,13 @@ actor LocalRepoManager {
     private var statusCache: [String: StatusCacheEntry] = [:]
     private var lastFetchByPath: [String: Date] = [:]
 
-    struct SnapshotResult: Sendable {
+    struct SnapshotResult {
         let discoveredCount: Int
         let repoIndex: LocalRepoIndex
         let accessDenied: Bool
     }
 
-    struct SnapshotOptions: Sendable {
+    struct SnapshotOptions {
         let autoSyncEnabled: Bool
         let fetchInterval: TimeInterval
         let preferredPathsByFullName: [String: String]

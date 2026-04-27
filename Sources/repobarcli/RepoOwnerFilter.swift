@@ -1,7 +1,7 @@
 import Foundation
 import RepoBarCore
 
-struct RepoOwnerFilter: Equatable, Sendable {
+struct RepoOwnerFilter: Equatable {
     let owners: Set<String>
 
     static func parse(_ values: [String]) -> RepoOwnerFilter? {

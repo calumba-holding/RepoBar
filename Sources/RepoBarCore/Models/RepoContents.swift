@@ -9,7 +9,9 @@ public struct RepoContentItem: Identifiable, Hashable, Sendable, Decodable {
     public let htmlURL: URL?
     public let downloadURL: URL?
 
-    public var id: String { self.path }
+    public var id: String {
+        self.path
+    }
 
     public init(
         name: String,
@@ -29,7 +31,9 @@ public struct RepoContentItem: Identifiable, Hashable, Sendable, Decodable {
         self.downloadURL = downloadURL
     }
 
-    public var isDirectory: Bool { self.type == .dir }
+    public var isDirectory: Bool {
+        self.type == .dir
+    }
 
     enum CodingKeys: String, CodingKey {
         case name

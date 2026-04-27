@@ -4,8 +4,8 @@ import Testing
 
 struct ActivityMetadataCoverageTests {
     @Test
-    func label_formatsCommonTargets() {
-        let url = URL(string: "https://example.com")!
+    func label_formatsCommonTargets() throws {
+        let url = try #require(URL(string: "https://example.com"))
 
         #expect(ActivityMetadata(actor: "a", action: "Forked", target: "→ org/repo", url: url).label == "Forked → org/repo")
         #expect(ActivityMetadata(actor: "a", action: "Commented", target: "#123", url: url).label == "Commented #123")
@@ -16,8 +16,8 @@ struct ActivityMetadataCoverageTests {
     }
 
     @Test
-    func deepLink_isURL() {
-        let url = URL(string: "https://example.com")!
+    func deepLink_isURL() throws {
+        let url = try #require(URL(string: "https://example.com"))
         #expect(ActivityMetadata(actor: "a", action: nil, target: nil, url: url).deepLink == url)
     }
 }

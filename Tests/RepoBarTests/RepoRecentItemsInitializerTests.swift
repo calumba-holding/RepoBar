@@ -4,9 +4,9 @@ import Testing
 
 struct RepoRecentItemsInitializerTests {
     @Test
-    func initializers_assignFields() {
-        let url = URL(string: "https://example.com")!
-        let avatar = URL(string: "https://example.com/a.png")!
+    func initializers_assignFields() throws {
+        let url = try #require(URL(string: "https://example.com"))
+        let avatar = try #require(URL(string: "https://example.com/a.png"))
         let now = Date(timeIntervalSinceReferenceDate: 1_234_567)
 
         let label = RepoIssueLabel(name: "bug", colorHex: "ff0000")

@@ -16,7 +16,7 @@
         }
     }
 
-    struct GitExecutableLocator: Sendable {
+    struct GitExecutableLocator {
         static let shared = GitExecutableLocator()
         let url: URL
 

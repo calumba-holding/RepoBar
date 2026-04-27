@@ -218,7 +218,7 @@
         }
     }
 
-    private struct LocalGitRunner: Sendable {
+    private struct LocalGitRunner {
         func run(_ arguments: [String], in directory: URL) throws -> String {
             let process = Process()
             process.executableURL = GitExecutableLocator.shared.url

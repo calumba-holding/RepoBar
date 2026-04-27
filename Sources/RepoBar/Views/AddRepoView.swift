@@ -50,7 +50,9 @@ struct AddRepoView: View {
         .onAppear { Task { await self.searchDefault() } }
     }
 
-    private func searchDefault() async { await self.search() }
+    private func searchDefault() async {
+        await self.search()
+    }
 
     private func search() async {
         self.isLoading = true

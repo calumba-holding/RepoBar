@@ -13,9 +13,9 @@ struct HeatmapSpanCoverageTests {
     }
 
     @Test
-    func range_alignToWeekFalse_usesDirectMonthOffset() {
+    func range_alignToWeekFalse_usesDirectMonthOffset() throws {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         let now = Date(timeIntervalSinceReferenceDate: 2_000_000)
         let range = HeatmapFilter.range(span: .oneMonth, now: now, calendar: calendar, alignToWeek: false)
         #expect(range.end == calendar.startOfDay(for: now))

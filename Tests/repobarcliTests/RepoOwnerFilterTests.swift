@@ -22,8 +22,8 @@ struct RepoOwnerFilterTests {
     }
 
     @Test
-    func applyingFiltersByOwner() {
-        let filter = RepoOwnerFilter.parse(["mine"])!
+    func applyingFiltersByOwner() throws {
+        let filter = try #require(RepoOwnerFilter.parse(["mine"]))
         let repos = [
             Repository(
                 id: "1",

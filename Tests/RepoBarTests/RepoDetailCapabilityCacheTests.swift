@@ -10,7 +10,7 @@ struct RepoDetailCapabilityCacheTests {
 
         let diskStore = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
         var store = RepoDetailStore(diskStore: diskStore)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         let now = Date(timeIntervalSinceReferenceDate: 123_456)
 
         _ = store.updateDiscussionsEnabled(
@@ -46,7 +46,7 @@ struct RepoDetailCapabilityCacheTests {
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
         let diskStore = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         let now = Date(timeIntervalSinceReferenceDate: 222_222)
 
         var writer = RepoDetailStore(diskStore: diskStore)

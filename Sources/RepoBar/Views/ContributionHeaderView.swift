@@ -9,18 +9,6 @@ struct ContributionHeaderView: View {
     let appState: AppState
     @Environment(\.menuItemHighlighted) private var isHighlighted
 
-    init(
-        username: String,
-        displayName: String,
-        session: Session,
-        appState: AppState
-    ) {
-        self.username = username
-        self.displayName = displayName
-        self.session = session
-        self.appState = appState
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Contributions · \(self.displayName) · last \(self.session.settings.heatmap.span.label)")

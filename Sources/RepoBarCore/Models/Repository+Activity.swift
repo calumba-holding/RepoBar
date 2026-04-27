@@ -1,12 +1,19 @@
 import Foundation
 
 public extension ActivityEvent {
-    var line: String { "\(self.actor): \(self.title)" }
+    var line: String {
+        "\(self.actor): \(self.title)"
+    }
 }
 
 public extension Repository {
-    var activityLine: String? { (self.latestActivity ?? self.activityEvents.first)?.line }
-    var activityURL: URL? { (self.latestActivity ?? self.activityEvents.first)?.url }
+    var activityLine: String? {
+        (self.latestActivity ?? self.activityEvents.first)?.line
+    }
+
+    var activityURL: URL? {
+        (self.latestActivity ?? self.activityEvents.first)?.url
+    }
 
     /// Returns the most recent activity date between latest activity and last push.
     var activityDate: Date? {

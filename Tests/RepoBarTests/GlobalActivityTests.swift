@@ -17,7 +17,7 @@ struct GlobalActivityTests {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let event = try decoder.decode(RepoEvent.self, from: data)
-        let webHost = URL(string: "https://github.com")!
+        let webHost = try #require(URL(string: "https://github.com"))
 
         let activity = event.activityEventFromRepo(webHost: webHost)
 
@@ -41,7 +41,7 @@ struct GlobalActivityTests {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let event = try decoder.decode(RepoEvent.self, from: data)
-        let webHost = URL(string: "https://github.com")!
+        let webHost = try #require(URL(string: "https://github.com"))
 
         let activity = event.activityEventFromRepo(webHost: webHost)
 
@@ -72,7 +72,7 @@ struct GlobalActivityTests {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let event = try decoder.decode(RepoEvent.self, from: data)
-        let webHost = URL(string: "https://ghe.example.com")!
+        let webHost = try #require(URL(string: "https://ghe.example.com"))
 
         let commits = event.commitSummaries(webHost: webHost)
 

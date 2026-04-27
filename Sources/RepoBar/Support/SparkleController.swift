@@ -43,7 +43,9 @@ final class DisabledUpdaterController: UpdaterProviding {
             set { self.updater.automaticallyDownloadsUpdates = newValue }
         }
 
-        var isAvailable: Bool { true }
+        var isAvailable: Bool {
+            true
+        }
     }
 #endif
 

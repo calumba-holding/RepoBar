@@ -25,10 +25,12 @@ struct RepoCardView: View {
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2))
+                .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.gray.opacity(0.1), lineWidth: 1))
+                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+        )
         .contentShape(Rectangle())
         .onTapGesture { self.open(url: self.repoURL()) }
         .accessibilityAction(named: Text("Move down")) { self.moveDown?() }
@@ -68,7 +70,6 @@ struct RepoCardView: View {
         return parts.joined(separator: ", ")
     }
 
-    @ViewBuilder
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
@@ -101,7 +102,6 @@ struct RepoCardView: View {
         }
     }
 
-    @ViewBuilder
     private var stats: some View {
         HStack(spacing: 10) {
             LinkBadge(
@@ -303,8 +303,13 @@ private struct CIBadge: View {
         .help(self.helpText)
     }
 
-    private var color: Color { .clear }
-    private var helpText: String { "" }
+    private var color: Color {
+        .clear
+    }
+
+    private var helpText: String {
+        ""
+    }
 }
 
 struct StatBadge: View {

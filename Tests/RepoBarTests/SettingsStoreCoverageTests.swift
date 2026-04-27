@@ -4,9 +4,9 @@ import Testing
 
 struct SettingsStoreCoverageTests {
     @Test
-    func load_returnsDefaultsWhenMissing() {
+    func load_returnsDefaultsWhenMissing() throws {
         let suiteName = "SettingsStoreCoverageTests.missing.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
         let store = SettingsStore(defaults: defaults)
         let settings = store.load()
@@ -14,15 +14,15 @@ struct SettingsStoreCoverageTests {
     }
 
     @Test
-    func saveAndLoad_roundTrips() {
+    func saveAndLoad_roundTrips() throws {
         let suiteName = "SettingsStoreCoverageTests.roundtrip.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
         let store = SettingsStore(defaults: defaults)
 
         var settings = UserSettings()
         settings.repoList.displayLimit = 9
-        settings.githubHost = URL(string: "https://github.example.com")!
+        settings.githubHost = try #require(URL(string: "https://github.example.com"))
         store.save(settings)
 
         let loaded = store.load()
@@ -33,7 +33,7 @@ struct SettingsStoreCoverageTests {
     @Test
     func load_migratesOlderEnvelopeAndPersistsCurrentVersion() throws {
         let suiteName = "SettingsStoreCoverageTests.migrate.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
 
         struct TestEnvelope: Codable {
@@ -56,9 +56,9 @@ struct SettingsStoreCoverageTests {
     }
 
     @Test
-    func load_invalidDataFallsBackToDefaults() {
+    func load_invalidDataFallsBackToDefaults() throws {
         let suiteName = "SettingsStoreCoverageTests.invalid.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
         defaults.set(Data([0x00, 0x01, 0x02]), forKey: "com.steipete.repobar.settings")
         let store = SettingsStore(defaults: defaults)

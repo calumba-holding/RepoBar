@@ -30,5 +30,7 @@ public struct ActivityMetadata: Codable, Equatable, Sendable {
         }
     }
 
-    public var deepLink: URL? { self.url }
+    public var deepLink: URL? {
+        self.url
+    }
 }

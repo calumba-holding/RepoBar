@@ -1,11 +1,11 @@
 import Foundation
 
-struct ActivitySnapshot: Sendable {
+struct ActivitySnapshot {
     let events: [ActivityEvent]
     let latest: ActivityEvent?
 }
 
-struct GitHubRestAPI: Sendable {
+struct GitHubRestAPI {
     let apiHost: @Sendable () async -> URL
     let tokenProvider: @Sendable () async throws -> String
     let requestRunner: GitHubRequestRunner

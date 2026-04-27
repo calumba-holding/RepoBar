@@ -70,7 +70,9 @@ public struct Repository: Identifiable, Equatable, Sendable {
         self.discussionsEnabled = discussionsEnabled
     }
 
-    public var fullName: String { "\(self.owner)/\(self.name)" }
+    public var fullName: String {
+        "\(self.owner)/\(self.name)"
+    }
 
     public func withOrder(_ order: Int?) -> Repository {
         Repository(

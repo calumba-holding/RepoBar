@@ -50,9 +50,9 @@ struct RepositorySortCoverageTests {
     }
 
     @Test
-    func sortsByEventLine() {
+    func sortsByEventLine() throws {
         let now = Date(timeIntervalSinceReferenceDate: 2_000_000)
-        let url = URL(string: "https://example.com")!
+        let url = try #require(URL(string: "https://example.com"))
         let one = Repository(
             id: "1",
             name: "One",
@@ -126,8 +126,8 @@ struct RepositorySortCoverageTests {
     }
 
     @Test
-    func tieBreakFallsBackToFullName() {
-        let a = Repository(
+    func tieBreakFallsBackToFullName() throws {
+        let a = try Repository(
             id: "1",
             name: "A",
             owner: "me",
@@ -145,7 +145,7 @@ struct RepositorySortCoverageTests {
                 title: "Same",
                 actor: "me",
                 date: Date(timeIntervalSinceReferenceDate: 1),
-                url: URL(string: "https://example.com")!
+                url: #require(URL(string: "https://example.com"))
             ),
             traffic: nil,
             heatmap: []

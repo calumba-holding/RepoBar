@@ -1,6 +1,6 @@
 import Foundation
 
-enum ChangelogSource: Equatable, Sendable {
+enum ChangelogSource: Equatable {
     case local
     case remote
 
@@ -12,7 +12,7 @@ enum ChangelogSource: Equatable, Sendable {
     }
 }
 
-struct ChangelogContent: Equatable, Sendable {
+struct ChangelogContent: Equatable {
     let fileName: String
     let markdown: String
     let source: ChangelogSource

@@ -40,16 +40,16 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityEventUsesIssueTitleAndRepoFallback() {
-        let webHost = URL(string: "https://github.com")!
-        let event = RepoEvent(
+    func activityEventUsesIssueTitleAndRepoFallback() throws {
+        let webHost = try #require(URL(string: "https://github.com"))
+        let event = try RepoEvent(
             type: "IssuesEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
             payload: EventPayload(
                 action: "opened",
                 comment: nil,
-                issue: EventIssue(title: "Fix it", number: 123, htmlUrl: URL(string: "https://example.com/issue/1")!),
+                issue: EventIssue(title: "Fix it", number: 123, htmlUrl: #require(URL(string: "https://example.com/issue/1"))),
                 pullRequest: nil
             ),
             createdAt: Date()
@@ -61,8 +61,8 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityEventUsesStargazerLinkForWatchEvents() {
-        let webHost = URL(string: "https://github.com")!
+    func activityEventUsesStargazerLinkForWatchEvents() throws {
+        let webHost = try #require(URL(string: "https://github.com"))
         let event = RepoEvent(
             type: "WatchEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -75,8 +75,8 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityEventUsesCommitLinkForPushEvents() {
-        let webHost = URL(string: "https://github.com")!
+    func activityEventUsesCommitLinkForPushEvents() throws {
+        let webHost = try #require(URL(string: "https://github.com"))
         let event = RepoEvent(
             type: "PushEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -100,9 +100,9 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityMetadataCapturesActionTargetAndLink() {
-        let webHost = URL(string: "https://github.com")!
-        let event = RepoEvent(
+    func activityMetadataCapturesActionTargetAndLink() throws {
+        let webHost = try #require(URL(string: "https://github.com"))
+        let event = try RepoEvent(
             type: "PullRequestEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
@@ -114,7 +114,7 @@ struct EventLabelTests {
                     title: "Ship it",
                     number: 42,
                     merged: true,
-                    htmlUrl: URL(string: "https://example.com/pr/42")!
+                    htmlUrl: #require(URL(string: "https://example.com/pr/42"))
                 )
             ),
             createdAt: Date()
@@ -125,9 +125,9 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityMetadataIncludesReleaseTag() {
-        let webHost = URL(string: "https://github.com")!
-        let event = RepoEvent(
+    func activityMetadataIncludesReleaseTag() throws {
+        let webHost = try #require(URL(string: "https://github.com"))
+        let event = try RepoEvent(
             type: "ReleaseEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
@@ -137,7 +137,7 @@ struct EventLabelTests {
                 issue: nil,
                 pullRequest: nil,
                 release: EventRelease(
-                    htmlUrl: URL(string: "https://example.com/releases/v1.0.0")!,
+                    htmlUrl: #require(URL(string: "https://example.com/releases/v1.0.0")),
                     tagName: "v1.0.0",
                     name: nil
                 )
@@ -149,9 +149,9 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityMetadataFormatsForkTarget() {
-        let webHost = URL(string: "https://github.com")!
-        let event = RepoEvent(
+    func activityMetadataFormatsForkTarget() throws {
+        let webHost = try #require(URL(string: "https://github.com"))
+        let event = try RepoEvent(
             type: "ForkEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
@@ -162,7 +162,7 @@ struct EventLabelTests {
                 pullRequest: nil,
                 release: nil,
                 forkee: EventForkee(
-                    htmlUrl: URL(string: "https://example.com/octo/fork")!,
+                    htmlUrl: #require(URL(string: "https://example.com/octo/fork")),
                     fullName: "octo/fork"
                 )
             ),

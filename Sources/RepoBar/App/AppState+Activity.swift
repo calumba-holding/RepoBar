@@ -134,7 +134,9 @@ extension AppState {
         let owner: String
         let name: String
 
-        var fullName: String { "\(self.owner)/\(self.name)" }
+        var fullName: String {
+            "\(self.owner)/\(self.name)"
+        }
     }
 
     private func pinnedRepoTargets(

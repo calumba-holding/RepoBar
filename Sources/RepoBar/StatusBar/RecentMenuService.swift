@@ -279,7 +279,7 @@ struct RecentMenuDescriptor {
     let load: @MainActor (String, String, String, Int) async throws -> RecentMenuItems
 }
 
-enum RecentMenuItems: Sendable {
+enum RecentMenuItems {
     case commits([RepoCommitSummary])
     case issues([RepoIssueSummary])
     case pullRequests([RepoPullRequestSummary])

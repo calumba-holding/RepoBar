@@ -37,8 +37,13 @@ struct RepoAutocompleteWindowView: NSViewRepresentable {
     @MainActor
     class Coordinator: NSObject {
         private final class DropdownWindow: NSPanel {
-            override var canBecomeKey: Bool { false }
-            override var canBecomeMain: Bool { false }
+            override var canBecomeKey: Bool {
+                false
+            }
+
+            override var canBecomeMain: Bool {
+                false
+            }
         }
 
         private var dropdownWindow: NSWindow?

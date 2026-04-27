@@ -1,7 +1,7 @@
 import Foundation
 import Swiftdansi
 
-struct MarkdownRenderRequest: Sendable {
+struct MarkdownRenderRequest {
     var width: Int?
     var wrap: Bool?
     var color: Bool?

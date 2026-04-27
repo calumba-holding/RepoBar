@@ -12,13 +12,13 @@ struct HeatmapFilterTests {
     }
 
     @Test
-    func filterDropsOlderCells() {
+    func filterDropsOlderCells() throws {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
 
-        let now = calendar.date(from: DateComponents(year: 2025, month: 12, day: 15, hour: 12))!
-        let recent = calendar.date(byAdding: .day, value: -10, to: now)!
-        let old = calendar.date(byAdding: .day, value: -80, to: now)!
+        let now = try #require(calendar.date(from: DateComponents(year: 2025, month: 12, day: 15, hour: 12)))
+        let recent = try #require(calendar.date(byAdding: .day, value: -10, to: now))
+        let old = try #require(calendar.date(byAdding: .day, value: -80, to: now))
 
         let cells = [
             HeatmapCell(date: old, count: 1),
@@ -31,12 +31,12 @@ struct HeatmapFilterTests {
     }
 
     @Test
-    func alignedRangeStartsOnWeekBoundary() {
+    func alignedRangeStartsOnWeekBoundary() throws {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         calendar.firstWeekday = 2
 
-        let now = calendar.date(from: DateComponents(year: 2025, month: 12, day: 20, hour: 12))!
+        let now = try #require(calendar.date(from: DateComponents(year: 2025, month: 12, day: 20, hour: 12)))
         let range = HeatmapFilter.alignedRange(span: .threeMonths, now: now, calendar: calendar)
         let weekday = calendar.component(.weekday, from: range.start)
         #expect(weekday == calendar.firstWeekday)

@@ -40,17 +40,7 @@ private struct MenuItemSelectionBackground: Shape {
 struct MenuItemContainerView<Content: View>: View {
     @Bindable var highlightState: MenuItemHighlightState
     let showsSubmenuIndicator: Bool
-    let content: Content
-
-    init(
-        highlightState: MenuItemHighlightState,
-        showsSubmenuIndicator: Bool,
-        @ViewBuilder content: () -> Content
-    ) {
-        self.highlightState = highlightState
-        self.showsSubmenuIndicator = showsSubmenuIndicator
-        self.content = content()
-    }
+    @ViewBuilder let content: Content
 
     var body: some View {
         self.content
@@ -86,7 +76,10 @@ final class MenuItemHostingView: NSView, MenuItemMeasuring, MenuItemHighlighting
     private var cachedHeight: CGFloat?
     private var cachedContentVersion: Int = -1
 
-    override var allowsVibrancy: Bool { true }
+    override var allowsVibrancy: Bool {
+        true
+    }
+
     override var focusRingType: NSFocusRingType {
         get { MenuFocusRingStyle.type }
         set {}

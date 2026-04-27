@@ -197,7 +197,7 @@ actor GitHubRequestRunner {
     }
 }
 
-struct RequestRunnerDiagnostics: Sendable {
+struct RequestRunnerDiagnostics {
     let rateLimitReset: Date?
     let lastRateLimitError: String?
     let etagEntries: Int

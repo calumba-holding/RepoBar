@@ -251,5 +251,7 @@ public struct MenuCustomization: Equatable, Codable, Hashable, Sendable {
 }
 
 public extension MainMenuItemID {
-    var isRequired: Bool { MenuCustomization.requiredMainMenuItems.contains(self) }
+    var isRequired: Bool {
+        MenuCustomization.requiredMainMenuItems.contains(self)
+    }
 }

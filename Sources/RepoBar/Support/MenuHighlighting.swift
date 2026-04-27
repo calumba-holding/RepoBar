@@ -1,15 +1,8 @@
 import AppKit
 import SwiftUI
 
-private struct MenuItemHighlightedKey: EnvironmentKey {
-    static let defaultValue = false
-}
-
 extension EnvironmentValues {
-    var menuItemHighlighted: Bool {
-        get { self[MenuItemHighlightedKey.self] }
-        set { self[MenuItemHighlightedKey.self] = newValue }
-    }
+    @Entry var menuItemHighlighted: Bool = false
 }
 
 enum MenuHighlightStyle {

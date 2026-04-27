@@ -30,7 +30,10 @@ public enum TokenStoreError: Error {
 }
 
 public struct TokenStore: Sendable {
-    public static var shared: TokenStore { TokenStore() }
+    public static var shared: TokenStore {
+        TokenStore()
+    }
+
     private let service: String
     private let accessGroup: String?
     private let logger = RepoBarLogging.logger("token-store")

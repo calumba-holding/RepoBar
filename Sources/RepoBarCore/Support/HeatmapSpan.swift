@@ -15,7 +15,9 @@ public enum HeatmapSpan: Int, CaseIterable, Equatable, Codable {
         }
     }
 
-    public var months: Int { self.rawValue }
+    public var months: Int {
+        self.rawValue
+    }
 }
 
 public struct HeatmapRange: Equatable, Codable, Sendable {

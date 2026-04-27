@@ -5,7 +5,9 @@ public enum CacheFreshness: String, Codable, Sendable {
     case fresh
     case stale
 
-    public var needsRefresh: Bool { self != .fresh }
+    public var needsRefresh: Bool {
+        self != .fresh
+    }
 }
 
 public struct RepoDetailCacheState: Equatable, Sendable {

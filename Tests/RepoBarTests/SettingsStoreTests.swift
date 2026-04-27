@@ -16,7 +16,7 @@ struct SettingsStoreTests {
         settings.repoList.displayLimit = 9
         settings.repoList.pinnedRepositories = ["steipete/RepoBar", "steipete/clawdis"]
         settings.repoList.hiddenRepositories = ["steipete/agent-scripts"]
-        settings.enterpriseHost = URL(string: "https://ghe.example.com")!
+        settings.enterpriseHost = try #require(URL(string: "https://ghe.example.com"))
         settings.debugPaneEnabled = true
 
         store.save(settings)

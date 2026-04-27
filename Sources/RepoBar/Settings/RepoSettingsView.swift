@@ -124,7 +124,10 @@ struct RepoSettingsView: View {
 // MARK: - Autocomplete helper
 
 private struct RepoRow: Identifiable, Hashable {
-    var id: String { self.name }
+    var id: String {
+        self.name
+    }
+
     let name: String
     var visibility: RepoVisibility
     let sortKey: Int
@@ -182,7 +185,8 @@ private struct RepoInputRow<Accessory: View>: View {
                                 .onChange(of: geometry.size) { _, newSize in
                                     self.textFieldSize = newSize
                                 }
-                        })
+                        }
+                    )
                     .background(
                         RepoAutocompleteWindowView(
                             suggestions: self.suggestions,

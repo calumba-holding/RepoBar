@@ -158,11 +158,15 @@ private struct MarkdownBlockBuilder {
 }
 
 private extension SoftBreak {
-    var renderedText: String { "\n" }
+    var renderedText: String {
+        "\n"
+    }
 }
 
 private extension LineBreak {
-    var renderedText: String { "\n" }
+    var renderedText: String {
+        "\n"
+    }
 }
 
 private extension ListItemContainer {

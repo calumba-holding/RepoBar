@@ -21,12 +21,12 @@ struct LoopbackServerTests {
         let expectedCode = "code-1"
         let expectedState = "state-1"
 
-        var components = URLComponents(url: redirectURL, resolvingAgainstBaseURL: false)!
+        var components = try #require(URLComponents(url: redirectURL, resolvingAgainstBaseURL: false))
         components.queryItems = [
             URLQueryItem(name: "code", value: expectedCode),
             URLQueryItem(name: "state", value: expectedState)
         ]
-        let callbackURL = components.url!
+        let callbackURL = try #require(components.url)
 
         let sendTask = Task.detached {
             while !Task.isCancelled {
@@ -63,7 +63,7 @@ struct LoopbackServerTests {
 
     @Test
     @MainActor
-    func startThrowsPortInUse() async throws {
+    func startThrowsPortInUse() throws {
         let (port, socket) = try Self.reservePort()
         defer { close(socket) }
 

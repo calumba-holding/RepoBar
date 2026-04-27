@@ -1,8 +1,8 @@
 import Foundation
 import RepoBarCore
 
-struct LocalRefMenuRowViewModel: Sendable {
-    enum Kind: Sendable {
+struct LocalRefMenuRowViewModel {
+    enum Kind {
         case branch
         case worktree
     }

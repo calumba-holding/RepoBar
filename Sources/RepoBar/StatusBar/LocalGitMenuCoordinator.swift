@@ -635,7 +635,7 @@ final class LocalGitMenuCoordinator {
     }
 }
 
-private enum LocalGitAction: Sendable {
+private enum LocalGitAction {
     case sync(URL)
     case rebase(URL)
     case reset(URL)

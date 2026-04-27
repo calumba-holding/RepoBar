@@ -264,7 +264,7 @@
         }
     }
 
-    private struct GitRunner: Sendable {
+    private struct GitRunner {
         func run(_ arguments: [String], in directory: URL) throws -> String {
             let process = Process()
             process.executableURL = GitExecutableLocator.shared.url
@@ -292,12 +292,14 @@
         case commandFailed(output: String, error: String)
     }
 
-    private struct GitRemote: Sendable {
+    private struct GitRemote {
         let host: String
         let owner: String
         let name: String
 
-        var fullName: String { "\(self.owner)/\(self.name)" }
+        var fullName: String {
+            "\(self.owner)/\(self.name)"
+        }
 
         static func parse(_ value: String) -> GitRemote? {
             if value.contains("://") {

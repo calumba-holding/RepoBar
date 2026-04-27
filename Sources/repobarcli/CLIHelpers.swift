@@ -46,7 +46,7 @@ extension ParsedValues {
     }
 }
 
-struct OutputOptions: CommanderParsable, Sendable {
+struct OutputOptions: CommanderParsable {
     @Flag(
         names: [.customLong("json"), .customLong("json-output"), .short("j")],
         help: "Output JSON instead of the formatted table"
@@ -58,8 +58,6 @@ struct OutputOptions: CommanderParsable, Sendable {
 
     @Flag(names: [.customLong("no-color")], help: "Disable color output")
     var noColor: Bool = false
-
-    init() {}
 
     mutating func bind(_ values: ParsedValues) {
         self.jsonOutput = values.flag("jsonOutput")

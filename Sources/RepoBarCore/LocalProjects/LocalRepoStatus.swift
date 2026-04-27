@@ -45,7 +45,9 @@ public struct LocalRepoStatus: Equatable, Sendable {
         self.lastFetchAt = lastFetchAt
     }
 
-    public var displayName: String { self.fullName ?? self.name }
+    public var displayName: String {
+        self.fullName ?? self.name
+    }
 
     public var syncDetail: String {
         switch self.syncState {

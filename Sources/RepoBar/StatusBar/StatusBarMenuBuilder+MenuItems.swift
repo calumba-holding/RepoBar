@@ -150,7 +150,7 @@ extension StatusBarMenuBuilder {
         highlightable: Bool = false,
         submenu: NSMenu? = nil
     ) -> NSMenuItem {
-        let item = self.menuItemFactory.makeItem(
+        self.menuItemFactory.makeItem(
             for: content,
             enabled: enabled,
             highlightable: highlightable,
@@ -159,6 +159,5 @@ extension StatusBarMenuBuilder {
             target: submenu != nil ? self.target : nil,
             action: submenu != nil ? #selector(self.target.menuItemNoOp(_:)) : nil
         )
-        return item
     }
 }

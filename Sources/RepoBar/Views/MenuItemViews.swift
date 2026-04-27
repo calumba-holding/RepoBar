@@ -32,7 +32,6 @@ struct RepoMenuCardView: View {
         }
     }
 
-    @ViewBuilder
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             HStack(spacing: 6) {
@@ -64,7 +63,6 @@ struct RepoMenuCardView: View {
         }
     }
 
-    @ViewBuilder
     private var stats: some View {
         HStack(spacing: 12) {
             ForEach(self.repo.stats) { stat in
@@ -165,7 +163,9 @@ struct RepoMenuCardView: View {
         }
     }
 
-    private var verticalSpacing: CGFloat { MenuStyle.cardSpacing }
+    private var verticalSpacing: CGFloat {
+        MenuStyle.cardSpacing
+    }
 
     private var isLightAppearance: Bool {
         NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .aqua

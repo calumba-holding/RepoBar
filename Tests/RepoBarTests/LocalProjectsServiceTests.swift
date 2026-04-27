@@ -102,7 +102,7 @@ struct LocalProjectsServiceTests {
     }
 
     @Test
-    func discoverRepoRoots_acceptsFileReferenceURLs() async throws {
+    func discoverRepoRoots_acceptsFileReferenceURLs() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 

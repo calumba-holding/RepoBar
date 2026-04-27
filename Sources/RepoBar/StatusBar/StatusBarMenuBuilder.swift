@@ -293,7 +293,7 @@ final class StatusBarMenuBuilder {
             : session.repositories
         let sorted = RepositoryPipeline.apply(baseRepos, query: query)
         let displayIndex = session.menuDisplayIndex
-        let models = sorted.map { repo in
+        return sorted.map { repo in
             displayIndex[repo.fullName.lowercased()]
                 ?? RepositoryDisplayModel(
                     repo: repo,
@@ -301,7 +301,6 @@ final class StatusBarMenuBuilder {
                     now: now
                 )
         }
-        return models
     }
 
     private func localScopeViewModels(

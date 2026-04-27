@@ -398,7 +398,7 @@ final class HeatmapRasterNSView: NSView {
     }
 }
 
-private struct RGBAColor: Hashable, Sendable {
+private struct RGBAColor: Hashable {
     let r: UInt8
     let g: UInt8
     let b: UInt8
@@ -459,7 +459,7 @@ private enum HeatmapPalette {
     }
 }
 
-private struct RenderPayload: Sendable {
+private struct RenderPayload {
     let widthPx: Int
     let heightPx: Int
     let scale: CGFloat
@@ -467,7 +467,9 @@ private struct RenderPayload: Sendable {
     let palette: [RGBAColor]
     let cornerRadius: CGFloat
 
-    var cost: Int { self.widthPx * self.heightPx * 4 }
+    var cost: Int {
+        self.widthPx * self.heightPx * 4
+    }
 
     func renderImage() -> CGImage? {
         guard let context = CGContext(

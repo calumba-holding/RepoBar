@@ -3,7 +3,9 @@ enum RepoVisibility: String, CaseIterable, Identifiable {
     case hidden
     case visible
 
-    var id: String { self.rawValue }
+    var id: String {
+        self.rawValue
+    }
 
     var label: String {
         switch self {

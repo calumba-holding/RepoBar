@@ -4,7 +4,7 @@ import Testing
 
 struct LocalGitServiceTests {
     @Test
-    func smartSync_fastForwardsBehindRepo() async throws {
+    func smartSync_fastForwardsBehindRepo() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -38,7 +38,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func smartSync_errorsWithoutUpstream() async throws {
+    func smartSync_errorsWithoutUpstream() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
         let repo = root.appendingPathComponent("repo", isDirectory: true)
@@ -54,7 +54,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func rebaseOntoUpstream_errorsWhenDirty() async throws {
+    func rebaseOntoUpstream_errorsWhenDirty() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -81,7 +81,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func createBranch_createsAndSwitches() async throws {
+    func createBranch_createsAndSwitches() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -97,7 +97,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func createWorktree_createsNewWorktree() async throws {
+    func createWorktree_createsNewWorktree() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -115,7 +115,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func cloneRepo_clonesIntoDestination() async throws {
+    func cloneRepo_clonesIntoDestination() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -133,7 +133,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func branches_marksCurrentBranch() async throws {
+    func branches_marksCurrentBranch() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -150,7 +150,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func worktrees_parsesDetachedEntry() async throws {
+    func worktrees_parsesDetachedEntry() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -172,7 +172,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func hardResetToUpstream_discardsLocalCommit() async throws {
+    func hardResetToUpstream_discardsLocalCommit() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -201,7 +201,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func smartSync_errorsWhenDetached() async throws {
+    func smartSync_errorsWhenDetached() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -219,7 +219,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func smartSync_pushesWhenAhead() async throws {
+    func smartSync_pushesWhenAhead() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -245,7 +245,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func branchDetails_reportsUpstreamAndAhead() async throws {
+    func branchDetails_reportsUpstreamAndAhead() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -274,7 +274,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func worktrees_includeMetadata() async throws {
+    func worktrees_includeMetadata() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 

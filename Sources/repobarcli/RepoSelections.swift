@@ -2,7 +2,7 @@ import Commander
 import Foundation
 import RepoBarCore
 
-enum RepoScopeSelection: String, CaseIterable, ExpressibleFromArgument, Sendable {
+enum RepoScopeSelection: String, CaseIterable, ExpressibleFromArgument {
     case all
     case pinned
     case hidden
@@ -22,7 +22,7 @@ extension RepoScopeSelection {
     }
 }
 
-enum RepoFilterSelection: String, CaseIterable, ExpressibleFromArgument, Sendable {
+enum RepoFilterSelection: String, CaseIterable, ExpressibleFromArgument {
     case all
     case work
     case issues

@@ -168,7 +168,9 @@ private extension OAuthTokenRefresherTests {
             URLProtocol.property(forKey: "handlerID", in: request) != nil
         }
 
-        override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+        override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+            request
+        }
 
         override func startLoading() {
             guard

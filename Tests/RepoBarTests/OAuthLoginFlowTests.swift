@@ -30,12 +30,12 @@ struct OAuthLoginFlowTests {
         }
         defer { Self.MockURLProtocol.unregister(handlerID: handlerID) }
 
-        let fakeRedirectURL = URL(string: "http://127.0.0.1:12345/callback")!
+        let fakeRedirectURL = try #require(URL(string: "http://127.0.0.1:12345/callback"))
         let server = FakeLoopbackServer(
             redirectURL: fakeRedirectURL,
             result: (code: "code-123", state: "state-123")
         )
-        let host = URL(string: "https://example.com")!
+        let host = try #require(URL(string: "https://example.com"))
 
         let flow = OAuthLoginFlow(
             tokenStore: store,
@@ -75,7 +75,7 @@ struct OAuthLoginFlowTests {
     @MainActor
     func normalizeHostRequiresHTTPS() throws {
         do {
-            _ = try OAuthLoginFlow.normalizeHost(URL(string: "http://github.com")!)
+            _ = try OAuthLoginFlow.normalizeHost(#require(URL(string: "http://github.com")))
             Issue.record("Expected invalidHost")
         } catch {
             guard let gh = error as? GitHubAPIError, case .invalidHost = gh else {
@@ -85,7 +85,7 @@ struct OAuthLoginFlowTests {
         }
 
         do {
-            _ = try OAuthLoginFlow.normalizeHost(URL(string: "github.com")!)
+            _ = try OAuthLoginFlow.normalizeHost(#require(URL(string: "github.com")))
             Issue.record("Expected invalidHost")
         } catch {
             guard let gh = error as? GitHubAPIError, case .invalidHost = gh else {
@@ -94,7 +94,7 @@ struct OAuthLoginFlowTests {
             }
         }
 
-        let cleaned = try OAuthLoginFlow.normalizeHost(URL(string: "https://github.com/path?q=1#frag")!)
+        let cleaned = try OAuthLoginFlow.normalizeHost(#require(URL(string: "https://github.com/path?q=1#frag")))
         #expect(cleaned.absoluteString == "https://github.com")
     }
 }
@@ -115,9 +115,13 @@ private extension OAuthLoginFlowTests {
             self.result = result
         }
 
-        func start() throws -> URL { self.redirectURL }
+        func start() throws -> URL {
+            self.redirectURL
+        }
 
-        func waitForCallback(timeout _: TimeInterval) async throws -> (code: String, state: String) { self.result }
+        func waitForCallback(timeout _: TimeInterval) async throws -> (code: String, state: String) {
+            self.result
+        }
 
         func stop() {}
     }
@@ -146,7 +150,9 @@ private extension OAuthLoginFlowTests {
             URLProtocol.property(forKey: "handlerID", in: request) != nil
         }
 
-        override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+        override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+            request
+        }
 
         override func startLoading() {
             guard

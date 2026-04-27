@@ -4,8 +4,8 @@ import Testing
 
 struct RepoBarCoreModelsTests {
     @Test
-    func userIdentity_init() {
-        let host = URL(string: "https://github.com")!
+    func userIdentity_init() throws {
+        let host = try #require(URL(string: "https://github.com"))
         let identity = UserIdentity(username: "steipete", host: host)
         #expect(identity.username == "steipete")
         #expect(identity.host == host)
@@ -50,9 +50,9 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func repoRecentItems_init() {
+    func repoRecentItems_init() throws {
         let now = Date()
-        let url = URL(string: "https://example.com")!
+        let url = try #require(URL(string: "https://example.com"))
         _ = RepoIssueSummary(
             number: 1,
             title: "Issue",
@@ -115,9 +115,9 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func backoffTracker_lifecycle() async {
+    func backoffTracker_lifecycle() async throws {
         let tracker = BackoffTracker()
-        let url = URL(string: "https://example.com")!
+        let url = try #require(URL(string: "https://example.com"))
         let now = Date()
         #expect(await tracker.isCoolingDown(url: url, now: now) == false)
         await tracker.setCooldown(url: url, until: now.addingTimeInterval(60))

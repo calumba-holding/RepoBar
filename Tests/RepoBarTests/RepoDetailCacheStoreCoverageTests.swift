@@ -4,12 +4,12 @@ import Testing
 
 struct RepoDetailCacheStoreCoverageTests {
     @Test
-    func saveThenLoad_roundTripsFromDisk() {
+    func saveThenLoad_roundTripsFromDisk() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.\(UUID().uuidString)", isDirectory: true)
 
         let store = RepoDetailCacheStore(baseURL: base)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         var cache = RepoDetailCache()
         cache.openPulls = 7
         cache.openPullsFetchedAt = Date(timeIntervalSinceReferenceDate: 123)
@@ -25,7 +25,7 @@ struct RepoDetailCacheStoreCoverageTests {
     func load_invalidJSONDeletesCacheFile() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.invalid.\(UUID().uuidString)", isDirectory: true)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         let store = RepoDetailCacheStore(baseURL: base)
 
         let fileURL = base
@@ -47,7 +47,7 @@ struct RepoDetailCacheStoreCoverageTests {
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.clear.\(UUID().uuidString)", isDirectory: true)
         let store = RepoDetailCacheStore(baseURL: base)
 
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         let cache = RepoDetailCache(openPulls: 1)
         store.save(cache, apiHost: apiHost, owner: "me", name: "Repo")
         #expect(FileManager.default.fileExists(atPath: base.path) == true)
@@ -57,11 +57,11 @@ struct RepoDetailCacheStoreCoverageTests {
     }
 
     @Test
-    func load_missingFileReturnsNil() {
+    func load_missingFileReturnsNil() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.missing.\(UUID().uuidString)", isDirectory: true)
         let store = RepoDetailCacheStore(baseURL: base)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         #expect(store.load(apiHost: apiHost, owner: "me", name: "Repo") == nil)
     }
 
@@ -88,7 +88,7 @@ struct RepoDetailCacheStoreCoverageTests {
         #expect(FileManager.default.fileExists(atPath: base.path) == true)
 
         let store = RepoDetailCacheStore(baseURL: base)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         store.save(RepoDetailCache(openPulls: 1), apiHost: apiHost, owner: "me", name: "Repo")
 
         let expected = base

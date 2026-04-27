@@ -43,7 +43,7 @@ struct RepoDetailStoreTests {
 
         let diskStore = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
         var store = RepoDetailStore(diskStore: diskStore)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         let cache = RepoDetailCache(openPulls: 5)
 
         store.save(cache, apiHost: apiHost, owner: "steipete", name: "RepoBar")
@@ -65,7 +65,7 @@ struct RepoDetailStoreTests {
 
         let diskStore = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
         var store = RepoDetailStore(diskStore: diskStore)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
 
         store.save(RepoDetailCache(openPulls: 2), apiHost: apiHost, owner: "me", name: "Repo")
         #expect(store.load(apiHost: apiHost, owner: "me", name: "Repo").openPulls == 2)
@@ -76,7 +76,7 @@ struct RepoDetailStoreTests {
     }
 
     @Test
-    func load_usesDiskWhenMemoryEmpty() throws {
+    func load_usesDiskWhenMemoryEmpty() {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-disk-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 

@@ -32,7 +32,7 @@ struct PATAuthenticatorTests {
 
         let user = try await authenticator.authenticate(
             pat: "ghp_testtoken",
-            host: URL(string: "https://github.com")!
+            host: #require(URL(string: "https://github.com"))
         )
 
         #expect(user.username == "testuser")
@@ -63,7 +63,7 @@ struct PATAuthenticatorTests {
         do {
             _ = try await authenticator.authenticate(
                 pat: "invalid_token",
-                host: URL(string: "https://github.com")!
+                host: #require(URL(string: "https://github.com"))
             )
             Issue.record("Expected invalidToken error")
         } catch let error as PATAuthError {
@@ -99,7 +99,7 @@ struct PATAuthenticatorTests {
         do {
             _ = try await authenticator.authenticate(
                 pat: "token_without_scopes",
-                host: URL(string: "https://github.com")!
+                host: #require(URL(string: "https://github.com"))
             )
             Issue.record("Expected forbidden error")
         } catch let error as PATAuthError {
@@ -135,7 +135,7 @@ struct PATAuthenticatorTests {
 
     @Test
     @MainActor
-    func loadPATReturnsNilWhenNotStored() async throws {
+    func loadPATReturnsNilWhenNotStored() {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -174,7 +174,7 @@ struct PATAuthenticatorTests {
 
         let user = try await authenticator.authenticate(
             pat: "ghp_enterprisetoken",
-            host: URL(string: "https://ghe.example.com")!
+            host: #require(URL(string: "https://ghe.example.com"))
         )
 
         #expect(user.username == "enterpriseuser")
@@ -220,7 +220,9 @@ private extension PATAuthenticatorTests {
             request.value(forHTTPHeaderField: "X-Handler-ID") != nil
         }
 
-        override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+        override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+            request
+        }
 
         override func startLoading() {
             guard

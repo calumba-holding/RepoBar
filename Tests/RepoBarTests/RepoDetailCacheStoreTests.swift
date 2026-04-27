@@ -9,10 +9,10 @@ struct RepoDetailCacheStoreTests {
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
         let store = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
         let now = Date(timeIntervalSinceReferenceDate: 123_456)
 
-        let cache = RepoDetailCache(
+        let cache = try RepoDetailCache(
             openPulls: 7,
             openPullsFetchedAt: now,
             ciDetails: CIStatusDetails(status: .passing, runCount: 42),
@@ -21,20 +21,20 @@ struct RepoDetailCacheStoreTests {
                 title: "Merged PR",
                 actor: "alice",
                 date: now,
-                url: URL(string: "https://example.com/pr/1")!
+                url: #require(URL(string: "https://example.com/pr/1"))
             ),
             activityEvents: [
                 ActivityEvent(
                     title: "Merged PR",
                     actor: "alice",
                     date: now,
-                    url: URL(string: "https://example.com/pr/1")!
+                    url: #require(URL(string: "https://example.com/pr/1"))
                 ),
                 ActivityEvent(
                     title: "Opened issue",
                     actor: "bob",
                     date: now.addingTimeInterval(-600),
-                    url: URL(string: "https://example.com/issue/2")!
+                    url: #require(URL(string: "https://example.com/issue/2"))
                 )
             ],
             activityFetchedAt: now,
@@ -42,7 +42,7 @@ struct RepoDetailCacheStoreTests {
             trafficFetchedAt: now,
             heatmap: [HeatmapCell(date: now, count: 3)],
             heatmapFetchedAt: now,
-            latestRelease: Release(name: "v1.0.0", tag: "v1.0.0", publishedAt: now, url: URL(string: "https://example.com/release")!),
+            latestRelease: Release(name: "v1.0.0", tag: "v1.0.0", publishedAt: now, url: #require(URL(string: "https://example.com/release"))),
             releaseFetchedAt: now,
             discussionsEnabled: true,
             discussionsCheckedAt: now
@@ -68,7 +68,7 @@ struct RepoDetailCacheStoreTests {
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
         let store = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
 
         let cacheFile = baseURL
             .appending(path: "api.github.com")
@@ -88,7 +88,7 @@ struct RepoDetailCacheStoreTests {
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
         let store = RepoDetailCacheStore(fileManager: .default, baseURL: baseURL)
-        let apiHost = URL(string: "https://api.github.com")!
+        let apiHost = try #require(URL(string: "https://api.github.com"))
 
         store.save(RepoDetailCache(), apiHost: apiHost, owner: "steipete", name: "RepoBar")
         #expect(FileManager.default.fileExists(atPath: baseURL.path()))

@@ -173,7 +173,7 @@ func settingsSummaryLines(settings: UserSettings) -> [String] {
     let pinned = settings.repoList.pinnedRepositories
     let hidden = settings.repoList.hiddenRepositories
     let localRoot = settings.localProjects.rootPath.map(PathFormatter.displayString) ?? "-"
-    let lines = [
+    return [
         "Refresh interval: \(intervalLabel(settings.refreshInterval))",
         "Repo limit: \(settings.repoList.displayLimit)",
         "Show forks: \(settings.repoList.showForks ? "on" : "off")",
@@ -196,7 +196,6 @@ func settingsSummaryLines(settings: UserSettings) -> [String] {
         "Pinned repositories: \(pinned.isEmpty ? "-" : pinned.joined(separator: ", "))",
         "Hidden repositories: \(hidden.isEmpty ? "-" : hidden.joined(separator: ", "))"
     ]
-    return lines
 }
 
 func parseBool(_ raw: String) throws -> Bool {

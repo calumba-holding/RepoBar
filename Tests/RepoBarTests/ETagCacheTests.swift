@@ -4,9 +4,9 @@ import Testing
 
 struct ETagCacheTests {
     @Test
-    func saveAndRetrieve() async {
+    func saveAndRetrieve() async throws {
         let cache = ETagCache()
-        let url = URL(string: "https://example.com/a")!
+        let url = try #require(URL(string: "https://example.com/a"))
 
         await cache.save(url: url, etag: nil, data: Data("x".utf8))
         #expect(await cache.count() == 0)
@@ -33,9 +33,9 @@ struct ETagCacheTests {
     }
 
     @Test
-    func clearDropsEntriesAndRateLimit() async {
+    func clearDropsEntriesAndRateLimit() async throws {
         let cache = ETagCache()
-        let url = URL(string: "https://example.com/a")!
+        let url = try #require(URL(string: "https://example.com/a"))
         await cache.save(url: url, etag: "etag-1", data: Data("payload".utf8))
         await cache.setRateLimitReset(date: Date().addingTimeInterval(60))
 

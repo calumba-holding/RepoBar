@@ -5,18 +5,18 @@ import Testing
 
 struct RepositoryDisplayModelTests {
     @Test
-    func mapsReleaseAndActivity() {
-        let release = Release(
+    func mapsReleaseAndActivity() throws {
+        let release = try Release(
             name: "v1.0",
             tag: "v1.0",
             publishedAt: Date().addingTimeInterval(-3600),
-            url: URL(string: "https://example.com")!
+            url: #require(URL(string: "https://example.com"))
         )
-        let activity = ActivityEvent(
+        let activity = try ActivityEvent(
             title: "Fix bug",
             actor: "alice",
             date: Date().addingTimeInterval(-1800),
-            url: URL(string: "https://example.com/1")!
+            url: #require(URL(string: "https://example.com/1"))
         )
         let repo = Repository(
             id: "1",

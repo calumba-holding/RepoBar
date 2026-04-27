@@ -40,8 +40,7 @@ enum JWTSigner {
         ) as Data?
         else { throw error?.takeRetainedValue() ?? Error.signFailed }
 
-        let jwt = signingInput + "." + signature.base64URLEncodedString()
-        return jwt
+        return signingInput + "." + signature.base64URLEncodedString()
     }
 
     private static func derData(fromPEM pem: String) throws -> Data {

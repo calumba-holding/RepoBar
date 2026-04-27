@@ -10,7 +10,7 @@ struct GraphQLContributionParsingTests {
         #expect(decoded.contributionCount == 3)
 
         let calendar = Calendar(identifier: .gregorian)
-        let components = calendar.dateComponents(in: TimeZone(secondsFromGMT: 0)!, from: decoded.date)
+        let components = try calendar.dateComponents(in: #require(TimeZone(secondsFromGMT: 0)), from: decoded.date)
         #expect(components.year == 2025)
         #expect(components.month == 12)
         #expect(components.day == 28)
@@ -23,7 +23,7 @@ struct GraphQLContributionParsingTests {
         #expect(decoded.contributionCount == 1)
 
         let calendar = Calendar(identifier: .gregorian)
-        let components = calendar.dateComponents(in: TimeZone(secondsFromGMT: 0)!, from: decoded.date)
+        let components = try calendar.dateComponents(in: #require(TimeZone(secondsFromGMT: 0)), from: decoded.date)
         #expect(components.year == 2025)
         #expect(components.month == 12)
         #expect(components.day == 28)

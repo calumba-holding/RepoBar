@@ -21,7 +21,9 @@ struct ErrorDisplayCoverageTests {
 
     @Test
     func fallback_returnsLocalizedDescription() {
-        struct TestError: LocalizedError { var errorDescription: String? { "boom" } }
+        struct TestError: LocalizedError { var errorDescription: String? {
+            "boom"
+        } }
         let error: Error = TestError()
         #expect(error.userFacingMessage == "boom")
     }

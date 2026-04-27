@@ -43,7 +43,10 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
     private var lastMainMenuSignature: MenuBuildSignature?
     private var lastMainMenuWidthSignature: MenuBuildSignature?
     private var pendingMenuReopen = false
-    var webURLBuilder: RepoWebURLBuilder { RepoWebURLBuilder(host: self.appState.session.settings.githubHost) }
+    var webURLBuilder: RepoWebURLBuilder {
+        RepoWebURLBuilder(host: self.appState.session.settings.githubHost)
+    }
+
     private weak var checkoutProgressWindow: NSWindow?
 
     init(appState: AppState) {
