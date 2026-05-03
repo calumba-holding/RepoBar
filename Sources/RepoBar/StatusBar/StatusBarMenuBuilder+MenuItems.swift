@@ -77,6 +77,7 @@ extension StatusBarMenuBuilder {
         guard let cached = self.repoSubmenuCache[fullName] else { return }
         guard let item = cached.menu.items.first(where: {
             guard let identifier = $0.representedObject as? RepoSubmenuRowIdentifier else { return false }
+
             return identifier.fullName == fullName && identifier.kind == .changelog
         }) else { return }
 
@@ -129,6 +130,7 @@ extension StatusBarMenuBuilder {
             return cached
         }
         guard let image = NSImage(systemSymbolName: name, accessibilityDescription: nil) else { return nil }
+
         image.size = NSSize(width: 14, height: 14)
         if name == "eye.slash", self.isLightAppearance {
             let config = NSImage.SymbolConfiguration(hierarchicalColor: .secondaryLabelColor)

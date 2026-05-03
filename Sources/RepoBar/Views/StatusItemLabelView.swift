@@ -49,6 +49,7 @@ struct StatusItemLabelView: View {
     private func presentLoginSettingsIfNeeded() {
         guard case .loggedOut = self.session.account else { return }
         guard self.session.hasStoredTokens == false else { return }
+
         self.session.settingsSelectedTab = .accounts
         SettingsOpener.shared.open()
     }

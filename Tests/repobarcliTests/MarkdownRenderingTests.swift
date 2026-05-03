@@ -3,7 +3,7 @@ import Testing
 
 struct MarkdownRenderingTests {
     @Test
-    func rendersAnsiWhenColorEnabled() {
+    func `renders ansi when color enabled`() {
         let markdown = """
         # Heading
 
@@ -19,7 +19,7 @@ struct MarkdownRenderingTests {
     }
 
     @Test
-    func stripsAnsiWhenPlain() {
+    func `strips ansi when plain`() {
         let markdown = """
         # Heading
 

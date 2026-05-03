@@ -169,6 +169,7 @@ actor LocalRepoManager {
         // Prioritize GitHub-matching repos first, then include non-matching ones.
         let interesting: [URL] = {
             guard !matchKeys.isEmpty else { return repoRoots }
+
             let matching = repoRoots.filter { matchKeys.contains($0.lastPathComponent.lowercased()) }
             let nonMatching = repoRoots.filter { !matchKeys.contains($0.lastPathComponent.lowercased()) }
             return matching + nonMatching
@@ -213,8 +214,10 @@ actor LocalRepoManager {
 
     private func needsFetch(for repoURL: URL, now: Date, interval: TimeInterval) -> Bool {
         guard interval > 0 else { return false }
+
         let lastFetch = self.lastFetchByPath[repoURL.path]
         guard let lastFetch else { return true }
+
         return now.timeIntervalSince(lastFetch) >= interval
     }
 
@@ -224,6 +227,7 @@ actor LocalRepoManager {
         now: Date
     ) -> Set<URL> {
         guard fetchInterval > 0 else { return [] }
+
         return Set(repoRoots.filter { self.needsFetch(for: $0, now: now, interval: fetchInterval) })
     }
 }

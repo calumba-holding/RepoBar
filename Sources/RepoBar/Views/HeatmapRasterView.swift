@@ -201,6 +201,7 @@ final class HeatmapRasterNSView: NSView {
 
     private func apply(image: CGImage, renderKey: String, scale: CGFloat) {
         guard let layer = self.layer else { return }
+
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         layer.contentsScale = scale
@@ -343,6 +344,7 @@ final class HeatmapRasterNSView: NSView {
 
     private static func snapToPixel(_ value: CGFloat, scale: CGFloat) -> CGFloat {
         guard scale > 0 else { return value }
+
         return round(value * scale) / scale
     }
 

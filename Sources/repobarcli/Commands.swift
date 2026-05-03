@@ -205,6 +205,7 @@ struct ReposCommand: CommanderRunnableCommand {
                 }
                 return
             }
+
             let repos = try await self.fetchNamedRepositories(pinned, client: client)
             let ownerFiltered = ownerFilter?.applying(to: repos) ?? repos
             let filtered = RepositoryPipeline.apply(ownerFiltered, query: query)
@@ -225,6 +226,7 @@ struct ReposCommand: CommanderRunnableCommand {
                 }
                 return
             }
+
             let repos = try await self.fetchNamedRepositories(hiddenList, client: client)
             let ownerFiltered = ownerFilter?.applying(to: repos) ?? repos
             let filtered = RepositoryPipeline.apply(ownerFiltered, query: query)
@@ -315,6 +317,7 @@ struct ReposCommand: CommanderRunnableCommand {
         let targets: [RepoLookup] = names.enumerated().compactMap { index, name in
             let parts = name.split(separator: "/", maxSplits: 1).map(String.init)
             guard parts.count == 2 else { return nil }
+
             return RepoLookup(index: index, owner: parts[0], name: parts[1])
         }
         return try await withThrowingTaskGroup(of: (Int, Repository).self) { group in

@@ -145,9 +145,11 @@ struct EventRepo: Decodable {
     var fullName: String? {
         if let name, name.contains("/") { return name }
         guard let url else { return nil }
+
         let parts = url.path.split(separator: "/")
         guard let reposIndex = parts.firstIndex(where: { $0 == "repos" }),
               parts.count > reposIndex + 2 else { return nil }
+
         return "\(parts[reposIndex + 1])/\(parts[reposIndex + 2])"
     }
 }
@@ -289,6 +291,7 @@ extension RepoEvent {
     var displayTitle: String {
         let base = Self.displayName(for: self.eventType, raw: self.type)
         guard let action = self.payload.action, action.isEmpty == false else { return base }
+
         let actionLabel = action.replacingOccurrences(of: "_", with: " ")
         return "\(base) \(actionLabel)"
     }
@@ -305,8 +308,10 @@ extension RepoEvent {
 
     func commitSummaries(webHost: URL) -> [RepoCommitSummary] {
         guard let repo, let repoName = repo.fullName else { return [] }
+
         let parts = repoName.split(separator: "/", maxSplits: 1).map(String.init)
         guard parts.count == 2 else { return [] }
+
         let owner = parts[0]
         let name = parts[1]
         let repoURL = webHost.appending(path: owner).appending(path: name)
@@ -348,8 +353,10 @@ extension RepoEvent {
 
     func activityEventFromRepo(webHost: URL) -> ActivityEvent? {
         guard let repo, let repoName = repo.fullName else { return nil }
+
         let parts = repoName.split(separator: "/", maxSplits: 1)
         guard parts.count == 2 else { return nil }
+
         return self.activityEvent(owner: String(parts[0]), name: String(parts[1]), webHost: webHost)
     }
 
@@ -414,6 +421,7 @@ extension RepoEvent {
 
     private func issueAction(prefix: String, action: String?) -> String {
         guard let action else { return prefix }
+
         return "\(prefix) \(action)"
     }
 
@@ -422,11 +430,13 @@ extension RepoEvent {
         if let number { parts.append("#\(number)") }
         if let title, !title.isEmpty { parts.append(title) }
         guard parts.isEmpty == false else { return nil }
+
         return parts.joined(separator: ": ")
     }
 
     private func actionSuffix() -> String? {
         guard let action = self.payload.action, action.isEmpty == false else { return nil }
+
         if self.eventType == .watch, action == "started" {
             return "starred"
         }
@@ -460,6 +470,7 @@ extension RepoEvent {
 
     static func displayName(for type: ActivityEventType?, raw: String) -> String {
         guard let type else { return self.prettyName(for: raw) }
+
         return switch type {
         case .pullRequest: "Pull Request"
         case .pullRequestReview: "Pull Request Review"

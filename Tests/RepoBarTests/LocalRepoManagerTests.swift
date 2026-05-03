@@ -4,7 +4,7 @@ import Testing
 
 struct LocalRepoManagerTests {
     @Test
-    func snapshot_respectsMaxDepth() async throws {
+    func `snapshot respects max depth`() async throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 

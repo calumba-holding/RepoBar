@@ -5,7 +5,7 @@ import Testing
 
 struct OnlyWithFilteringTests {
     @Test
-    func onlyWithWorkIncludesIssuesOrPRs() {
+    func `only with work includes issues or P rs`() {
         let repos = [
             Self.repo(name: "none", issues: 0, prs: 0),
             Self.repo(name: "issues", issues: 2, prs: 0),
@@ -23,7 +23,7 @@ struct OnlyWithFilteringTests {
     }
 
     @Test
-    func onlyWithKeepsPinnedReposEvenIfNoWork() {
+    func `only with keeps pinned repos even if no work`() {
         let pinned = Self.repo(owner: "me", name: "pinned", issues: 0, prs: 0)
         let other = Self.repo(owner: "me", name: "other", issues: 0, prs: 0)
 
@@ -39,7 +39,7 @@ struct OnlyWithFilteringTests {
     }
 
     @Test
-    func onlyWithIssuesOnly() {
+    func `only with issues only`() {
         let repos = [
             Self.repo(name: "none", issues: 0, prs: 9),
             Self.repo(name: "issues", issues: 1, prs: 0)

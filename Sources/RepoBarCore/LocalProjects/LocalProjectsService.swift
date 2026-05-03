@@ -62,6 +62,7 @@
             else {
                 return []
             }
+
             return self.findGitRepos(in: rootURL, maxDepth: max(0, maxDepth), fileManager: fileManager)
         }
 
@@ -169,6 +170,7 @@
                     for repoURL in chunk {
                         group.addTask {
                             guard var status = loadStatus(at: repoURL) else { return nil }
+
                             var didSync = false
                             var didSyncAttempt = false
                             var didFetch = false
@@ -312,8 +314,10 @@
             guard let url = URL(string: value),
                   let host = url.host
             else { return nil }
+
             let parts = url.path.split(separator: "/").map(String.init)
             guard parts.count >= 2 else { return nil }
+
             let owner = parts[parts.count - 2]
             let name = self.stripGitSuffix(parts.last ?? "")
             return GitRemote(host: host, owner: owner, name: name)
@@ -323,10 +327,12 @@
             let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
             let parts = trimmed.split(separator: ":", maxSplits: 1).map(String.init)
             guard parts.count == 2 else { return nil }
+
             let hostPart = parts[0].split(separator: "@").last.map(String.init) ?? parts[0]
             let path = parts[1]
             let pathParts = path.split(separator: "/").map(String.init)
             guard pathParts.count >= 2 else { return nil }
+
             let owner = pathParts[pathParts.count - 2]
             let name = self.stripGitSuffix(pathParts.last ?? "")
             return GitRemote(host: hostPart, owner: owner, name: name)
@@ -341,6 +347,7 @@
         guard let raw = try? git.run(["rev-parse", "--abbrev-ref", "HEAD"], in: repoURL) else {
             return "unknown"
         }
+
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed == "HEAD" ? "detached" : trimmed
     }
@@ -357,6 +364,7 @@
         for rawLine in output.split(whereSeparator: \.isNewline) {
             let line = String(rawLine)
             guard line.count >= 3 else { continue }
+
             let status = String(line.prefix(2))
             var path = String(line.dropFirst(3)).trimmingCharacters(in: .whitespacesAndNewlines)
             if let arrowRange = path.range(of: " -> ") {
@@ -390,19 +398,23 @@
 
     private func parseDirtyFiles(from output: String, limit: Int) -> [String] {
         guard limit > 0 else { return [] }
+
         var files: [String] = []
         files.reserveCapacity(limit)
 
         for rawLine in output.split(whereSeparator: \.isNewline) {
             guard files.count < limit else { break }
+
             let line = String(rawLine)
             guard line.count >= 3 else { continue }
+
             let status = String(line.prefix(2))
             var path = String(line.dropFirst(3)).trimmingCharacters(in: .whitespacesAndNewlines)
             if let arrowRange = path.range(of: " -> ") {
                 path = String(path[arrowRange.upperBound...])
             }
             guard path.isEmpty == false else { continue }
+
             let isDirtyStatus = status == "??"
                 || status.contains("M")
                 || status.contains("A")
@@ -423,11 +435,13 @@
         guard let output = try? git.run(["rev-list", "--left-right", "--count", "@{u}...HEAD"], in: repoURL) else {
             return (nil, nil)
         }
+
         let parts = output.split(whereSeparator: { $0 == " " || $0 == "\t" || $0 == "\n" })
         guard parts.count >= 2,
               let behind = Int(parts[0]),
               let ahead = Int(parts[1])
         else { return (nil, nil) }
+
         return (ahead, behind)
     }
 
@@ -435,6 +449,7 @@
         guard let raw = try? git.run(["remote", "get-url", "origin"], in: repoURL) else {
             return nil
         }
+
         return GitRemote.parse(raw.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
@@ -442,6 +457,7 @@
         guard let raw = try? git.run(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], in: repoURL) else {
             return nil
         }
+
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
     }
@@ -456,6 +472,7 @@
         }
         guard let contents = try? String(contentsOf: gitPath, encoding: .utf8) else { return nil }
         guard let range = contents.range(of: "worktrees/") else { return nil }
+
         let suffix = contents[range.upperBound...]
         let name = suffix.split(whereSeparator: { $0 == "\n" || $0 == "\r" || $0 == "/" }).first
         return name.map(String.init)

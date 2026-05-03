@@ -11,6 +11,7 @@ public enum RepoAutocompleteSuggestions {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             guard showRecentsForEmptyQuery else { return [] }
+
             return Array(prefetched.prefix(max(limit, 0)))
         }
 

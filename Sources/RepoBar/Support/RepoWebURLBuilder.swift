@@ -6,6 +6,7 @@ struct RepoWebURLBuilder {
     func repoURL(fullName: String) -> URL? {
         let parts = fullName.split(separator: "/", maxSplits: 1)
         guard parts.count == 2 else { return nil }
+
         return self.repoPathURL(components: [String(parts[0]), String(parts[1])])
     }
 
@@ -56,6 +57,7 @@ struct RepoWebURLBuilder {
 
     private func repoPathURL(fullName: String, components: [String]) -> URL? {
         guard var url = self.repoURL(fullName: fullName) else { return nil }
+
         for component in components where component.isEmpty == false {
             url.appendPathComponent(component)
         }

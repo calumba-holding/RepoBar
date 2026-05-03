@@ -85,6 +85,7 @@ extension AppState {
         for event in sorted {
             let key = "\(event.url.absoluteString)|\(event.date.timeIntervalSinceReferenceDate)|\(event.actor)"
             guard seen.insert(key).inserted else { continue }
+
             results.append(event)
             if results.count >= limit { break }
         }
@@ -100,6 +101,7 @@ extension AppState {
         pinned: [String]
     ) async -> [Repository] {
         guard !pinned.isEmpty else { return repos }
+
         let existing = Set(repos.map { $0.fullName.lowercased() })
         let targets = self.pinnedRepoTargets(from: pinned, excluding: existing)
         guard !targets.isEmpty else { return repos }
@@ -148,15 +150,19 @@ extension AppState {
         for raw in pinned {
             let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { continue }
+
             let parts = trimmed.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: false)
             guard parts.count == 2 else { continue }
+
             let owner = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
             let name = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
             guard !owner.isEmpty, !name.isEmpty else { continue }
+
             let fullName = "\(owner)/\(name)"
             let normalized = fullName.lowercased()
             guard !existing.contains(normalized) else { continue }
             guard seen.insert(normalized).inserted else { continue }
+
             targets.append(PinnedRepoTarget(owner: owner, name: name))
         }
         return targets

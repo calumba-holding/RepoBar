@@ -229,6 +229,7 @@ struct AdvancedSettingsView: View {
         guard let path = self.session.settings.localProjects.rootPath,
               path.isEmpty == false
         else { return "Not set" }
+
         return PathFormatter.displayString(path)
     }
 
@@ -238,6 +239,7 @@ struct AdvancedSettingsView: View {
 
     private var localRepoSummary: String? {
         guard self.session.settings.localProjects.rootPath != nil else { return nil }
+
         if self.session.localProjectsScanInProgress { return "Scanning…" }
         let total = self.session.localDiscoveredRepoCount
         let matched = self.localMatchedRepoCount
@@ -256,6 +258,7 @@ struct AdvancedSettingsView: View {
             ? (self.session.menuSnapshot?.repositories ?? [])
             : self.session.repositories
         guard repos.isEmpty == false else { return 0 }
+
         let fullNames = Set(repos.map(\.fullName))
         let repoByName = Dictionary(grouping: repos, by: \.name)
         var matched = 0
@@ -274,6 +277,7 @@ struct AdvancedSettingsView: View {
     private func currentCLIStatus() -> String? {
         let installed = Self.cliTargets.filter { FileManager.default.fileExists(atPath: $0) }
         guard installed.isEmpty == false else { return "Not installed yet." }
+
         if installed.count == Self.cliTargets.count {
             return "Installed in /usr/local/bin and /opt/homebrew/bin."
         }
@@ -282,6 +286,7 @@ struct AdvancedSettingsView: View {
 
     private func installCLI() async {
         guard !self.isInstallingCLI else { return }
+
         self.isInstallingCLI = true
         defer { self.isInstallingCLI = false }
 

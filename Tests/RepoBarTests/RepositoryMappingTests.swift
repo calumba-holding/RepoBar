@@ -5,11 +5,11 @@ import Testing
 
 struct RepositoryMappingTests {
     @Test
-    func repoViewModelRespectsPinnedOrderThenAlpha() {
+    func `repo view model respects pinned order then alpha`() {
         let repos = [
-            Repository(id: "1", name: "b", owner: "z", sortOrder: 2, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
-            Repository(id: "2", name: "a", owner: "z", sortOrder: 0, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
-            Repository(id: "3", name: "c", owner: "z", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: [])
+            makeRepository(id: "1", name: "b", sortOrder: 2),
+            makeRepository(id: "2", name: "a", sortOrder: 0),
+            makeRepository(id: "3", name: "c")
         ]
         let viewModels = repos.map { RepositoryDisplayModel(repo: $0) }
         let sorted = TestableRepoGrid.sortedForTest(viewModels)
@@ -18,7 +18,7 @@ struct RepositoryMappingTests {
     }
 
     @Test
-    func trafficAndErrorsPropagate() {
+    func `traffic and errors propagate`() {
         let repo = Repository(
             id: "99",
             name: "repo",
@@ -40,6 +40,24 @@ struct RepositoryMappingTests {
         #expect(vm.trafficVisitors == 10)
         #expect(vm.trafficCloners == 3)
     }
+}
+
+private func makeRepository(id: String, name: String, sortOrder: Int? = nil) -> Repository {
+    Repository(
+        id: id,
+        name: name,
+        owner: "z",
+        sortOrder: sortOrder,
+        error: nil,
+        rateLimitedUntil: nil,
+        ciStatus: .unknown,
+        openIssues: 0,
+        openPulls: 0,
+        latestRelease: nil,
+        latestActivity: nil,
+        traffic: nil,
+        heatmap: []
+    )
 }
 
 /// Reuse helper from MenuContentViewModelTests

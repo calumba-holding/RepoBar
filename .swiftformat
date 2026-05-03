@@ -1,4 +1,4 @@
---swiftversion 6.0
+--swiftversion 6.2
 --exclude Sources/RepoBar/API/Generated
 --indent 4
 --allman false
@@ -10,3 +10,6 @@
 --binarygrouping 4,8
 --hexgrouping 4,8
 --decimalgrouping 3,6
+--enable blankLinesAfterGuardStatements
+--enable isEmpty
+--enable privateStateVariables

@@ -199,6 +199,7 @@ struct IssuesCommand: CommanderRunnableCommand {
         guard let repoName, !repoName.isEmpty else {
             throw ValidationError("Missing repository name (owner/name)")
         }
+
         let parts = repoName.split(separator: "/", maxSplits: 1).map(String.init)
         guard parts.count == 2 else {
             throw ValidationError("Repository must be in owner/name format")
@@ -277,6 +278,7 @@ struct PullsCommand: CommanderRunnableCommand {
         guard let repoName, !repoName.isEmpty else {
             throw ValidationError("Missing repository name (owner/name)")
         }
+
         let parts = repoName.split(separator: "/", maxSplits: 1).map(String.init)
         guard parts.count == 2 else {
             throw ValidationError("Repository must be in owner/name format")
@@ -377,6 +379,7 @@ private func refreshPinned(_ pinned: [String], client: GitHubClient) async throw
                 guard parts.count == 2 else {
                     return RefreshRepositoryOutput(fullName: name, error: "Invalid repository name", rateLimitedUntil: nil)
                 }
+
                 do {
                     let repo = try await client.fullRepository(owner: parts[0], name: parts[1])
                     return RefreshRepositoryOutput(

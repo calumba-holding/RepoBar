@@ -5,6 +5,7 @@ extension AppState {
     func localMatchRepoNamesForLocalProjects(repos: [Repository], includePinned: Bool) -> Set<String> {
         var names = Set(repos.map(\.name))
         guard includePinned else { return names }
+
         let pinned = self.session.settings.repoList.pinnedRepositories
         for fullName in pinned {
             if let last = fullName.split(separator: "/").last {
@@ -72,6 +73,7 @@ extension AppState {
         guard !self.session.settings.repoList.pinnedRepositories.contains(where: {
             self.normalizedFullName($0) == normalized
         }) else { return }
+
         self.session.settings.repoList.pinnedRepositories.append(fullName)
         self.settingsStore.save(self.session.settings)
         await self.refresh()
@@ -91,6 +93,7 @@ extension AppState {
         guard !self.session.settings.repoList.hiddenRepositories.contains(where: {
             self.normalizedFullName($0) == normalized
         }) else { return }
+
         self.session.settings.repoList.hiddenRepositories.append(fullName)
         // If hidden, also unpin to avoid stale pin list.
         self.session.settings.repoList.pinnedRepositories.removeAll {
@@ -117,6 +120,7 @@ extension AppState {
         // Always trim first to avoid storing whitespace variants.
         let trimmed = fullName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+
         let normalized = self.normalizedFullName(trimmed)
 
         // Remove from both buckets before re-adding.

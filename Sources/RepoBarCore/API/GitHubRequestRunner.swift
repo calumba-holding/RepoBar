@@ -24,11 +24,13 @@ actor GitHubRequestRunner {
             self.lastRateLimitError = nil
             return nil
         }
+
         return reset
     }
 
     func rateLimitMessage(now: Date = Date()) -> String? {
         guard self.rateLimitReset(now: now) != nil else { return nil }
+
         return self.lastRateLimitError
     }
 
@@ -172,6 +174,7 @@ actor GitHubRequestRunner {
     private func rateLimitDate(from response: HTTPURLResponse) -> Date? {
         guard let reset = response.value(forHTTPHeaderField: "X-RateLimit-Reset"),
               let epoch = TimeInterval(reset) else { return nil }
+
         return Date(timeIntervalSince1970: epoch)
     }
 

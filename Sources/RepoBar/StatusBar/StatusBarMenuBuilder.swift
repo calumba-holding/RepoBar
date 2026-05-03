@@ -121,12 +121,14 @@ final class StatusBarMenuBuilder {
             }
         case .contributionHeader:
             guard case .loggedIn = session.account else { return [] }
+
             let hasContributionHeatmap = session.contributionHeatmap.isEmpty == false
             let shouldShowContributionHeader = settings.appearance.showContributionHeader
                 && (hasContributionHeatmap || session.contributionError == nil)
             let username = self.currentUsername()
             let displayName = self.currentDisplayName()
             guard shouldShowContributionHeader, let username, let displayName else { return [] }
+
             let header = ContributionHeaderView(
                 username: username,
                 displayName: displayName,
@@ -140,6 +142,7 @@ final class StatusBarMenuBuilder {
             return [self.viewItem(for: header, enabled: true, highlightable: true, submenu: submenu)]
         case .statusBanner:
             guard case .loggedIn = session.account else { return [] }
+
             if let reset = session.rateLimitReset {
                 let banner = RateLimitBanner(reset: reset)
                     .padding(.horizontal, MenuStyle.bannerHorizontalPadding)
@@ -158,6 +161,7 @@ final class StatusBarMenuBuilder {
             let hasLocalFolder = session.settings.localProjects.rootPath?.isEmpty == false
             // Show filters if logged in with repos, OR if local folder is configured
             guard isLoggedIn ? session.hasLoadedRepositories : hasLocalFolder else { return [] }
+
             let filters = MenuRepoFiltersView(session: session)
                 .padding(.horizontal, 0)
                 .padding(.vertical, 0)
@@ -168,6 +172,7 @@ final class StatusBarMenuBuilder {
             let uniqueRepos = self.uniqueDisplayModels(repos)
             // Allow repo list for logged in users, or for local scope when logged out
             guard isLoggedIn || isLocalScope else { return [] }
+
             if isLoggedIn, !session.hasLoadedRepositories {
                 let loading = MenuLoadingRowView()
                     .padding(.horizontal, MenuStyle.sectionHorizontalPadding)
@@ -206,6 +211,7 @@ final class StatusBarMenuBuilder {
         case .restartToUpdate:
             guard case .loggedIn = session.account else { return [] }
             guard SparkleController.shared.updateStatus.isUpdateReady else { return [] }
+
             return [self.actionItem(title: "Restart to update", action: #selector(self.target.checkForUpdates))]
         case .quit:
             return [self.actionItem(title: "Quit RepoBar", action: #selector(self.target.quitApp), keyEquivalent: "q")]
@@ -224,6 +230,7 @@ final class StatusBarMenuBuilder {
         var lastGroup: MainMenuItemGroup?
         for block in blocks {
             guard block.items.isEmpty == false else { continue }
+
             if let lastGroup, lastGroup != block.group, items.isEmpty == false {
                 let separator: NSMenuItem = block.group == .footer ? self.paddedSeparator() : .separator()
                 items.append(separator)
@@ -246,6 +253,7 @@ final class StatusBarMenuBuilder {
         for item in menu.items {
             guard let view = item.view,
                   let measuring = view as? MenuItemMeasuring else { continue }
+
             let height = measuring.measuredHeight(width: width)
             if abs(view.frame.size.height - height) > 0.5 || view.frame.size.width != width {
                 view.frame = NSRect(origin: .zero, size: NSSize(width: width, height: height))
@@ -329,6 +337,7 @@ final class StatusBarMenuBuilder {
                 models.append(model)
                 continue
             }
+
             models.append(existingModel)
         }
 
@@ -363,6 +372,7 @@ final class StatusBarMenuBuilder {
 
     private func currentDisplayName() -> String? {
         guard case let .loggedIn(user) = self.appState.session.account else { return nil }
+
         let host = user.host.host ?? "github.com"
         return "\(user.username)@\(host)"
     }

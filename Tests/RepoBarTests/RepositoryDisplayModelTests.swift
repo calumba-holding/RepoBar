@@ -5,7 +5,7 @@ import Testing
 
 struct RepositoryDisplayModelTests {
     @Test
-    func mapsReleaseAndActivity() throws {
+    func `maps release and activity`() throws {
         let release = try Release(
             name: "v1.0",
             tag: "v1.0",

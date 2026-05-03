@@ -5,7 +5,7 @@ import Testing
 
 struct MenuSnapshotTests {
     @Test
-    func staleChecksUseInterval() {
+    func `stale checks use interval`() {
         let repo = Repository(
             id: "1",
             name: "Repo",

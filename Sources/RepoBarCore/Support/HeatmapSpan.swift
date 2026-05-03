@@ -66,6 +66,7 @@ public enum HeatmapFilter {
             let start = calendar.date(byAdding: .month, value: -span.months, to: end) ?? end
             return HeatmapRange(start: start, end: end)
         }
+
         return self.alignedRange(span: span, now: now, calendar: calendar)
     }
 

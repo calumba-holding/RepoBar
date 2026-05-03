@@ -15,6 +15,7 @@ public struct SettingsStore {
         guard let data = defaults.data(forKey: key) else {
             return UserSettings()
         }
+
         let decoder = JSONDecoder()
         if let envelope = try? decoder.decode(SettingsEnvelope.self, from: data) {
             var settings = envelope.settings

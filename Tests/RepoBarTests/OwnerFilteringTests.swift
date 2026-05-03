@@ -5,12 +5,12 @@ import Testing
 
 struct OwnerFilteringTests {
     @Test
-    func ownerFilterNormalizeTrimsLowercasesDedupesAndSorts() {
+    func `owner filter normalize trims lowercases dedupes and sorts`() {
         #expect(OwnerFilter.normalize([" Alice ", "bob", "ALICE", "", "  "]) == ["alice", "bob"])
     }
 
     @Test
-    func repositoryFilterIncludesAllWhenOwnerFilterIsEmpty() {
+    func `repository filter includes all when owner filter is empty`() {
         let repos = [
             Self.repo(owner: "alice", name: "A"),
             Self.repo(owner: "bob", name: "B"),
@@ -26,7 +26,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryFilterTreatsWhitespaceOnlyOwnerFilterAsEmpty() {
+    func `repository filter treats whitespace only owner filter as empty`() {
         let repos = [
             Self.repo(owner: "alice", name: "A"),
             Self.repo(owner: "bob", name: "B")
@@ -41,7 +41,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryFilterIncludesOnlySpecifiedOwner() {
+    func `repository filter includes only specified owner`() {
         let repos = [
             Self.repo(owner: "alice", name: "A"),
             Self.repo(owner: "bob", name: "B"),
@@ -58,7 +58,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryFilterIncludesMultipleSpecifiedOwners() {
+    func `repository filter includes multiple specified owners`() {
         let repos = [
             Self.repo(owner: "alice", name: "A"),
             Self.repo(owner: "bob", name: "B"),
@@ -76,7 +76,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryFilterIsCaseInsensitive() {
+    func `repository filter is case insensitive`() {
         let repos = [
             Self.repo(owner: "Alice", name: "A"),
             Self.repo(owner: "BOB", name: "B"),
@@ -92,7 +92,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryFilterTrimsOwnerFilterEntries() {
+    func `repository filter trims owner filter entries`() {
         let repos = [
             Self.repo(owner: "alice", name: "A"),
             Self.repo(owner: "bob", name: "B")
@@ -108,7 +108,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryFilterKeepsPinnedReposRegardlessOfOwner() {
+    func `repository filter keeps pinned repos regardless of owner`() {
         let pinnedRepo = Self.repo(owner: "dotnet", name: "Pinned")
         let otherRepo = Self.repo(owner: "dotnet", name: "Other")
         let myRepo = Self.repo(owner: "me", name: "Mine")
@@ -125,7 +125,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func selectVisibleAppliesOwnerFilter() {
+    func `select visible applies owner filter`() {
         let myRepo1 = Self.repo(owner: "me", name: "Repo1")
         let myRepo2 = Self.repo(owner: "me", name: "Repo2")
         let orgRepo1 = Self.repo(owner: "dotnet", name: "AspNetCore")
@@ -148,7 +148,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryPipelineAppliesOwnerFilter() {
+    func `repository pipeline applies owner filter`() {
         let repos = [
             Self.repo(owner: "alice", name: "A"),
             Self.repo(owner: "bob", name: "B"),
@@ -173,7 +173,7 @@ struct OwnerFilteringTests {
     }
 
     @Test
-    func repositoryQueryNormalizesOwnerFilterForEquality() {
+    func `repository query normalizes owner filter for equality`() {
         let left = RepositoryQuery(ownerFilter: ["Alice", " bob ", "ALICE"])
         let right = RepositoryQuery(ownerFilter: ["bob", "alice"])
         #expect(left == right)

@@ -58,6 +58,7 @@ actor GraphQLClient {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+
         await self.logGraphQLResponse(http, label: "RepoSummary", startedAt: startedAt)
         if let snapshot = RateLimitSnapshot.from(response: http) {
             self.rateLimit = snapshot
@@ -120,6 +121,7 @@ actor GraphQLClient {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+
         await self.logGraphQLResponse(http, label: "UserContributions", startedAt: startedAt)
         if let snapshot = RateLimitSnapshot.from(response: http) {
             self.rateLimit = snapshot
@@ -255,6 +257,7 @@ struct ContributionDay: Decodable {
                 debugDescription: "Unsupported date format: \(rawDate)"
             )
         }
+
         self.date = parsedDate
         self.contributionCount = try container.decode(Int.self, forKey: .contributionCount)
     }

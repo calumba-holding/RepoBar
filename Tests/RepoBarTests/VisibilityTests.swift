@@ -5,10 +5,10 @@ import Testing
 
 struct VisibilityTests {
     @Test
-    func hidesRepositoriesNotInHiddenList() {
+    func `hides repositories not in hidden list`() {
         let repos = [
-            Repository(id: "1", name: "a", owner: "me", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
-            Repository(id: "2", name: "b", owner: "me", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: [])
+            makeRepository(id: "1", name: "a"),
+            makeRepository(id: "2", name: "b")
         ]
         let visible = AppState.selectVisible(
             all: repos,
@@ -26,10 +26,10 @@ struct VisibilityTests {
     }
 
     @Test
-    func prioritizesPinnedOrder() {
+    func `prioritizes pinned order`() {
         let repos = [
-            Repository(id: "1", name: "b", owner: "me", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
-            Repository(id: "2", name: "a", owner: "me", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: [])
+            makeRepository(id: "1", name: "b"),
+            makeRepository(id: "2", name: "a")
         ]
         let visible = AppState.selectVisible(
             all: repos,
@@ -46,9 +46,9 @@ struct VisibilityTests {
     }
 
     @Test
-    func appliesLimitAfterFiltering() {
+    func `applies limit after filtering`() {
         let repos = (0 ..< 10).map { idx in
-            Repository(id: "\(idx)", name: "r\(idx)", owner: "me", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 0, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: [])
+            makeRepository(id: "\(idx)", name: "r\(idx)")
         }
         let visible = AppState.selectVisible(
             all: repos,
@@ -66,11 +66,11 @@ struct VisibilityTests {
     }
 
     @Test
-    func collapsesDuplicateReposBeforeMenuSelection() {
+    func `collapses duplicate repos before menu selection`() {
         let repos = [
-            Repository(id: "1", name: "Repo", owner: "Owner", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 1, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
-            Repository(id: "2", name: "repo", owner: "owner", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 9, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
-            Repository(id: "3", name: "Other", owner: "owner", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 2, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: [])
+            makeRepository(id: "1", name: "Repo", owner: "Owner", openIssues: 1),
+            makeRepository(id: "2", name: "repo", owner: "owner", openIssues: 9),
+            makeRepository(id: "3", name: "Other", owner: "owner", openIssues: 2)
         ]
         let visible = AppState.selectVisible(
             all: repos,
@@ -93,4 +93,27 @@ struct VisibilityTests {
         #expect(matchingFullNames.count == 1)
         #expect(keptIssues == 1)
     }
+}
+
+private func makeRepository(
+    id: String,
+    name: String,
+    owner: String = "me",
+    openIssues: Int = 0
+) -> Repository {
+    Repository(
+        id: id,
+        name: name,
+        owner: owner,
+        sortOrder: nil,
+        error: nil,
+        rateLimitedUntil: nil,
+        ciStatus: .unknown,
+        openIssues: openIssues,
+        openPulls: 0,
+        latestRelease: nil,
+        latestActivity: nil,
+        traffic: nil,
+        heatmap: []
+    )
 }

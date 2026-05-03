@@ -5,7 +5,7 @@ import Testing
 struct OAuthLoginFlowTests {
     @Test
     @MainActor
-    func loginPersistsTokensAndClientCredentials() async throws {
+    func `login persists tokens and client credentials`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -45,6 +45,7 @@ struct OAuthLoginFlowTests {
                 let redirect = query.first(where: { $0.name == "redirect_uri" })?.value
                 guard state == "state-123" else { throw URLError(.badServerResponse) }
                 guard redirect == fakeRedirectURL.absoluteString else { throw URLError(.badURL) }
+
                 #expect(query.contains { $0.name == "scope" } == false)
             },
             dataProvider: { request in
@@ -74,7 +75,7 @@ struct OAuthLoginFlowTests {
 
     @Test
     @MainActor
-    func loginIncludesExplicitScopeWhenRequested() async throws {
+    func `login includes explicit scope when requested`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -124,7 +125,7 @@ struct OAuthLoginFlowTests {
 
     @Test
     @MainActor
-    func normalizeHostRequiresHTTPS() throws {
+    func `normalize host requires HTTPS`() throws {
         do {
             _ = try OAuthLoginFlow.normalizeHost(#require(URL(string: "http://github.com")))
             Issue.record("Expected invalidHost")
@@ -241,6 +242,7 @@ private extension OAuthLoginFlowTests {
         }
 
         guard let stream = request.httpBodyStream else { return nil }
+
         stream.open()
         defer { stream.close() }
 

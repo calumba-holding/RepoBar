@@ -88,8 +88,10 @@ struct SettingsView: View {
             $0.identifier?.rawValue == self.settingsWindowIdentifier
                 || self.knownTabTitles.contains($0.title)
         }) else { return }
+
         let toolbarHeight = window.frame.height - window.contentLayoutRect.height
         guard toolbarHeight > 0 else { return }
+
         let newSize = NSSize(width: width, height: height + toolbarHeight)
         var frame = window.frame
         frame.origin.y += frame.size.height - newSize.height

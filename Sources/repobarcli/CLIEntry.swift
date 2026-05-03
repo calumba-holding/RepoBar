@@ -29,6 +29,7 @@ enum RepoBarCLI {
         guard let type = commandRegistry[name] else {
             throw CLIError.unknownCommand(name)
         }
+
         var command = type.init()
         try command.bind(invocation.parsedValues)
         return command

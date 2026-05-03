@@ -2,8 +2,8 @@
 import Testing
 
 struct ChangelogParserTests {
-    @Test("Unreleased entries produce badge count")
-    func unreleasedEntriesProduceBadge() {
+    @Test
+    func `Unreleased entries produce badge count`() {
         let markdown = """
         # Changelog
 
@@ -21,8 +21,8 @@ struct ChangelogParserTests {
         #expect(presentation?.detailText == nil)
     }
 
-    @Test("Empty unreleased maps to up-to-date")
-    func emptyUnreleasedIsUpToDate() {
+    @Test
+    func `Empty unreleased maps to up-to-date`() {
         let markdown = """
         # Changelog
 
@@ -37,8 +37,8 @@ struct ChangelogParserTests {
         #expect(presentation?.detailText == "Up to date")
     }
 
-    @Test("Fuzzy version matching counts entries since release")
-    func fuzzyVersionMatchingCountsSinceRelease() {
+    @Test
+    func `Fuzzy version matching counts entries since release`() {
         let markdown = """
         # Changelog
 
@@ -55,8 +55,8 @@ struct ChangelogParserTests {
         #expect(presentation?.badgeText == "2")
     }
 
-    @Test("Missing release match returns no metadata")
-    func missingReleaseMatchReturnsNil() {
+    @Test
+    func `Missing release match returns no metadata`() {
         let markdown = """
         # Changelog
 
@@ -68,8 +68,8 @@ struct ChangelogParserTests {
         #expect(presentation == nil)
     }
 
-    @Test("Subheadings do not split sections")
-    func subheadingsDoNotSplitSections() {
+    @Test
+    func `Subheadings do not split sections`() {
         let markdown = """
         # Changelog
 
@@ -88,8 +88,8 @@ struct ChangelogParserTests {
         #expect(parsed.sections.first?.entryCount == 3)
     }
 
-    @Test("Numbered list items are counted")
-    func numberedListItemsAreCounted() {
+    @Test
+    func `Numbered list items are counted`() {
         let markdown = """
         # Changelog
 
@@ -102,8 +102,8 @@ struct ChangelogParserTests {
         #expect(presentation?.badgeText == "2")
     }
 
-    @Test("Headline prefers first release section over Unreleased")
-    func headlinePrefersFirstReleaseSection() {
+    @Test
+    func `Headline prefers first release section over Unreleased`() {
         let markdown = """
         # Changelog
 
@@ -117,8 +117,8 @@ struct ChangelogParserTests {
         #expect(ChangelogParser.headline(parsed: parsed) == "1.2.0 - 2025-12-31")
     }
 
-    @Test("Headline falls back to first section when no version exists")
-    func headlineFallsBackToFirstSection() {
+    @Test
+    func `Headline falls back to first section when no version exists`() {
         let markdown = """
         # Changelog
 

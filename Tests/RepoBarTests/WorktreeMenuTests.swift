@@ -5,7 +5,7 @@ import Testing
 struct WorktreeMenuTests {
     @MainActor
     @Test
-    func worktreeMenuItem_wiresActionAndPayload() {
+    func `worktree menu item wires action and payload`() {
         let manager = StatusBarMenuManager(appState: AppState())
         let path = URL(fileURLWithPath: "/tmp/worktree", isDirectory: true)
         let model = LocalRefMenuRowViewModel(

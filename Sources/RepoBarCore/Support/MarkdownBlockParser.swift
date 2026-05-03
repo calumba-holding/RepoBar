@@ -76,6 +76,7 @@ private struct MarkdownBlockBuilder {
     ) {
         let paragraphs = listItem.children.compactMap { child -> String? in
             guard let paragraph = child as? Paragraph else { return nil }
+
             let text = self.inlineMarkdown(from: paragraph)
             return text.isEmpty ? nil : text
         }

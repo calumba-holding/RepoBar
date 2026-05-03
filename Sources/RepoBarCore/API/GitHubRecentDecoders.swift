@@ -54,6 +54,7 @@ enum GitHubRecentDecoders {
                     else {
                         return nil
                     }
+
                     return RepoReleaseAssetSummary(
                         name: name,
                         sizeBytes: asset.size,
@@ -81,6 +82,7 @@ enum GitHubRecentDecoders {
         let response = try GitHubDecoding.decode(ActionsRunsResponse.self, from: data)
         return response.workflowRuns.compactMap { run in
             guard let url = run.htmlUrl else { return nil }
+
             let title = self.workflowRunTitle(run)
             let updatedAt = run.updatedAt ?? run.createdAt ?? Date.distantPast
             return RepoWorkflowRunSummary(
@@ -131,6 +133,7 @@ enum GitHubRecentDecoders {
         let responses = try GitHubDecoding.decode([CommitRecentResponse].self, from: data)
         return responses.compactMap { response in
             guard let url = response.htmlUrl else { return nil }
+
             let message = response.commit.message.trimmingCharacters(in: .whitespacesAndNewlines)
             let title = message.split(whereSeparator: \.isNewline).first.map(String.init) ?? message
             return RepoCommitSummary(
@@ -149,6 +152,7 @@ enum GitHubRecentDecoders {
         let responses = try GitHubDecoding.decode([ContributorResponse].self, from: data)
         return responses.compactMap {
             guard let login = $0.login else { return nil }
+
             return RepoContributorSummary(
                 login: login,
                 avatarURL: $0.avatarUrl,

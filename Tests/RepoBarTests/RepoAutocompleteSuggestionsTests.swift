@@ -4,7 +4,7 @@ import Testing
 
 struct RepoAutocompleteSuggestionsTests {
     @Test
-    func emptyQuery_returnsRecentsPrefix() {
+    func `empty query returns recents prefix`() {
         let prefetched = [
             Self.make("steipete/RepoBar"),
             Self.make("steipete/clawdis"),
@@ -16,7 +16,7 @@ struct RepoAutocompleteSuggestionsTests {
     }
 
     @Test
-    func nonMatchingQuery_doesNotFallbackToRecents() {
+    func `non matching query does not fallback to recents`() {
         let prefetched = [
             Self.make("steipete/RepoBar"),
             Self.make("amantus-ai/sweetistics")
@@ -27,7 +27,7 @@ struct RepoAutocompleteSuggestionsTests {
     }
 
     @Test
-    func matchingQuery_filtersAndRanksByName() {
+    func `matching query filters and ranks by name`() {
         let prefetched = [
             Self.make("steipete/RepoBar"),
             Self.make("amantus-ai/sweetistics"),

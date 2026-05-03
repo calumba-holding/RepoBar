@@ -77,6 +77,7 @@ enum HeatmapLayout {
 
     static func centeredInset(available: CGFloat, content: CGFloat) -> CGFloat {
         guard available > content else { return 0 }
+
         return floor((available - content) / 2)
     }
 }

@@ -4,7 +4,7 @@ import Testing
 
 struct RepositorySortTests {
     @Test
-    func sortedByIssuesFallsBackToActivity() {
+    func `sorted by issues falls back to activity`() {
         let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
         let newer = now.addingTimeInterval(-60)
         let older = now.addingTimeInterval(-3600)
@@ -17,7 +17,7 @@ struct RepositorySortTests {
     }
 
     @Test
-    func sortedByNameIsCaseInsensitive() {
+    func `sorted by name is case insensitive`() {
         let repoA = Self.repo(owner: "a", name: "Repo", issues: 0, pulls: 0, stars: 0, pushedAt: nil)
         let repoB = Self.repo(owner: "B", name: "repo", issues: 0, pulls: 0, stars: 0, pushedAt: nil)
 
@@ -26,7 +26,7 @@ struct RepositorySortTests {
     }
 
     @Test
-    func sortedByEventUsesActivityLineWithPushFallback() throws {
+    func `sorted by event uses activity line with push fallback`() throws {
         let withActivity = try Self.repo(
             name: "A",
             issues: 0,
@@ -47,7 +47,7 @@ struct RepositorySortTests {
     }
 
     @Test
-    func activityDatePicksMostRecentOfActivityAndPush() throws {
+    func `activity date picks most recent of activity and push`() throws {
         let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
         let pushedAt = now.addingTimeInterval(-100)
         let activityAt = now.addingTimeInterval(-10)
@@ -69,7 +69,7 @@ struct RepositorySortTests {
     }
 
     @Test
-    func activityLineFallsBackToPush() {
+    func `activity line falls back to push`() {
         let repo = Self.repo(name: "Repo", issues: 0, pulls: 0, stars: 0, pushedAt: Date(), activity: nil)
         #expect(repo.activityLine(fallbackToPush: true) == "push")
         #expect(repo.activityLine(fallbackToPush: false) == nil)

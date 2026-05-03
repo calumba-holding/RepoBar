@@ -33,6 +33,7 @@ extension NSColor {
 
     private func relativeLuminance(appearance: NSAppearance?) -> CGFloat {
         guard let rgba = self.rgba(appearance: appearance) else { return 0 }
+
         let r = Self.srgbToLinear(rgba.r)
         let g = Self.srgbToLinear(rgba.g)
         let b = Self.srgbToLinear(rgba.b)
@@ -57,6 +58,7 @@ extension NSColor {
 
         let rgb = self.usingColorSpace(.deviceRGB) ?? self.usingColorSpace(.sRGB)
         guard let rgb else { return nil }
+
         return RGBA(r: rgb.redComponent, g: rgb.greenComponent, b: rgb.blueComponent, a: rgb.alphaComponent)
     }
 
@@ -67,12 +69,14 @@ extension NSColor {
 
     private func resolvedRGBColor(appearance: NSAppearance?) -> NSColor {
         guard let rgba = self.rgba(appearance: appearance) else { return self }
+
         return NSColor(srgbRed: rgba.r, green: rgba.g, blue: rgba.b, alpha: rgba.a)
     }
 
     private func blended(with other: NSColor, fraction: CGFloat) -> NSColor {
         let f = max(0, min(1, fraction))
         guard let a = self.rgba(appearance: nil), let b = other.rgba(appearance: nil) else { return self }
+
         return NSColor(
             srgbRed: a.r + (b.r - a.r) * f,
             green: a.g + (b.g - a.g) * f,

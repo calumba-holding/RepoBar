@@ -557,8 +557,10 @@ private func ciStatusLabel(_ status: CIStatus, conclusion: String?) -> String {
 
 private func repoName(from url: URL, host: URL) -> String? {
     guard url.host == host.host else { return nil }
+
     let parts = url.path.split(separator: "/").map(String.init)
     guard parts.count >= 2 else { return nil }
+
     return "\(parts[0])/\(parts[1])"
 }
 
@@ -570,5 +572,6 @@ private func shortSHA(_ sha: String) -> String {
 private func truncate(_ text: String, max: Int) -> String {
     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
     guard trimmed.count > max else { return trimmed }
+
     return String(trimmed.prefix(max)) + "…"
 }

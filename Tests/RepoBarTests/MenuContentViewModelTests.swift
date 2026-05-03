@@ -5,7 +5,7 @@ import Testing
 
 struct MenuContentViewModelTests {
     @Test
-    func sortedRespectsPinnedOrderThenAlpha() {
+    func `sorted respects pinned order then alpha`() {
         let repos = [
             Repository(
                 id: "1",
@@ -59,7 +59,7 @@ struct MenuContentViewModelTests {
     }
 
     @Test
-    func moveStepCalculatesBounds() {
+    func `move step calculates bounds`() {
         let repos = [
             RepositoryDisplayModel(repo: Repository(
                 id: "1",
@@ -121,9 +121,11 @@ private enum TestableRepoGrid {
         move: (IndexSet, Int) -> Void
     ) {
         guard let currentIndex = ordered.firstIndex(of: repo) else { return }
+
         let maxIndex = max(ordered.count - 1, 0)
         let target = max(0, min(maxIndex, currentIndex + direction))
         guard target != currentIndex else { return }
+
         move(IndexSet(integer: currentIndex), target > currentIndex ? target + 1 : target)
     }
 }

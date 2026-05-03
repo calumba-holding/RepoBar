@@ -131,6 +131,7 @@ public enum LocalSyncState: String, Equatable, Sendable {
     public static func resolve(isClean: Bool, ahead: Int?, behind: Int?) -> LocalSyncState {
         if !isClean { return .dirty }
         guard let ahead, let behind else { return .unknown }
+
         if ahead == 0, behind == 0 { return .synced }
         if behind > 0, ahead == 0 { return .behind }
         if ahead > 0, behind == 0 { return .ahead }
@@ -233,11 +234,13 @@ public struct LocalRepoIndex: Equatable, Sendable {
 
     private func uniqueStatus(in index: [String: [LocalRepoStatus]], forKey key: String) -> LocalRepoStatus? {
         guard let matches = index[key], matches.count == 1 else { return nil }
+
         return matches.first
     }
 
     private func preferredStatus(in index: [String: [LocalRepoStatus]], forKey key: String) -> LocalRepoStatus? {
         guard let matches = index[key], matches.isEmpty == false else { return nil }
+
         return matches.reduce(matches[0]) { current, candidate in
             Self.preferredStatus(current, candidate)
         }

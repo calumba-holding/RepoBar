@@ -170,6 +170,7 @@ final class RecentMenuService {
 
     func cachedRecentListCount(fullName: String, kind: RepoRecentMenuKind) -> Int? {
         guard let descriptor = self.descriptor(for: kind) else { return nil }
+
         return descriptor.stale(fullName)?.count
     }
 
@@ -186,6 +187,7 @@ final class RecentMenuService {
     func cachedCommitDigest(fullName: String) -> Int? {
         let now = Date()
         guard let commits = self.cachedCommits(fullName: fullName, now: now), commits.isEmpty == false else { return nil }
+
         var hasher = Hasher()
         for commit in commits {
             hasher.combine(commit.sha)
@@ -340,18 +342,21 @@ final class RecentListCache<Item: Sendable> {
     func cached(for key: String, now: Date, maxAge: TimeInterval) -> [Item]? {
         guard let entry = self.entries[key] else { return nil }
         guard now.timeIntervalSince(entry.fetchedAt) <= maxAge else { return nil }
+
         self.touch(key)
         return entry.items
     }
 
     func stale(for key: String) -> [Item]? {
         guard let entry = self.entries[key] else { return nil }
+
         self.touch(key)
         return entry.items
     }
 
     func needsRefresh(for key: String, now: Date, maxAge: TimeInterval) -> Bool {
         guard let entry = self.entries[key] else { return true }
+
         return now.timeIntervalSince(entry.fetchedAt) > maxAge
     }
 
@@ -369,6 +374,7 @@ final class RecentListCache<Item: Sendable> {
     @discardableResult
     func store(_ items: [Item], for key: String, fetchedAt: Date) -> [String] {
         guard self.maxEntries > 0 else { return [] }
+
         self.entries[key] = Entry(fetchedAt: fetchedAt, items: items)
         self.touch(key)
         return self.evictIfNeeded()

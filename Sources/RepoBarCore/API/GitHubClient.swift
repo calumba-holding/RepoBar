@@ -12,6 +12,7 @@ public actor GitHubClient {
         apiHost: { [weak self] in await self?.apiHost ?? URL(string: "https://api.github.com")! },
         tokenProvider: { [weak self] in
             guard let self else { throw URLError(.userAuthenticationRequired) }
+
             return try await self.validAccessToken()
         },
         requestRunner: requestRunner,
@@ -43,14 +44,17 @@ public actor GitHubClient {
     private func trusted(_ host: URL) throws -> URL {
         guard host.scheme?.lowercased() == "https" else { throw GitHubAPIError.invalidHost }
         guard host.host != nil else { throw GitHubAPIError.invalidHost }
+
         return host
     }
 
     public func setTokenProvider(_ provider: @Sendable @escaping () async throws -> OAuthTokens?) {
         self.tokenProvider = provider
+        // swiftlint:disable:next unhandled_throwing_task
         Task {
             await self.graphQL.setTokenProvider {
                 guard let tokens = try await provider() else { throw URLError(.userAuthenticationRequired) }
+
                 return tokens.accessToken
             }
         }
@@ -189,6 +193,7 @@ public actor GitHubClient {
         }
         let task = Task { [weak self] () throws -> Repository in
             guard let self else { throw CancellationError() }
+
             return try await self.fullRepositoryInternal(owner: owner, name: name)
         }
         self.inflightRepoDetails[key] = task

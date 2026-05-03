@@ -2,8 +2,8 @@ import RepoBarCore
 import Testing
 
 struct MarkdownBlockParserTests {
-    @Test("Unordered lists preserve nesting depth")
-    func unorderedListNestingDepth() {
+    @Test
+    func `Unordered lists preserve nesting depth`() {
         let markdown = """
         - First
           - Child
@@ -18,8 +18,8 @@ struct MarkdownBlockParserTests {
         ])
     }
 
-    @Test("Ordered lists keep numbered markers")
-    func orderedListMarkers() {
+    @Test
+    func `Ordered lists keep numbered markers`() {
         let markdown = """
         1. One
         2. Two
@@ -32,8 +32,8 @@ struct MarkdownBlockParserTests {
         ])
     }
 
-    @Test("Inline markdown is preserved for SwiftUI rendering")
-    func inlineMarkdownIsPreserved() {
+    @Test
+    func `Inline markdown is preserved for SwiftUI rendering`() {
         let markdown = """
         - **Bold** and `code` [link](https://example.com)
         """
@@ -48,8 +48,8 @@ struct MarkdownBlockParserTests {
         ])
     }
 
-    @Test("Code blocks are preserved")
-    func codeBlockParsing() {
+    @Test
+    func `Code blocks are preserved`() {
         let markdown = """
         ```swift
         let value = 1
@@ -62,8 +62,8 @@ struct MarkdownBlockParserTests {
         ])
     }
 
-    @Test("Block quotes render as quote blocks")
-    func blockQuoteParsing() {
+    @Test
+    func `Block quotes render as quote blocks`() {
         let markdown = """
         > Quoted text
         """

@@ -4,7 +4,7 @@ import Testing
 
 struct ETagCacheTests {
     @Test
-    func saveAndRetrieve() async throws {
+    func `save and retrieve`() async throws {
         let cache = ETagCache()
         let url = try #require(URL(string: "https://example.com/a"))
 
@@ -20,7 +20,7 @@ struct ETagCacheTests {
     }
 
     @Test
-    func evictsOldestEntryWhenCapacityIsReached() async throws {
+    func `evicts oldest entry when capacity is reached`() async throws {
         let cache = ETagCache(maxEntries: 2)
         let firstURL = try #require(URL(string: "https://example.com/a"))
         let secondURL = try #require(URL(string: "https://example.com/b"))
@@ -38,7 +38,7 @@ struct ETagCacheTests {
     }
 
     @Test
-    func rateLimitExpiresAndClears() async {
+    func `rate limit expires and clears`() async {
         let cache = ETagCache()
         let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
         let until = now.addingTimeInterval(10)
@@ -51,7 +51,7 @@ struct ETagCacheTests {
     }
 
     @Test
-    func clearDropsEntriesAndRateLimit() async throws {
+    func `clear drops entries and rate limit`() async throws {
         let cache = ETagCache()
         let url = try #require(URL(string: "https://example.com/a"))
         await cache.save(url: url, etag: "etag-1", data: Data("payload".utf8))

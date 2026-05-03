@@ -137,5 +137,6 @@ private func recentItemsTableLines(
 private func truncate(_ text: String, max: Int) -> String {
     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
     guard trimmed.count > max else { return trimmed }
+
     return String(trimmed.prefix(max)) + "…"
 }

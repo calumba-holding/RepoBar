@@ -4,7 +4,7 @@ import Testing
 
 struct RepoDetailStoreTests {
     @Test
-    func cachePolicyMarksFreshAndStale() {
+    func `cache policy marks fresh and stale`() {
         let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
         let cache = RepoDetailCache(
             openPulls: 1,
@@ -37,7 +37,7 @@ struct RepoDetailStoreTests {
     }
 
     @Test
-    func storeUsesMemoryAfterDiskRemoval() throws {
+    func `store uses memory after disk removal`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
@@ -59,7 +59,7 @@ struct RepoDetailStoreTests {
     }
 
     @Test
-    func clear_dropsMemoryAndDisk() throws {
+    func `clear drops memory and disk`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-clear-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
@@ -76,7 +76,7 @@ struct RepoDetailStoreTests {
     }
 
     @Test
-    func load_usesDiskWhenMemoryEmpty() {
+    func `load uses disk when memory empty`() {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-disk-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 

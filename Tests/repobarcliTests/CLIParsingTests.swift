@@ -4,14 +4,14 @@ import Testing
 
 struct CLIParsingTests {
     @Test
-    func parseRepoNameSplitsOwnerAndName() throws {
+    func `parse repo name splits owner and name`() throws {
         let result = try parseRepoName("steipete/RepoBar")
         #expect(result.owner == "steipete")
         #expect(result.name == "RepoBar")
     }
 
     @Test
-    func parseRepoNameRejectsMissingSlash() {
+    func `parse repo name rejects missing slash`() {
         #expect(throws: ValidationError.self) {
             _ = try parseRepoName("RepoBar")
         }

@@ -133,5 +133,6 @@ private func gitRootURL() -> URL? {
     else {
         return nil
     }
+
     return URL(fileURLWithPath: path, isDirectory: true)
 }

@@ -75,6 +75,7 @@ final class SparkleController: NSObject {
 
         #if canImport(Sparkle)
             guard canUseSparkle else { return }
+
             let saved = (UserDefaults.standard.object(forKey: self.defaultsKey) as? Bool) ?? true
             let controller = SPUStandardUpdaterController(
                 startingUpdater: false,
@@ -107,6 +108,7 @@ final class SparkleController: NSObject {
 
     func checkForUpdates() {
         guard self.canCheckForUpdates else { return }
+
         self.updater.checkForUpdates(nil)
     }
 

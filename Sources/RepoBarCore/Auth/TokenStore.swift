@@ -61,6 +61,7 @@ public struct TokenStore: Sendable {
 
     public func load() throws -> OAuthTokens? {
         guard let data = try self.loadData(account: "default") else { return nil }
+
         return try JSONDecoder().decode(OAuthTokens.self, from: data)
     }
 
@@ -71,6 +72,7 @@ public struct TokenStore: Sendable {
 
     public func loadClientCredentials() throws -> OAuthClientCredentials? {
         guard let data = try self.loadData(account: "client") else { return nil }
+
         return try JSONDecoder().decode(OAuthClientCredentials.self, from: data)
     }
 
@@ -89,6 +91,7 @@ public struct TokenStore: Sendable {
 
     public func loadPAT() throws -> String? {
         guard let data = try self.loadData(account: "pat") else { return nil }
+
         return String(data: data, encoding: .utf8)
     }
 
@@ -109,6 +112,7 @@ extension TokenStore {
             else {
                 return nil
             }
+
             if let groups = entitlement as? [String] {
                 return groups.first(where: { $0.hasSuffix(Self.sharedAccessGroupSuffix) })
             }
@@ -220,6 +224,7 @@ private extension TokenStore {
 
     func accessGroupsForOperation() -> [String?] {
         guard let accessGroup else { return [nil] }
+
         return [accessGroup, nil]
     }
 
@@ -237,6 +242,7 @@ private extension TokenStore {
 
     func shouldRetryWithoutAccessGroup(status: OSStatus, accessGroup: String?) -> Bool {
         guard accessGroup != nil else { return false }
+
         switch status {
         case errSecMissingEntitlement, errSecInteractionNotAllowed:
             return true
@@ -247,6 +253,7 @@ private extension TokenStore {
 
     func logFailure(_ action: String, status: OSStatus) {
         guard status != errSecSuccess else { return }
+
         let statusMessage = SecCopyErrorMessageString(status, nil) as String?
         if let statusMessage {
             self.logger.error("Keychain \(action) failed: \(statusMessage)")
@@ -265,6 +272,7 @@ private extension TokenStore {
     func loadFile(account: String, directory: URL) throws -> Data? {
         let url = self.fileURL(account: account, directory: directory)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+
         return try Data(contentsOf: url)
     }
 

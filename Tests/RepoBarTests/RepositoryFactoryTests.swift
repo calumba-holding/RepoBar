@@ -4,7 +4,7 @@ import Testing
 
 struct RepositoryFactoryTests {
     @Test
-    func from_mapsRepoItemFields() throws {
+    func `from maps repo item fields`() throws {
         let json = """
         {
           "id": 42,
@@ -58,7 +58,7 @@ struct RepositoryFactoryTests {
     }
 
     @Test
-    func placeholder_buildsMinimalRepo() {
+    func `placeholder builds minimal repo`() {
         let limitedUntil = Date(timeIntervalSinceReferenceDate: 999)
         let repo = Repository.placeholder(owner: "me", name: "Repo", error: "oops", rateLimitedUntil: limitedUntil)
 

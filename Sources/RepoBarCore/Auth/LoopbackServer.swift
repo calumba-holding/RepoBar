@@ -62,6 +62,7 @@ public final class LoopbackServer {
 
         let sock = socket(AF_INET, SOCK_STREAM, 0)
         guard sock >= 0 else { return false }
+
         defer { close(sock) }
 
         let connectResult = withUnsafePointer(to: &addr) { ptr in
@@ -110,6 +111,7 @@ public final class LoopbackServer {
             Task { @MainActor [weak self] in
                 guard let self, let data, let request = String(data: data, encoding: .utf8) else { return }
                 guard let parsed = Self.parse(request: request) else { return }
+
                 let response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 7\r\n\r\nSuccess"
                 connection.send(content: response.data(using: .utf8), completion: .contentProcessed { [weak self] _ in
                     connection.cancel()
@@ -129,6 +131,7 @@ public final class LoopbackServer {
     public nonisolated static func parse(request: String) -> (code: String, state: String)? {
         guard let firstLine = request.components(separatedBy: "\r\n").first,
               let range = firstLine.range(of: "GET ") else { return nil }
+
         let pathPart = firstLine[range.upperBound...].split(separator: " ").first ?? "" as Substring
         let components = URLComponents(string: "http://localhost\(pathPart)")
         let code = components?.queryItems?.first(where: { $0.name == "code" })?.value ?? ""

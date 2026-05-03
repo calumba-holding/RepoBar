@@ -4,7 +4,7 @@ import Testing
 
 struct RepoBarCoreModelsTests {
     @Test
-    func userIdentity_init() throws {
+    func `user identity init`() throws {
         let host = try #require(URL(string: "https://github.com"))
         let identity = UserIdentity(username: "steipete", host: host)
         #expect(identity.username == "steipete")
@@ -12,7 +12,7 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func repository_fullName_and_withOrder() {
+    func `repository full name and with order`() {
         var repo = Repository(
             id: "1",
             name: "RepoBar",
@@ -34,7 +34,7 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func localProjectsRefreshInterval_labels() {
+    func `local projects refresh interval labels`() {
         #expect(LocalProjectsRefreshInterval.oneMinute.label == "1 minute")
         #expect(LocalProjectsRefreshInterval.twoMinutes.label == "2 minutes")
         #expect(LocalProjectsRefreshInterval.fiveMinutes.label == "5 minutes")
@@ -43,14 +43,14 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func userSettings_defaults() {
+    func `user settings defaults`() {
         let settings = UserSettings()
         #expect(settings.localProjects.worktreeFolderName == ".work")
         #expect(settings.localProjects.autoSyncEnabled == true)
     }
 
     @Test
-    func repoRecentItems_init() throws {
+    func `repo recent items init`() throws {
         let now = Date()
         let url = try #require(URL(string: "https://example.com"))
         _ = RepoIssueSummary(
@@ -115,7 +115,7 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func backoffTracker_lifecycle() async throws {
+    func `backoff tracker lifecycle`() async throws {
         let tracker = BackoffTracker()
         let url = try #require(URL(string: "https://example.com"))
         let now = Date()
@@ -129,7 +129,7 @@ struct RepoBarCoreModelsTests {
     }
 
     @Test
-    func gitExecutableLocator_version() {
+    func `git executable locator version`() {
         let result = GitExecutableLocator.version(at: URL(fileURLWithPath: "/usr/bin/git"))
         #expect(result.version != nil)
         #expect(result.error == nil)

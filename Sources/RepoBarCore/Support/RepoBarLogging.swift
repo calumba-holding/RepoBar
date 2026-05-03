@@ -65,6 +65,7 @@ private final class LogState: @unchecked Sendable {
         self.lock.lock()
         defer { self.lock.unlock() }
         guard !self.isBootstrapped else { return }
+
         self.isBootstrapped = true
         LoggingSystem.bootstrap { label in
             RepoBarLogHandler(label: label, state: self)
@@ -107,6 +108,7 @@ private final class LogState: @unchecked Sendable {
         self.lock.lock()
         defer { self.lock.unlock() }
         guard self.fileLoggingEnabled, let handle = self.fileHandle else { return }
+
         if let data = line.data(using: .utf8) {
             handle.write(data)
         }
@@ -121,6 +123,7 @@ private final class LogState: @unchecked Sendable {
 
     private func openFileHandle() {
         guard let url = self.resolveLogFileURL() else { return }
+
         self.logFileURL = url
         let directory = url.deletingLastPathComponent()
         if FileManager.default.fileExists(atPath: directory.path) == false {
@@ -149,6 +152,7 @@ private final class LogState: @unchecked Sendable {
         guard let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return nil
         }
+
         let directory = base.appending(path: "RepoBar/Logs", directoryHint: .isDirectory)
         return directory.appending(path: "repobar.log", directoryHint: .notDirectory)
     }
@@ -179,20 +183,11 @@ private struct RepoBarLogHandler: LogHandler {
         set { self.metadata[key] = newValue }
     }
 
-    // swiftlint:disable:next function_parameter_count
-    func log(
-        level: Logging.Logger.Level,
-        message: Logging.Logger.Message,
-        metadata: Logging.Logger.Metadata?,
-        source _: String,
-        file _: String,
-        function _: String,
-        line _: UInt
-    ) {
-        let combined = self.mergedMetadata(extra: metadata)
-        let renderedMessage = self.renderMessage(message, metadata: combined)
-        self.osLogger.log(level: self.osLogType(for: level), "\(renderedMessage)")
-        let fileLine = self.renderFileLine(level: level, message: renderedMessage)
+    func log(event: Logging.LogEvent) {
+        let combined = self.mergedMetadata(extra: event.metadata)
+        let renderedMessage = self.renderMessage(event.message, metadata: combined)
+        self.osLogger.log(level: self.osLogType(for: event.level), "\(renderedMessage)")
+        let fileLine = self.renderFileLine(level: event.level, message: renderedMessage)
         self.state.logToFile(fileLine)
     }
 
@@ -209,6 +204,7 @@ private struct RepoBarLogHandler: LogHandler {
 
     private func renderMessage(_ message: Logging.Logger.Message, metadata: Logging.Logger.Metadata) -> String {
         guard metadata.isEmpty == false else { return message.description }
+
         let metadataText = metadata
             .sorted(by: { $0.key < $1.key })
             .map { "\($0.key)=\(self.stringify($0.value))" }

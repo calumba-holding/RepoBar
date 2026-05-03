@@ -4,7 +4,7 @@ import Testing
 
 struct LocalRepoStatusTests {
     @Test
-    func syncDetail_formatsCounts() {
+    func `sync detail formats counts`() {
         let status = LocalRepoStatus(
             path: URL(fileURLWithPath: "/tmp"),
             name: "Repo",
@@ -20,7 +20,7 @@ struct LocalRepoStatusTests {
     }
 
     @Test
-    func syncDetail_includesDirtySummary() {
+    func `sync detail includes dirty summary`() {
         let status = LocalRepoStatus(
             path: URL(fileURLWithPath: "/tmp"),
             name: "Repo",
@@ -36,7 +36,7 @@ struct LocalRepoStatusTests {
     }
 
     @Test
-    func canAutoSync_requiresCleanBehind() {
+    func `can auto sync requires clean behind`() {
         let status = LocalRepoStatus(
             path: URL(fileURLWithPath: "/tmp"),
             name: "Repo",
@@ -51,7 +51,7 @@ struct LocalRepoStatusTests {
     }
 
     @Test
-    func canAutoSync_rejectsDetached() {
+    func `can auto sync rejects detached`() {
         let status = LocalRepoStatus(
             path: URL(fileURLWithPath: "/tmp"),
             name: "Repo",
@@ -66,14 +66,14 @@ struct LocalRepoStatusTests {
     }
 
     @Test
-    func localDirtyCounts_summaryOrdering() {
+    func `local dirty counts summary ordering`() {
         let counts = LocalDirtyCounts(added: 2, modified: 1, deleted: 0)
         #expect(counts.summary == "+2 ~1")
         #expect(counts.isEmpty == false)
     }
 
     @Test
-    func localSyncState_resolveAndLabels() {
+    func `local sync state resolve and labels`() {
         #expect(LocalSyncState.resolve(isClean: true, ahead: 0, behind: 0) == .synced)
         #expect(LocalSyncState.resolve(isClean: true, ahead: 0, behind: 2) == .behind)
         #expect(LocalSyncState.resolve(isClean: true, ahead: 1, behind: 0) == .ahead)

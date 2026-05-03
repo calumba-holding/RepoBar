@@ -4,7 +4,7 @@ import Testing
 
 struct HeatmapFilterTests {
     @Test
-    func spanLabelsAreStable() {
+    func `span labels are stable`() {
         #expect(HeatmapSpan.oneMonth.label == "1 month")
         #expect(HeatmapSpan.threeMonths.label == "3 months")
         #expect(HeatmapSpan.sixMonths.label == "6 months")
@@ -12,7 +12,7 @@ struct HeatmapFilterTests {
     }
 
     @Test
-    func filterDropsOlderCells() throws {
+    func `filter drops older cells`() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
 
@@ -31,7 +31,7 @@ struct HeatmapFilterTests {
     }
 
     @Test
-    func alignedRangeStartsOnWeekBoundary() throws {
+    func `aligned range starts on week boundary`() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         calendar.firstWeekday = 2

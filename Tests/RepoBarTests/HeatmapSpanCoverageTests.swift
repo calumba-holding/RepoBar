@@ -4,7 +4,7 @@ import Testing
 
 struct HeatmapSpanCoverageTests {
     @Test
-    func labels_coverAllCases() {
+    func `labels cover all cases`() {
         #expect(HeatmapSpan.oneMonth.label == "1 month")
         #expect(HeatmapSpan.threeMonths.label == "3 months")
         #expect(HeatmapSpan.sixMonths.label == "6 months")
@@ -13,7 +13,7 @@ struct HeatmapSpanCoverageTests {
     }
 
     @Test
-    func range_alignToWeekFalse_usesDirectMonthOffset() throws {
+    func `range align to week false uses direct month offset`() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         let now = Date(timeIntervalSinceReferenceDate: 2_000_000)
@@ -26,7 +26,7 @@ struct HeatmapSpanCoverageTests {
     }
 
     @Test
-    func filter_helpers_coverOverloads() {
+    func `filter helpers cover overloads`() {
         let now = Date(timeIntervalSinceReferenceDate: 3_000_000)
         let cells = [
             HeatmapCell(date: now.addingTimeInterval(-86400 * 10), count: 1),

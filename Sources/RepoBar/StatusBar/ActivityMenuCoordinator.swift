@@ -82,6 +82,7 @@ final class ActivityMenuCoordinator {
 
     func activitySymbolName(for event: ActivityEvent) -> String {
         guard let type = event.eventTypeEnum else { return "clock" }
+
         switch type {
         case .pullRequest: return "arrow.triangle.branch"
         case .pullRequestReview: return "checkmark.bubble"
@@ -132,6 +133,7 @@ final class ActivityMenuCoordinator {
 
     private func profileURL(for username: String) -> URL? {
         guard username.isEmpty == false else { return nil }
+
         var host = self.appState.session.settings.githubHost
         host.appendPathComponent(username)
         return host

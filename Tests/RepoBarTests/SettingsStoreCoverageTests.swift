@@ -4,7 +4,7 @@ import Testing
 
 struct SettingsStoreCoverageTests {
     @Test
-    func load_returnsDefaultsWhenMissing() throws {
+    func `load returns defaults when missing`() throws {
         let suiteName = "SettingsStoreCoverageTests.missing.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
@@ -14,7 +14,7 @@ struct SettingsStoreCoverageTests {
     }
 
     @Test
-    func saveAndLoad_roundTrips() throws {
+    func `save and load round trips`() throws {
         let suiteName = "SettingsStoreCoverageTests.roundtrip.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
@@ -31,7 +31,7 @@ struct SettingsStoreCoverageTests {
     }
 
     @Test
-    func load_migratesOlderEnvelopeAndPersistsCurrentVersion() throws {
+    func `load migrates older envelope and persists current version`() throws {
         let suiteName = "SettingsStoreCoverageTests.migrate.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
@@ -56,7 +56,7 @@ struct SettingsStoreCoverageTests {
     }
 
     @Test
-    func load_invalidDataFallsBackToDefaults() throws {
+    func `load invalid data falls back to defaults`() throws {
         let suiteName = "SettingsStoreCoverageTests.invalid.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)

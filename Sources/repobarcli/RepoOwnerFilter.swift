@@ -26,6 +26,7 @@ struct RepoOwnerFilter: Equatable {
     private static func normalizeOwner(_ raw: String) -> String? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.isEmpty == false else { return nil }
+
         let owner = trimmed.split(separator: "/", maxSplits: 1).first.map(String.init) ?? trimmed
         let normalized = owner.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         return normalized.isEmpty ? nil : normalized

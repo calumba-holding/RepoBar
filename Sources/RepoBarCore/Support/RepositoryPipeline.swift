@@ -55,6 +55,7 @@ public enum RepositoryQueryDefaults {
         ageDays: Int = defaultAgeDays
     ) -> Date? {
         guard scope == .all, ageDays > 0 else { return nil }
+
         return Calendar.current.date(byAdding: .day, value: -ageDays, to: now)
     }
 }

@@ -4,7 +4,7 @@ import Testing
 
 struct RecentRepoItemsDecodingTests {
     @Test
-    func issuesEndpointFiltersOutPullRequests() throws {
+    func `issues endpoint filters out pull requests`() throws {
         let json = """
         [
           {
@@ -46,7 +46,7 @@ struct RecentRepoItemsDecodingTests {
     }
 
     @Test
-    func pullsEndpointMapsDraftAndAuthor() throws {
+    func `pulls endpoint maps draft and author`() throws {
         let json = """
         [
           {
@@ -81,7 +81,7 @@ struct RecentRepoItemsDecodingTests {
     }
 
     @Test
-    func releasesEndpointSkipsDraftAndAggregatesAssets() throws {
+    func `releases endpoint skips draft and aggregates assets`() throws {
         let json = """
         [
           {

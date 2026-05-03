@@ -88,6 +88,7 @@ final class MenuItemHostingView: NSView, MenuItemMeasuring, MenuItemHighlighting
     override var intrinsicContentSize: NSSize {
         let size = self.hostingController.view.intrinsicContentSize
         guard self.bounds.width > 0 else { return size }
+
         return NSSize(width: self.bounds.width, height: size.height)
     }
 
@@ -156,6 +157,7 @@ final class MenuItemHostingView: NSView, MenuItemMeasuring, MenuItemHighlighting
             self.updateRootView(content)
             return
         }
+
         let wrapped = MenuItemContainerView(
             highlightState: highlightState,
             showsSubmenuIndicator: showsSubmenuIndicator

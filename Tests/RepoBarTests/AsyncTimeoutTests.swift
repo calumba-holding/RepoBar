@@ -4,7 +4,7 @@ import Testing
 @Suite("AsyncTimeout")
 struct AsyncTimeoutTests {
     @Test
-    func returnsValueBeforeTimeout() async throws {
+    func `returns value before timeout`() async throws {
         let task = Task<Int, Error> {
             try await Task.sleep(nanoseconds: 5_000_000)
             return 42
@@ -15,7 +15,7 @@ struct AsyncTimeoutTests {
     }
 
     @Test
-    func timesOutAndCancelsTask() async {
+    func `times out and cancels task`() async {
         let task = Task<Int, Error> {
             try await withTaskCancellationHandler {
                 try await Task.sleep(nanoseconds: 2_000_000_000)

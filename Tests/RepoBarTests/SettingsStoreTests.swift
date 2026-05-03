@@ -4,7 +4,7 @@ import Testing
 
 struct SettingsStoreTests {
     @Test
-    func saveAndLoad() throws {
+    func `save and load`() throws {
         let suiteName = "repobar.settings.tests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -16,7 +16,7 @@ struct SettingsStoreTests {
         settings.repoList.displayLimit = 9
         settings.repoList.pinnedRepositories = ["steipete/RepoBar", "steipete/clawdis"]
         settings.repoList.hiddenRepositories = ["steipete/agent-scripts"]
-        settings.enterpriseHost = try #require(URL(string: "https://ghe.example.com"))
+        settings.enterpriseHost = makeURL("https://ghe.example.com")
         settings.debugPaneEnabled = true
 
         store.save(settings)
@@ -24,7 +24,7 @@ struct SettingsStoreTests {
     }
 
     @Test
-    func saveAndLoad_persistsLocalProjectsBookmark() throws {
+    func `save and load persists local projects bookmark`() throws {
         let suiteName = "repobar.settings.tests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -39,4 +39,8 @@ struct SettingsStoreTests {
         #expect(loaded.localProjects.rootPath == "~/Projects")
         #expect(loaded.localProjects.rootBookmarkData == Data([0x01, 0x02, 0x03, 0x04]))
     }
+}
+
+private func makeURL(_ string: String) -> URL {
+    URL(string: string)!
 }

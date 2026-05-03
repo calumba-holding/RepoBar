@@ -17,6 +17,7 @@ enum AsyncTimeout {
                 guard let value = try await group.next() else {
                     throw AsyncTimeoutError()
                 }
+
                 group.cancelAll()
                 return value
             }

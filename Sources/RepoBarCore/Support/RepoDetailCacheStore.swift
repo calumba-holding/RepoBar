@@ -38,6 +38,7 @@ struct RepoDetailCacheStore {
     func load(apiHost: URL, owner: String, name: String) -> RepoDetailCache? {
         guard let url = cacheFileURL(apiHost: apiHost, owner: owner, name: name) else { return nil }
         guard let data = try? Data(contentsOf: url) else { return nil }
+
         do {
             return try self.decoder.decode(RepoDetailCache.self, from: data)
         } catch {
@@ -48,6 +49,7 @@ struct RepoDetailCacheStore {
 
     func save(_ cache: RepoDetailCache, apiHost: URL, owner: String, name: String) {
         guard let url = cacheFileURL(apiHost: apiHost, owner: owner, name: name) else { return }
+
         let folder = url.deletingLastPathComponent()
         do {
             try self.fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -60,11 +62,13 @@ struct RepoDetailCacheStore {
 
     func clear() {
         guard let baseURL else { return }
+
         try? self.fileManager.removeItem(at: baseURL)
     }
 
     private func cacheFileURL(apiHost: URL, owner: String, name: String) -> URL? {
         guard let baseURL else { return nil }
+
         let host = apiHost.host ?? "api.github.com"
         return baseURL
             .appending(path: host)
@@ -76,6 +80,7 @@ struct RepoDetailCacheStore {
         guard let support = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             return nil
         }
+
         let bundleID = Bundle.main.bundleIdentifier ?? "RepoBar"
         return support
             .appending(path: bundleID)

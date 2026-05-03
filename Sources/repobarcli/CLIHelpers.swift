@@ -38,6 +38,7 @@ extension ParsedValues {
         guard let value = T(argument: raw) else {
             throw ValidationError("Invalid value for --\(label): \(raw)")
         }
+
         return value
     }
 
@@ -133,6 +134,7 @@ enum Ansi {
 
     static var supportsColor: Bool {
         guard isatty(fileno(stdout)) != 0 else { return false }
+
         return ProcessInfo.processInfo.environment["NO_COLOR"] == nil
     }
 
@@ -154,6 +156,7 @@ enum Ansi {
 
     static func link(_ label: String, url: URL, enabled: Bool) -> String {
         guard enabled else { return "\(label) \(url.absoluteString)" }
+
         let start = "\u{001B}]8;;\(url.absoluteString)\(Ansi.oscTerminator)"
         let end = "\u{001B}]8;;\(Ansi.oscTerminator)"
         return "\(start)\(label)\(end)"
@@ -213,10 +216,12 @@ func parseHost(_ raw: String) throws -> URL {
     guard var components = URLComponents(string: raw) else {
         throw ValidationError("Invalid host: \(raw)")
     }
+
     if components.scheme == nil { components.scheme = "https" }
     guard let url = components.url else {
         throw ValidationError("Invalid host: \(raw)")
     }
+
     return url
 }
 
@@ -267,12 +272,14 @@ enum HelpTarget: String {
         }
 
         guard argv.contains("--help") || argv.contains("-h") else { return nil }
+
         let target = argv.dropFirst().first(where: { !$0.hasPrefix("-") })
         return HelpTarget.from(token: target)
     }
 
     private static func from(token: String?) -> HelpTarget {
         guard let token else { return .root }
+
         switch token {
         case ReposCommand.commandName:
             return .repos
@@ -357,7 +364,8 @@ func printHelp(_ target: HelpTarget) {
         repobar - list repositories by activity, issues, PRs, stars
 
         Usage:
-          repobar [repos] [--limit N] [--age DAYS] [--release] [--event] [--forks] [--archived] [--scope VAL] [--filter VAL] [--pinned-only] [--only-with VAL] [--owner LOGIN] [--mine] [--json] [--plain] [--sort KEY]
+          repobar [repos] [--limit N] [--age DAYS] [--release] [--event] [--forks] [--archived] [--scope VAL] [--filter VAL]
+                  [--pinned-only] [--only-with VAL] [--owner LOGIN] [--mine] [--json] [--plain] [--sort KEY]
           repobar repo <owner/name> [--traffic] [--heatmap] [--release] [--json] [--plain]
           repobar issues <owner/name> [--limit N] [--json] [--plain]
           repobar pulls <owner/name> [--limit N] [--json] [--plain]
@@ -417,7 +425,8 @@ func printHelp(_ target: HelpTarget) {
         repobar repos - list repositories
 
         Usage:
-          repobar repos [--limit N] [--age DAYS] [--release] [--event] [--forks] [--archived] [--scope VAL] [--filter VAL] [--pinned-only] [--only-with VAL] [--owner LOGIN] [--mine] [--json] [--plain] [--sort KEY]
+          repobar repos [--limit N] [--age DAYS] [--release] [--event] [--forks] [--archived] [--scope VAL] [--filter VAL]
+                        [--pinned-only] [--only-with VAL] [--owner LOGIN] [--mine] [--json] [--plain] [--sort KEY]
 
         Options:
           --limit N    Max repositories to fetch (default: all accessible)

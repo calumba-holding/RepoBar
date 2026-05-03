@@ -5,7 +5,7 @@ import Testing
 @MainActor
 struct ColorContrastTests {
     @Test
-    func ensuresContrastMeetsMinimum() {
+    func `ensures contrast meets minimum`() {
         let background = NSColor(srgbRed: 0.0, green: 0.47, blue: 1.0, alpha: 1.0)
         let foreground = NSColor(srgbRed: 0.12, green: 0.55, blue: 0.24, alpha: 1.0)
 

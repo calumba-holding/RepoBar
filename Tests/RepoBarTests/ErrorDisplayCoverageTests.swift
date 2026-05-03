@@ -4,7 +4,7 @@ import Testing
 
 struct ErrorDisplayCoverageTests {
     @Test
-    func urlError_messagesCoverCommonCases() {
+    func `url error messages cover common cases`() {
         #expect(URLError(.notConnectedToInternet).userFacingMessage == "No internet connection.")
         #expect(URLError(.timedOut).userFacingMessage == "Request timed out.")
         #expect(URLError(.cannotLoadFromNetwork).userFacingMessage == "Rate limited; retry soon.")
@@ -14,13 +14,13 @@ struct ErrorDisplayCoverageTests {
     }
 
     @Test
-    func githubError_usesDisplayMessage() {
+    func `github error uses display message`() {
         let error: Error = GitHubAPIError.badStatus(code: 500, message: nil)
         #expect(error.userFacingMessage == "GitHub returned 500.")
     }
 
     @Test
-    func fallback_returnsLocalizedDescription() {
+    func `fallback returns localized description`() {
         struct TestError: LocalizedError { var errorDescription: String? {
             "boom"
         } }

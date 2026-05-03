@@ -122,8 +122,10 @@ private struct IssueLabelFilterChip: View {
 private enum MenuLabelFilterColor {
     static func nsColor(from hex: String?) -> NSColor? {
         guard let hex, hex.isEmpty == false else { return nil }
+
         let cleaned = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
         guard cleaned.count == 6, let value = Int(cleaned, radix: 16) else { return nil }
+
         let r = Double((value >> 16) & 0xFF) / 255.0
         let g = Double((value >> 8) & 0xFF) / 255.0
         let b = Double(value & 0xFF) / 255.0

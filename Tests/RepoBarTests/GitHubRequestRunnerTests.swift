@@ -4,7 +4,7 @@ import Testing
 
 struct GitHubRequestRunnerTests {
     @Test
-    func cooldownMessageReadsNaturally() async throws {
+    func `cooldown message reads naturally`() async throws {
         let url = try #require(URL(string: "https://api.github.com/repos/owner/repo/stats/commit_activity"))
         let backoff = BackoffTracker()
         let retryAfter = Date().addingTimeInterval(30)

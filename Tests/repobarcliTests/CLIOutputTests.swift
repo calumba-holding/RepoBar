@@ -5,7 +5,7 @@ import Testing
 
 struct CLIOutputTests {
     @Test
-    func repoLabelUsesNameWhenURLsDisabled() throws {
+    func `repo label uses name when UR ls disabled`() throws {
         let url = try #require(URL(string: "https://github.com/steipete/RepoBar"))
         let label = formatRepoLabel(
             repoName: "steipete/RepoBar",
@@ -17,7 +17,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func repoLabelUsesURLWhenEnabled() throws {
+    func `repo label uses URL when enabled`() throws {
         let url = try #require(URL(string: "https://github.com/steipete/RepoBar"))
         let label = formatRepoLabel(
             repoName: "steipete/RepoBar",
@@ -29,7 +29,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func eventLabelUsesTextWithoutURL() {
+    func `event label uses text without URL`() {
         let label = formatEventLabel(
             text: "push",
             url: nil,
@@ -40,7 +40,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func eventLabelUsesURLWhenEnabled() throws {
+    func `event label uses URL when enabled`() throws {
         let url = try #require(URL(string: "https://github.com/steipete/RepoBar/pull/1"))
         let label = formatEventLabel(
             text: "PullRequestEvent",
@@ -52,7 +52,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func releaseDateFormattingIsStable() throws {
+    func `release date formatting is stable`() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         let date = try #require(calendar.date(from: DateComponents(year: 2025, month: 12, day: 26, hour: 23, minute: 59)))
@@ -61,7 +61,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func renderTableIncludesReleaseColumnsWhenEnabled() throws {
+    func `render table includes release columns when enabled`() throws {
         let baseHost = try #require(URL(string: "https://github.com"))
         let releaseDate = Date(timeIntervalSinceReferenceDate: 12345)
         let repo = Repository(
@@ -120,7 +120,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func renderJSONIncludesLatestRelease() throws {
+    func `render JSON includes latest release`() throws {
         let baseHost = try #require(URL(string: "https://github.com"))
         let releaseDate = Date(timeIntervalSinceReferenceDate: 777)
         let repo = Repository(
@@ -152,7 +152,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func tableHidesEventColumnByDefault() throws {
+    func `table hides event column by default`() throws {
         let baseHost = try #require(URL(string: "https://github.com"))
         let repo = Repository(
             id: "1",
@@ -190,7 +190,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func tableShowsEventColumnWhenEnabled() throws {
+    func `table shows event column when enabled`() throws {
         let baseHost = try #require(URL(string: "https://github.com"))
         let repo = Repository(
             id: "1",
@@ -228,7 +228,7 @@ struct CLIOutputTests {
     }
 
     @Test
-    func releasedUsesTodayAndYesterdayLabels() throws {
+    func `released uses today and yesterday labels`() throws {
         var calendar = Calendar.current
         calendar.timeZone = Calendar.current.timeZone
 

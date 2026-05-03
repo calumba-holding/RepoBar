@@ -167,6 +167,7 @@ struct RepoSettingsView: View {
     private var filteredRows: [RepoBrowserRow] {
         let query = self.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return self.allRows }
+
         return self.allRows.filter { $0.matches(query) }
     }
 
@@ -195,6 +196,7 @@ struct RepoSettingsView: View {
     private func addNewRepo(_ value: String) {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+
         self.newRepoInput = ""
         Task { await self.set(trimmed, to: self.newRepoVisibility) }
     }
@@ -253,6 +255,7 @@ struct RepoBrowserRow: Identifiable, Hashable {
             .split(whereSeparator: \.isWhitespace)
             .map { String($0).lowercased() }
         guard !terms.isEmpty else { return true }
+
         let haystack = [
             self.fullName,
             self.owner,
@@ -452,6 +455,7 @@ private struct RepoInputRow<Accessory: View>: View {
     private func commit(_ value: String? = nil) {
         let trimmed = (value ?? self.trimmedText).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+
         self.text = ""
         self.suggestions = []
         self.showSuggestions = false
@@ -471,6 +475,7 @@ private struct RepoInputRow<Accessory: View>: View {
                 }
             }
             guard !Task.isCancelled else { return }
+
             await self.loadSuggestions(query: query)
         }
     }
@@ -500,6 +505,7 @@ private struct RepoInputRow<Accessory: View>: View {
         )
 
         guard !Task.isCancelled else { return }
+
         await MainActor.run {
             self.suggestions = repos
             if self.selectedIndex >= self.suggestions.count {
@@ -519,6 +525,7 @@ private struct RepoInputRow<Accessory: View>: View {
 
     private func handleMove(_ direction: MoveCommandDirection) {
         guard !self.suggestions.isEmpty else { return }
+
         switch direction {
         case .down:
             self.keyboardNavigating = true

@@ -66,11 +66,13 @@ struct RepoErrorAccumulator {
 
     private mutating func appendUnique(_ message: String) {
         guard !self.messages.contains(message) else { return }
+
         self.messages.append(message)
     }
 
     private mutating func updateLimit(with candidate: Date?) {
         guard let candidate else { return }
+
         if let current = rateLimit {
             if candidate > current { self.rateLimit = candidate }
         } else {

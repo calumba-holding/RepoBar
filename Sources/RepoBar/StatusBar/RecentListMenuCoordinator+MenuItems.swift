@@ -124,6 +124,7 @@ extension RecentListMenuCoordinator {
 
     func applyMenuItemSymbol(_ systemImage: String, to item: NSMenuItem) {
         guard let image = NSImage(systemSymbolName: systemImage, accessibilityDescription: nil) else { return }
+
         image.size = NSSize(width: 14, height: 14)
         image.isTemplate = true
         item.image = image
@@ -154,6 +155,7 @@ extension RecentListMenuCoordinator {
         guard case let .pullRequests(pullRequestItems) = items ?? .pullRequests([]),
               pullRequestItems.isEmpty == false
         else { return [] }
+
         let filters = RecentPullRequestFiltersView(session: self.appState.session)
         let item = self.hostingMenuItem(for: filters, enabled: true)
         return [item, .separator()]
@@ -163,6 +165,7 @@ extension RecentListMenuCoordinator {
         guard case let .issues(issueItems) = items ?? .issues([]),
               issueItems.isEmpty == false
         else { return [] }
+
         let labelOptions = self.issueLabelOptions(for: issueItems)
         let chipOptions = self.issueLabelChipOptions(from: labelOptions)
         let filters = RecentIssueFiltersView(session: self.appState.session, labels: chipOptions)
@@ -215,6 +218,7 @@ extension RecentListMenuCoordinator {
 
     func issueLabelMoreMenuItem(for options: [RecentIssueLabelOption]) -> NSMenuItem? {
         guard options.count > self.issueLabelChipLimit else { return nil }
+
         let menu = NSMenu()
         menu.autoenablesItems = false
         let all = NSMenuItem(title: "All Labels", action: #selector(StatusBarMenuManager.clearIssueLabelFilters), keyEquivalent: "")
@@ -224,7 +228,7 @@ extension RecentListMenuCoordinator {
         menu.addItem(.separator())
 
         for option in options {
-            let title = option.count > 0 ? "\(option.name) (\(option.count))" : option.name
+            let title = option.count > .zero ? "\(option.name) (\(option.count))" : option.name
             let item = NSMenuItem(title: title, action: #selector(StatusBarMenuManager.toggleIssueLabelFilter(_:)), keyEquivalent: "")
             item.target = self.actionHandler
             item.representedObject = option.name
@@ -325,6 +329,7 @@ extension RecentListMenuCoordinator {
     func addTagMenuItem(_ summary: RepoTagSummary, repoFullName: String, to menu: NSMenu) {
         let view = TagMenuItemView(summary: summary) { [weak self] in
             guard let self, let url = self.webURLBuilder.tagURL(fullName: repoFullName, tag: summary.name) else { return }
+
             self.actionHandler.open(url: url)
         }
         let item = self.menuItemFactory.makeItem(for: view, enabled: true, highlightable: true)
@@ -335,6 +340,7 @@ extension RecentListMenuCoordinator {
     func addBranchMenuItem(_ summary: RepoBranchSummary, repoFullName: String, to menu: NSMenu) {
         let view = BranchMenuItemView(summary: summary) { [weak self] in
             guard let self, let url = self.webURLBuilder.branchURL(fullName: repoFullName, branch: summary.name) else { return }
+
             self.actionHandler.open(url: url)
         }
         let item = self.menuItemFactory.makeItem(for: view, enabled: true, highlightable: true)
@@ -345,6 +351,7 @@ extension RecentListMenuCoordinator {
     func addContributorMenuItem(_ summary: RepoContributorSummary, to menu: NSMenu) {
         let view = ContributorMenuItemView(summary: summary) { [weak self] in
             guard let url = summary.url else { return }
+
             self?.actionHandler.open(url: url)
         }
         let item = self.menuItemFactory.makeItem(for: view, enabled: true, highlightable: true)
@@ -404,6 +411,7 @@ extension RecentListMenuCoordinator {
     func ownerAndName(from fullName: String) -> (String, String)? {
         let parts = fullName.split(separator: "/", maxSplits: 1)
         guard parts.count == 2 else { return nil }
+
         return (String(parts[0]), String(parts[1]))
     }
 }

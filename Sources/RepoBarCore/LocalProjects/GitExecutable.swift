@@ -49,6 +49,7 @@
 
         static var isSandboxed: Bool {
             guard let task = SecTaskCreateFromSelf(nil) else { return false }
+
             let entitlement = SecTaskCopyValueForEntitlement(task, "com.apple.security.app-sandbox" as CFString, nil)
             return (entitlement as? Bool) == true
         }

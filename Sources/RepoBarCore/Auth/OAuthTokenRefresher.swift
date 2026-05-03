@@ -16,6 +16,7 @@ public struct OAuthTokenRefresher: Sendable {
 
     public func refreshIfNeeded(host: URL, force: Bool = false) async throws -> OAuthTokens? {
         guard var tokens = try tokenStore.load() else { return nil }
+
         if tokens.refreshToken.isEmpty {
             return tokens
         }
@@ -48,6 +49,7 @@ public struct OAuthTokenRefresher: Sendable {
             let message = Self.refreshErrorMessage(status: response.statusCode, detail: detail)
             throw GitHubAPIError.badStatus(code: response.statusCode, message: message)
         }
+
         do {
             let decoded = try JSONDecoder().decode(TokenResponse.self, from: data)
             let expires = Date().addingTimeInterval(TimeInterval(decoded.expiresIn ?? 3600))

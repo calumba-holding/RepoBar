@@ -52,6 +52,7 @@ final class RecentListMenuCoordinator {
 
     func handleMenuWillOpen(_ menu: NSMenu) -> Bool {
         guard let entry = self.recentListMenus[ObjectIdentifier(menu)] else { return false }
+
         self.menuBuilder.refreshMenuViewHeights(in: menu)
         Task { @MainActor [weak self] in
             await self?.refreshRecentListMenu(menu: menu, context: entry.context)
@@ -65,6 +66,7 @@ final class RecentListMenuCoordinator {
             guard entry.context.kind == .pullRequests || entry.context.kind == .issues,
                   let menu = entry.menu
             else { continue }
+
             Task { @MainActor [weak self] in
                 await self?.refreshRecentListMenu(menu: menu, context: entry.context)
             }
@@ -101,11 +103,14 @@ final class RecentListMenuCoordinator {
 
     func prefetchRecentList(fullName: String, kind: RepoRecentMenuKind) {
         guard let (owner, name) = self.ownerAndName(from: fullName) else { return }
+
         let now = Date()
         guard let descriptor = self.menuService.descriptor(for: kind) else { return }
         guard descriptor.needsRefresh(fullName, now, self.menuService.cacheTTL) else { return }
+
         Task { @MainActor [weak self] in
             guard let self else { return }
+
             do {
                 _ = try await descriptor.load(fullName, owner, name, self.menuService.listLimit)
             } catch {
@@ -170,6 +175,7 @@ final class RecentListMenuCoordinator {
         menu.update()
 
         guard descriptor.needsRefresh(context.fullName, now, self.menuService.cacheTTL) else { return }
+
         do {
             let items = try await descriptor.load(context.fullName, owner, name, self.menuService.listLimit)
             self.populateRecentListMenu(
@@ -272,6 +278,7 @@ final class RecentListMenuCoordinator {
                 .first(where: { $0.fullName == fullName })?
                 .latestRelease != nil
             guard hasLatestRelease else { return [] }
+
             return [
                 RecentMenuAction(
                     title: "Open Latest Release",
@@ -305,8 +312,10 @@ final class RecentListMenuCoordinator {
         let scope = self.appState.session.recentPullRequestScope
         if scope == .mine {
             guard case let .loggedIn(user) = self.appState.session.account else { return [] }
+
             filtered = filtered.filter { pullRequest in
                 guard let author = pullRequest.authorLogin else { return false }
+
                 return author.caseInsensitiveCompare(user.username) == .orderedSame
             }
         }
@@ -328,6 +337,7 @@ final class RecentListMenuCoordinator {
         let scope = self.appState.session.recentIssueScope
         if scope == .mine {
             guard case let .loggedIn(user) = self.appState.session.account else { return [] }
+
             let username = user.username.lowercased()
             filtered = filtered.filter { issue in
                 if let author = issue.authorLogin?.lowercased(), author == username {

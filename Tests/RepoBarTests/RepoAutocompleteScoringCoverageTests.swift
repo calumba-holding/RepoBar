@@ -4,7 +4,7 @@ import Testing
 
 struct RepoAutocompleteScoringCoverageTests {
     @Test
-    func score_handlesExactAndPrefixWithSlash() {
+    func `score handles exact and prefix with slash`() {
         let repo = Repository(
             id: "1",
             name: "RepoBar",
@@ -26,7 +26,7 @@ struct RepoAutocompleteScoringCoverageTests {
     }
 
     @Test
-    func score_handlesOwnerFallbackAndSubsequence() {
+    func `score handles owner fallback and subsequence`() {
         let repo = Repository(
             id: "1",
             name: "RepoBar",
@@ -50,7 +50,7 @@ struct RepoAutocompleteScoringCoverageTests {
     }
 
     @Test
-    func merge_picksBestScoreAndSorts() {
+    func `merge picks best score and sorts`() {
         func make(_ fullName: String) -> Repository {
             let parts = fullName.split(separator: "/", maxSplits: 1).map(String.init)
             return Repository(

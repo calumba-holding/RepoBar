@@ -251,6 +251,7 @@ actor RepoDetailCoordinator {
         var updatedCount = 0
         for item in items {
             guard let enabled = item.hasDiscussions else { continue }
+
             if self.store.updateDiscussionsEnabled(
                 apiHost: apiHost,
                 owner: item.owner.login,

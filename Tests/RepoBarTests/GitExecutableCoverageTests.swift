@@ -4,19 +4,19 @@ import Testing
 
 struct GitExecutableCoverageTests {
     @Test
-    func locator_resolvesExecutableURL() {
+    func `locator resolves executable URL`() {
         let locator = GitExecutableLocator()
         #expect(locator.url.path.hasSuffix("/git"))
     }
 
     @Test
-    func locator_exposesSandboxState() {
+    func `locator exposes sandbox state`() {
         _ = GitExecutableLocator.isSandboxed
         #expect(true)
     }
 
     @Test
-    func version_readsVersionForGit() {
+    func `version reads version for git`() {
         let url = URL(fileURLWithPath: "/usr/bin/git")
         let result = GitExecutableLocator.version(at: url)
         #expect(result.error == nil)
@@ -24,7 +24,7 @@ struct GitExecutableCoverageTests {
     }
 
     @Test
-    func version_returnsErrorForMissingExecutable() {
+    func `version returns error for missing executable`() {
         let url = URL(fileURLWithPath: "/no/such/git")
         let result = GitExecutableLocator.version(at: url)
         #expect(result.version == nil)
@@ -32,7 +32,7 @@ struct GitExecutableCoverageTests {
     }
 
     @Test
-    func version_returnsStderrForNonZeroExit() throws {
+    func `version returns stderr for non zero exit`() throws {
         let dir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("GitExecutableCoverageTests.\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

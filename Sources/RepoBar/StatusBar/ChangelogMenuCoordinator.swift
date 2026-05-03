@@ -33,9 +33,11 @@ final class ChangelogMenuCoordinator {
 
     func handleMenuWillOpen(_ menu: NSMenu) -> Bool {
         guard let entry = self.menus[ObjectIdentifier(menu)] else { return false }
+
         self.menuBuilder.refreshMenuViewHeights(in: menu)
         Task { @MainActor [weak self] in
             guard let self else { return }
+
             await self.refreshChangelogMenu(menu: menu, entry: entry)
         }
         return true
@@ -45,12 +47,14 @@ final class ChangelogMenuCoordinator {
         guard var entry = self.cache[fullName],
               let parsed = entry.parsed
         else { return nil }
+
         let key = releaseTag ?? "__none__"
         if let cached = entry.presentationCache[key] {
             self.touchCache(fullName)
             return cached
         }
         guard let presentation = ChangelogParser.presentation(parsed: parsed, releaseTag: releaseTag) else { return nil }
+
         entry.presentationCache[key] = presentation
         self.cache[fullName] = entry
         self.touchCache(fullName)
@@ -59,6 +63,7 @@ final class ChangelogMenuCoordinator {
 
     func cachedHeadline(fullName: String) -> String? {
         guard let parsed = self.cache[fullName]?.parsed else { return nil }
+
         self.touchCache(fullName)
         return ChangelogParser.headline(parsed: parsed)
     }
@@ -66,6 +71,7 @@ final class ChangelogMenuCoordinator {
     func prefetchChangelog(fullName: String, localPath: URL?, releaseTag: String?) {
         Task { @MainActor [weak self] in
             guard let self else { return }
+
             let now = Date()
             if let cached = self.cache[fullName] {
                 let isFresh = now.timeIntervalSince(cached.fetchedAt) <= AppLimits.Changelog.cacheTTL
@@ -170,6 +176,7 @@ final class ChangelogMenuCoordinator {
             guard let match = self.matchingChangelogItem(in: items) else {
                 return ChangelogFetchResult(result: .missing, parsed: nil)
             }
+
             let data = try await self.appState.github.repoFileContents(owner: owner, name: name, path: match.path)
             guard let text = String(bytes: data, encoding: .utf8) else {
                 return ChangelogFetchResult(result: .failure("Changelog is not UTF-8"), parsed: nil)
@@ -177,6 +184,7 @@ final class ChangelogMenuCoordinator {
             guard text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
                 return ChangelogFetchResult(result: .missing, parsed: nil)
             }
+
             let (truncatedText, isTruncated) = self.truncateMarkdown(text)
             let content = ChangelogContent(
                 fileName: match.name,
@@ -196,6 +204,7 @@ final class ChangelogMenuCoordinator {
         guard let data = try? Data(contentsOf: fileURL) else { return nil }
         guard let text = String(bytes: data, encoding: .utf8) else { return nil }
         guard text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else { return nil }
+
         let (truncatedText, isTruncated) = self.truncateMarkdown(text)
         let content = ChangelogContent(
             fileName: fileURL.lastPathComponent,
@@ -210,11 +219,13 @@ final class ChangelogMenuCoordinator {
     private func localChangelogURL(root: URL) -> URL? {
         guard let names = try? FileManager.default.contentsOfDirectory(atPath: root.path) else { return nil }
         guard let match = self.matchingChangelogName(in: names) else { return nil }
+
         let url = root.appendingPathComponent(match, isDirectory: false)
         var isDirectory = ObjCBool(false)
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
               isDirectory.boolValue == false
         else { return nil }
+
         return url
     }
 
@@ -256,6 +267,7 @@ final class ChangelogMenuCoordinator {
     private func ownerAndName(from fullName: String) -> (String, String)? {
         let parts = fullName.split(separator: "/", maxSplits: 1)
         guard parts.count == 2 else { return nil }
+
         return (String(parts[0]), String(parts[1]))
     }
 

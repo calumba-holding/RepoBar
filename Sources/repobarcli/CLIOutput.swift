@@ -227,6 +227,7 @@ func formatRepoLabel(
     linkEnabled: Bool
 ) -> String {
     guard includeURL else { return repoName }
+
     if linkEnabled {
         return Ansi.link(repoName, url: repoURL, enabled: true)
     }
@@ -240,6 +241,7 @@ func formatEventLabel(
     linkEnabled: Bool
 ) -> String {
     guard includeURL, let url else { return text }
+
     return formatURL(url, linkEnabled: linkEnabled)
 }
 

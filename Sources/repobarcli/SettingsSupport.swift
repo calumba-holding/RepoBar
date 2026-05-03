@@ -92,6 +92,7 @@ func applySetting(_ key: SettingsKey, value: String, settings: inout UserSetting
         guard let sort = RepositorySortKey(argument: value) else {
             throw ValidationError("Invalid menu-sort value: \(value)")
         }
+
         settings.repoList.menuSortKey = sort
         return sort.rawValue
     case .showContributionHeader:
@@ -102,6 +103,7 @@ func applySetting(_ key: SettingsKey, value: String, settings: inout UserSetting
         guard let density = CardDensity(rawValue: value.lowercased()) else {
             throw ValidationError("Invalid card-density value: \(value)")
         }
+
         settings.appearance.cardDensity = density
         return density.rawValue
     case .accentTone:
@@ -119,12 +121,14 @@ func applySetting(_ key: SettingsKey, value: String, settings: inout UserSetting
         guard let scope = GlobalActivityScope(argument: value) else {
             throw ValidationError("Invalid activity-scope value: \(value)")
         }
+
         settings.appearance.activityScope = scope
         return scope.rawValue
     case .heatmapDisplay:
         guard let display = HeatmapDisplay(rawValue: value.lowercased()) else {
             throw ValidationError("Invalid heatmap-display value: \(value)")
         }
+
         settings.heatmap.display = display
         return display.rawValue
     case .heatmapSpan:
@@ -213,6 +217,7 @@ func parsePositiveInt(_ raw: String, label: String) throws -> Int {
     guard let value = Int(raw), value > 0 else {
         throw ValidationError("Invalid \(label) value: \(raw)")
     }
+
     return value
 }
 

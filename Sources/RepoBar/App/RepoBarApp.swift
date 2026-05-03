@@ -49,6 +49,7 @@ struct RepoBarApp: App {
             self.menuManager = StatusBarMenuManager(appState: self.appState)
         }
         guard let menuManager = self.menuManager, menuManager.isAttached == false else { return }
+
         for _ in 0 ..< 10 {
             if let statusItem = StatusItemLocator.locate() {
                 self.logMenuEvent("statusItem fallback attach")
@@ -67,6 +68,7 @@ struct RepoBarApp: App {
 
     private func objectID(_ object: AnyObject?) -> String {
         guard let object else { return "nil" }
+
         return String(ObjectIdentifier(object).hashValue)
     }
 }
@@ -80,6 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
             return
         }
+
         configureImagePipeline()
         NSApp.setActivationPolicy(.accessory)
     }
@@ -93,6 +96,7 @@ extension AppDelegate {
     /// Prevent multiple instances when LS UI flag is unavailable under SwiftPM.
     private func ensureSingleInstance() -> Bool {
         guard let bundleID = Bundle.main.bundleIdentifier else { return true }
+
         let others = NSWorkspace.shared.runningApplications.filter {
             $0.bundleIdentifier == bundleID && !$0.isEqual(NSRunningApplication.current)
         }

@@ -20,6 +20,7 @@ public enum ActivityEventType: String, Codable, CaseIterable, Sendable {
 
     public static func parse(_ rawValue: String?) -> ActivityEventType? {
         guard let rawValue else { return nil }
+
         return ActivityEventType(rawValue: rawValue)
     }
 }

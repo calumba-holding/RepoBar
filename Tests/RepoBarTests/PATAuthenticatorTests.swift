@@ -6,7 +6,7 @@ import Testing
 struct PATAuthenticatorTests {
     @Test
     @MainActor
-    func validatePATSuccess() async throws {
+    func `validate PAT success`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -42,7 +42,7 @@ struct PATAuthenticatorTests {
 
     @Test
     @MainActor
-    func validatePATInvalidToken() async throws {
+    func `validate PAT invalid token`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -78,7 +78,7 @@ struct PATAuthenticatorTests {
 
     @Test
     @MainActor
-    func validatePATForbidden() async throws {
+    func `validate PAT forbidden`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -114,7 +114,7 @@ struct PATAuthenticatorTests {
 
     @Test
     @MainActor
-    func logoutClearsPAT() async throws {
+    func `logout clears PAT`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -135,7 +135,7 @@ struct PATAuthenticatorTests {
 
     @Test
     @MainActor
-    func loadPATReturnsNilWhenNotStored() {
+    func `load PAT returns nil when not stored`() {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -148,7 +148,7 @@ struct PATAuthenticatorTests {
 
     @Test
     @MainActor
-    func enterpriseHostUsesAPIPath() async throws {
+    func `enterprise host uses API path`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }

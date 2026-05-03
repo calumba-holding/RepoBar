@@ -4,14 +4,14 @@ import Testing
 
 struct CLISelectionTests {
     @Test
-    func scopeSelectionParsesValues() {
+    func `scope selection parses values`() {
         #expect(RepoScopeSelection(argument: "all") == .all)
         #expect(RepoScopeSelection(argument: "Pinned") == .pinned)
         #expect(RepoScopeSelection(argument: "hidden") == .hidden)
     }
 
     @Test
-    func filterSelectionParsesValues() {
+    func `filter selection parses values`() {
         #expect(RepoFilterSelection(argument: "all") == .all)
         #expect(RepoFilterSelection(argument: "work") == .work)
         #expect(RepoFilterSelection(argument: "issues") == .issues)
@@ -19,7 +19,7 @@ struct CLISelectionTests {
     }
 
     @Test
-    func filterSelectionMapsToOnlyWith() {
+    func `filter selection maps to only with`() {
         #expect(RepoFilterSelection.all.onlyWith == .none)
         #expect(RepoFilterSelection.work.onlyWith == RepositoryOnlyWith(requireIssues: true, requirePRs: true))
         #expect(RepoFilterSelection.issues.onlyWith == RepositoryOnlyWith(requireIssues: true))
@@ -27,7 +27,7 @@ struct CLISelectionTests {
     }
 
     @Test
-    func activityScopeParsesValues() {
+    func `activity scope parses values`() {
         #expect(GlobalActivityScope(argument: "all") == .allActivity)
         #expect(GlobalActivityScope(argument: "my") == .myActivity)
         #expect(GlobalActivityScope(argument: "mine") == .myActivity)

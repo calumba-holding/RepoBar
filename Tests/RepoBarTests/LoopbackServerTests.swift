@@ -5,7 +5,7 @@ import Testing
 
 struct LoopbackServerTests {
     @Test
-    func parseExtractsCodeAndState() {
+    func `parse extracts code and state`() {
         let request = "GET /callback?code=abc&state=xyz HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"
         let parsed = LoopbackServer.parse(request: request)
         #expect(parsed?.code == "abc")
@@ -14,7 +14,7 @@ struct LoopbackServerTests {
 
     @Test
     @MainActor
-    func waitForCallbackReturnsResult() async throws {
+    func `wait for callback returns result`() async throws {
         let (server, redirectURL) = try await Self.startServer()
         defer { server.stop() }
 
@@ -49,7 +49,7 @@ struct LoopbackServerTests {
 
     @Test
     @MainActor
-    func waitForCallbackTimesOut() async throws {
+    func `wait for callback times out`() async throws {
         let (server, _) = try await Self.startServer()
         defer { server.stop() }
 
@@ -63,7 +63,7 @@ struct LoopbackServerTests {
 
     @Test
     @MainActor
-    func startThrowsPortInUse() throws {
+    func `start throws port in use`() throws {
         let (port, socket) = try Self.reservePort()
         defer { close(socket) }
 

@@ -103,6 +103,7 @@ func requireLocalTarget(_ target: String?) throws -> String {
     guard let target, target.isEmpty == false else {
         throw ValidationError("Missing repository name or path")
     }
+
     return target
 }
 
@@ -115,6 +116,7 @@ func resolveLocalRepoTarget(_ target: String, settings: UserSettings) async thro
         guard let status = snapshot.statuses.first else {
             throw ValidationError("No git repository found at \(PathFormatter.displayString(expanded))")
         }
+
         return LocalRepoResolution(path: status.path, status: status)
     }
 
@@ -167,6 +169,7 @@ func confirmHardReset(path: String) throws {
     guard isatty(fileno(stdin)) != 0 else {
         throw ValidationError("Refusing to hard reset in non-interactive mode without --yes")
     }
+
     print("Hard reset \(path) to upstream. This is destructive.")
     print("Type 'reset' to continue: ", terminator: "")
     guard let response = readLine(), response.lowercased() == "reset" else {

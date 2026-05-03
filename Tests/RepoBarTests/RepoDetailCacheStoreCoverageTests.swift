@@ -4,7 +4,7 @@ import Testing
 
 struct RepoDetailCacheStoreCoverageTests {
     @Test
-    func saveThenLoad_roundTripsFromDisk() throws {
+    func `save then load round trips from disk`() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.\(UUID().uuidString)", isDirectory: true)
 
@@ -22,7 +22,7 @@ struct RepoDetailCacheStoreCoverageTests {
     }
 
     @Test
-    func load_invalidJSONDeletesCacheFile() throws {
+    func `load invalid JSON deletes cache file`() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.invalid.\(UUID().uuidString)", isDirectory: true)
         let apiHost = try #require(URL(string: "https://api.github.com"))
@@ -42,7 +42,7 @@ struct RepoDetailCacheStoreCoverageTests {
     }
 
     @Test
-    func clear_removesBaseDirectory() throws {
+    func `clear removes base directory`() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.clear.\(UUID().uuidString)", isDirectory: true)
         let store = RepoDetailCacheStore(baseURL: base)
@@ -57,7 +57,7 @@ struct RepoDetailCacheStoreCoverageTests {
     }
 
     @Test
-    func load_missingFileReturnsNil() throws {
+    func `load missing file returns nil`() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.missing.\(UUID().uuidString)", isDirectory: true)
         let store = RepoDetailCacheStore(baseURL: base)
@@ -66,7 +66,7 @@ struct RepoDetailCacheStoreCoverageTests {
     }
 
     @Test
-    func cacheFile_usesFallbackHostWhenMissing() {
+    func `cache file uses fallback host when missing`() {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.hostless.\(UUID().uuidString)", isDirectory: true)
         let store = RepoDetailCacheStore(baseURL: base)
@@ -80,7 +80,7 @@ struct RepoDetailCacheStoreCoverageTests {
     }
 
     @Test
-    func save_gracefullyHandlesWriteFailures() throws {
+    func `save gracefully handles write failures`() throws {
         let base = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("RepoDetailCacheStoreCoverageTests.filebase.\(UUID().uuidString)")
 

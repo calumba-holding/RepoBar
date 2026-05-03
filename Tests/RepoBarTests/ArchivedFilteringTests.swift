@@ -5,7 +5,7 @@ import Testing
 
 struct ArchivedFilteringTests {
     @Test
-    func repositoryFilterExcludesArchivedByDefault() {
+    func `repository filter excludes archived by default`() {
         let repos = [
             Self.repo(name: "A", isArchived: false),
             Self.repo(name: "B", isArchived: true),
@@ -16,7 +16,7 @@ struct ArchivedFilteringTests {
     }
 
     @Test
-    func repositoryFilterKeepsPinnedArchivedRepos() {
+    func `repository filter keeps pinned archived repos`() {
         let pinnedArchived = Self.repo(owner: "me", name: "PinnedArchived", isArchived: true)
         let otherArchived = Self.repo(owner: "me", name: "OtherArchived", isArchived: true)
         let normal = Self.repo(owner: "me", name: "Normal", isArchived: false)
@@ -31,7 +31,7 @@ struct ArchivedFilteringTests {
     }
 
     @Test
-    func selectVisibleHidesUnpinnedArchivedButKeepsPinnedArchived() {
+    func `select visible hides unpinned archived but keeps pinned archived`() {
         let pinnedArchived = Self.repo(owner: "me", name: "PinnedArchived", isArchived: true)
         let otherArchived = Self.repo(owner: "me", name: "OtherArchived", isArchived: true)
         let normal = Self.repo(owner: "me", name: "Normal", isArchived: false)

@@ -4,7 +4,7 @@ import Testing
 
 struct EventLabelTests {
     @Test
-    func pullRequestEventHasReadableTitle() {
+    func `pull request event has readable title`() {
         let event = RepoEvent(
             type: "PullRequestEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -16,7 +16,7 @@ struct EventLabelTests {
     }
 
     @Test
-    func actionGetsAppendedToTitle() {
+    func `action gets appended to title`() {
         let event = RepoEvent(
             type: "IssuesEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -28,7 +28,7 @@ struct EventLabelTests {
     }
 
     @Test
-    func unknownEventTypeFallsBackToReadableName() {
+    func `unknown event type falls back to readable name`() {
         let event = RepoEvent(
             type: "ProjectCardEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -40,16 +40,16 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityEventUsesIssueTitleAndRepoFallback() throws {
-        let webHost = try #require(URL(string: "https://github.com"))
-        let event = try RepoEvent(
+    func `activity event uses issue title and repo fallback`() {
+        let webHost = makeURL("https://github.com")
+        let event = RepoEvent(
             type: "IssuesEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
             payload: EventPayload(
                 action: "opened",
                 comment: nil,
-                issue: EventIssue(title: "Fix it", number: 123, htmlUrl: #require(URL(string: "https://example.com/issue/1"))),
+                issue: EventIssue(title: "Fix it", number: 123, htmlUrl: makeURL("https://example.com/issue/1")),
                 pullRequest: nil
             ),
             createdAt: Date()
@@ -61,8 +61,8 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityEventUsesStargazerLinkForWatchEvents() throws {
-        let webHost = try #require(URL(string: "https://github.com"))
+    func `activity event uses stargazer link for watch events`() {
+        let webHost = makeURL("https://github.com")
         let event = RepoEvent(
             type: "WatchEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -75,8 +75,8 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityEventUsesCommitLinkForPushEvents() throws {
-        let webHost = try #require(URL(string: "https://github.com"))
+    func `activity event uses commit link for push events`() {
+        let webHost = makeURL("https://github.com")
         let event = RepoEvent(
             type: "PushEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
@@ -100,9 +100,9 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityMetadataCapturesActionTargetAndLink() throws {
-        let webHost = try #require(URL(string: "https://github.com"))
-        let event = try RepoEvent(
+    func `activity metadata captures action target and link`() {
+        let webHost = makeURL("https://github.com")
+        let event = RepoEvent(
             type: "PullRequestEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
@@ -114,7 +114,7 @@ struct EventLabelTests {
                     title: "Ship it",
                     number: 42,
                     merged: true,
-                    htmlUrl: #require(URL(string: "https://example.com/pr/42"))
+                    htmlUrl: makeURL("https://example.com/pr/42")
                 )
             ),
             createdAt: Date()
@@ -125,9 +125,9 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityMetadataIncludesReleaseTag() throws {
-        let webHost = try #require(URL(string: "https://github.com"))
-        let event = try RepoEvent(
+    func `activity metadata includes release tag`() {
+        let webHost = makeURL("https://github.com")
+        let event = RepoEvent(
             type: "ReleaseEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
@@ -137,7 +137,7 @@ struct EventLabelTests {
                 issue: nil,
                 pullRequest: nil,
                 release: EventRelease(
-                    htmlUrl: #require(URL(string: "https://example.com/releases/v1.0.0")),
+                    htmlUrl: makeURL("https://example.com/releases/v1.0.0"),
                     tagName: "v1.0.0",
                     name: nil
                 )
@@ -149,9 +149,9 @@ struct EventLabelTests {
     }
 
     @Test
-    func activityMetadataFormatsForkTarget() throws {
-        let webHost = try #require(URL(string: "https://github.com"))
-        let event = try RepoEvent(
+    func `activity metadata formats fork target`() {
+        let webHost = makeURL("https://github.com")
+        let event = RepoEvent(
             type: "ForkEvent",
             actor: EventActor(login: "octo", avatarUrl: nil),
             repo: nil,
@@ -162,7 +162,7 @@ struct EventLabelTests {
                 pullRequest: nil,
                 release: nil,
                 forkee: EventForkee(
-                    htmlUrl: #require(URL(string: "https://example.com/octo/fork")),
+                    htmlUrl: makeURL("https://example.com/octo/fork"),
                     fullName: "octo/fork"
                 )
             ),
@@ -171,4 +171,8 @@ struct EventLabelTests {
         let activity = event.activityEvent(owner: "steipete", name: "RepoBar", webHost: webHost)
         #expect(activity.metadata?.label == "Forked → octo/fork")
     }
+}
+
+private func makeURL(_ string: String) -> URL {
+    URL(string: string)!
 }

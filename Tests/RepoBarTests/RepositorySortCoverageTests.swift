@@ -4,7 +4,7 @@ import Testing
 
 struct RepositorySortCoverageTests {
     @Test
-    func sortsByNameAndFallsBackToActivityThenFullName() {
+    func `sorts by name and falls back to activity then full name`() {
         let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
         let older = now.addingTimeInterval(-10)
         let newer = now.addingTimeInterval(10)
@@ -50,7 +50,7 @@ struct RepositorySortCoverageTests {
     }
 
     @Test
-    func sortsByEventLine() throws {
+    func `sorts by event line`() throws {
         let now = Date(timeIntervalSinceReferenceDate: 2_000_000)
         let url = try #require(URL(string: "https://example.com"))
         let one = Repository(
@@ -89,7 +89,7 @@ struct RepositorySortCoverageTests {
     }
 
     @Test
-    func sortsByCounts_coverIssuesPullsStars() {
+    func `sorts by counts cover issues pulls stars`() {
         let base = Repository(
             id: "1",
             name: "A",
@@ -126,7 +126,7 @@ struct RepositorySortCoverageTests {
     }
 
     @Test
-    func tieBreakFallsBackToFullName() throws {
+    func `tie break falls back to full name`() throws {
         let a = try Repository(
             id: "1",
             name: "A",
@@ -174,7 +174,7 @@ struct RepositorySortCoverageTests {
     }
 
     @Test
-    func isOrderedBefore_sameRepo_returnsFalse() {
+    func `is ordered before same repo returns false`() {
         let repo = Repository(
             id: "1",
             name: "A",

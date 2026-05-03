@@ -19,6 +19,7 @@ extension AppState {
             try? await Task.sleep(for: .milliseconds(250))
             await MainActor.run {
                 guard let self else { return }
+
                 self.menuRefreshTask = nil
                 self.requestRefresh(cancelInFlight: false)
             }
@@ -31,12 +32,14 @@ extension AppState {
             self.prefetchTask?.cancel()
         }
         guard cancelInFlight || self.refreshTask == nil else { return }
+
         let token = UUID()
         self.refreshTaskToken = token
         self.refreshTask = Task { [weak self] in
             await self?.refresh()
             await MainActor.run {
                 guard let self, self.refreshTaskToken == token else { return }
+
                 self.refreshTask = nil
             }
         }
@@ -90,12 +93,14 @@ extension AppState {
             let activityUsername: String? = {
                 guard case let .loggedIn(user) = self.session.account,
                       user.username.isEmpty == false else { return nil }
+
                 return user.username
             }()
             let globalActivityTask = Task { [weak self] in
                 guard let self, let activityUsername else {
                     return GlobalActivityResult(events: [], commits: [], error: nil, commitError: nil)
                 }
+
                 return await self.fetchGlobalActivityEvents(
                     username: activityUsername,
                     scope: self.session.settings.appearance.activityScope,
@@ -153,6 +158,7 @@ extension AppState {
         self.session.localProjectsScanInProgress = true
         self.localProjectsTask = Task { [weak self] in
             guard let self else { return }
+
             let matchNames = self.localMatchRepoNamesForLocalProjects(
                 repos: self.session.repositories.isEmpty
                     ? (self.session.menuSnapshot?.repositories ?? [])
@@ -196,6 +202,7 @@ extension AppState {
 
     private func hydrateMenuTargets(_ repos: [Repository]) async -> [Repository] {
         guard !repos.isEmpty else { return [] }
+
         let limit = max(1, min(self.hydrateConcurrencyLimit, repos.count))
         var detailed: [Repository] = []
         for batch in repos.chunked(into: limit) {
@@ -310,6 +317,7 @@ extension AppState {
     ) {
         let limit = self.session.settings.repoList.displayLimit
         guard limit > 0 else { return }
+
         let startIndex = min(visibleCount, repos.count)
         let prefetchTargets = Array(repos.dropFirst(startIndex).prefix(limit))
         guard prefetchTargets.isEmpty == false else { return }
@@ -317,10 +325,13 @@ extension AppState {
         self.prefetchTask?.cancel()
         self.prefetchTask = Task(priority: .utility) { [weak self] in
             guard let self else { return }
+
             let hydrated = await self.hydrateMenuTargets(prefetchTargets)
             guard Task.isCancelled == false, hydrated.isEmpty == false else { return }
+
             await MainActor.run {
                 guard self.refreshTaskToken == token else { return }
+
                 let merged = self.mergeHydrated(hydrated, into: self.session.repositories)
                 self.session.repositories = merged
                 let capturedAt = self.session.menuSnapshot?.capturedAt ?? Date()

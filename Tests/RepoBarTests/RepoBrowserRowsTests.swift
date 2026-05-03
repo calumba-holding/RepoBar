@@ -5,7 +5,7 @@ import Testing
 
 struct RepoBrowserRowsTests {
     @Test
-    func make_includesAccessibleRepositoriesWithVisibility() {
+    func `make includes accessible repositories with visibility`() {
         let rows = RepoBrowserRows.make(
             repositories: [
                 Self.makeRepo("steipete/RepoBar", issues: 2, pulls: 1, stars: 42),
@@ -26,7 +26,7 @@ struct RepoBrowserRowsTests {
     }
 
     @Test
-    func make_keepsPinnedAndHiddenManualRowsMissingFromFetch() {
+    func `make keeps pinned and hidden manual rows missing from fetch`() {
         let rows = RepoBrowserRows.make(
             repositories: [Self.makeRepo("steipete/RepoBar")],
             pinnedRepositories: ["steipete/missing-pin"],
@@ -41,7 +41,7 @@ struct RepoBrowserRowsTests {
     }
 
     @Test
-    func matches_findsPrivateOrgRepositoryByOwnerOrName() {
+    func `matches finds private org repository by owner or name`() {
         let row = RepoBrowserRows.make(
             repositories: [Self.makeRepo("amantus-ai/sweetistics")],
             pinnedRepositories: [],

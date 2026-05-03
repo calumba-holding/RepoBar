@@ -79,6 +79,7 @@ public struct OAuthLoginFlow {
         }
         components.queryItems = queryItems
         guard let authorizeURL = components.url else { throw URLError(.badURL) }
+
         try self.openURL(authorizeURL)
 
         let result = try await server.waitForCallback(timeout: timeout)
@@ -99,6 +100,7 @@ public struct OAuthLoginFlow {
 
         let (data, response) = try await self.dataProvider(tokenRequest)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+
         let decoded = try JSONDecoder().decode(TokenResponse.self, from: data)
         let tokens = OAuthTokens(
             accessToken: decoded.accessToken,
@@ -115,14 +117,17 @@ public struct OAuthLoginFlow {
         guard var components = URLComponents(url: host, resolvingAgainstBaseURL: false) else {
             throw GitHubAPIError.invalidHost
         }
+
         if components.scheme == nil { components.scheme = "https" }
         guard components.scheme?.lowercased() == "https", components.host != nil else {
             throw GitHubAPIError.invalidHost
         }
+
         components.path = ""
         components.query = nil
         components.fragment = nil
         guard let cleaned = components.url else { throw GitHubAPIError.invalidHost }
+
         return cleaned
     }
 }

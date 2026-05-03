@@ -4,7 +4,7 @@ import Testing
 
 struct ReleaseFormatterTests {
     @Test
-    func releasedLabelUsesTodayAndYesterday() throws {
+    func `released label uses today and yesterday`() throws {
         let now = Date()
         let today = ReleaseFormatter.releasedLabel(for: now, now: now)
         #expect(today == "today")
@@ -15,7 +15,7 @@ struct ReleaseFormatterTests {
     }
 
     @Test
-    func menuLineIncludesName() throws {
+    func `menu line includes name`() throws {
         let now = Date()
         let release = try Release(name: "v1.2.3", tag: "v1.2.3", publishedAt: now, url: #require(URL(string: "https://example.com")))
         let line = ReleaseFormatter.menuLine(for: release, now: now)

@@ -66,6 +66,7 @@ struct RepoSubmenuBuilder {
         var lastGroup: RepoSubmenuItemGroup?
         for block in blocks {
             guard block.items.isEmpty == false else { continue }
+
             if let lastGroup, lastGroup != block.group, items.isEmpty == false {
                 items.append(.separator())
             }
@@ -95,6 +96,7 @@ struct RepoSubmenuBuilder {
             return [self.menuBuilder.viewItem(for: openRow, enabled: true, highlightable: true)]
         case .openInFinder:
             guard let local else { return [] }
+
             return [self.menuBuilder.actionItem(
                 title: "Open in Finder",
                 action: #selector(StatusBarMenuManager.openLocalFinder(_:)),
@@ -103,6 +105,7 @@ struct RepoSubmenuBuilder {
             )]
         case .openInTerminal:
             guard let local else { return [] }
+
             return [self.menuBuilder.actionItem(
                 title: "Open in Terminal",
                 action: #selector(StatusBarMenuManager.openLocalTerminal(_:)),
@@ -111,6 +114,7 @@ struct RepoSubmenuBuilder {
             )]
         case .checkoutRepo:
             guard local == nil else { return [] }
+
             return [self.menuBuilder.actionItem(
                 title: "Checkout Repo",
                 action: #selector(self.target.checkoutRepoFromMenu),
@@ -119,6 +123,7 @@ struct RepoSubmenuBuilder {
             )]
         case .localState:
             guard let local else { return [] }
+
             let stateView = LocalRepoStateMenuView(
                 status: local,
                 onSync: { [weak target] in target?.syncLocalRepo(local) },
@@ -128,6 +133,7 @@ struct RepoSubmenuBuilder {
             return [self.menuBuilder.viewItem(for: stateView, enabled: true)]
         case .worktrees:
             guard let local else { return [] }
+
             return [self.localWorktreesSubmenuItem(for: local, fullName: repo.title)]
         case .issues:
             return [self.recentListSubmenuItem(RecentListConfig(
@@ -251,6 +257,7 @@ struct RepoSubmenuBuilder {
             ))]
         case .heatmap:
             guard settings.heatmap.display == .submenu, !repo.heatmap.isEmpty else { return [] }
+
             let filtered = HeatmapFilter.filter(repo.heatmap, range: self.appState.session.heatmapRange)
             let heatmap = VStack(spacing: 4) {
                 HeatmapView(
@@ -292,6 +299,7 @@ struct RepoSubmenuBuilder {
             let activityRemainder = Array(events.dropFirst(activityPreview.count))
             let hasActivityLink = repo.activityURL != nil
             guard hasActivityLink || activityPreview.isEmpty == false else { return [] }
+
             var items: [NSMenuItem] = []
             if hasActivityLink {
                 items.append(self.menuBuilder.actionItem(

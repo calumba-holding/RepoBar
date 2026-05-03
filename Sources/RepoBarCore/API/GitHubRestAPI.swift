@@ -134,6 +134,7 @@ struct GitHubRestAPI {
         let (data, _) = try await authorizedGet(url: components.url!, token: token)
         let runs = try GitHubDecoding.decode(ActionsRunsResponse.self, from: data)
         guard let run = runs.workflowRuns.first else { return CIStatusDetails(status: .unknown, runCount: runs.totalCount) }
+
         let status = GitHubStatusMapper.ciStatus(fromStatus: run.status, conclusion: run.conclusion)
         return CIStatusDetails(status: status, runCount: runs.totalCount)
     }
@@ -153,7 +154,7 @@ struct GitHubRestAPI {
             (event: event, activity: event.activityEvent(owner: owner, name: name, webHost: webHost))
         }
         let limited = Array(mapped.prefix(max(limit, 0)))
-        let preferred = limited.first(where: { $0.event.hasRichPayload })?.activity
+        let preferred = limited.first(where: \.event.hasRichPayload)?.activity
         return ActivitySnapshot(
             events: limited.map(\.activity),
             latest: preferred ?? limited.first?.activity
@@ -406,6 +407,7 @@ struct GitHubRestAPI {
         components.queryItems = [URLQueryItem(name: "per_page", value: "20")]
         let (data, response) = try await authorizedGet(url: components.url!, token: token, allowedStatuses: [200, 304, 404])
         guard response.statusCode != 404 else { throw URLError(.fileDoesNotExist) }
+
         let releases = try GitHubDecoding.decode([ReleaseResponse].self, from: data)
         return GitHubReleasePicker.latestRelease(from: releases)
     }

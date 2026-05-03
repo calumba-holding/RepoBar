@@ -4,7 +4,7 @@ import Testing
 
 struct RepoRecentItemsInitializerTests {
     @Test
-    func initializers_assignFields() throws {
+    func `initializers assign fields`() throws {
         let url = try #require(URL(string: "https://example.com"))
         let avatar = try #require(URL(string: "https://example.com/a.png"))
         let now = Date(timeIntervalSinceReferenceDate: 1_234_567)

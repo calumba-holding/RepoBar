@@ -4,7 +4,7 @@ import Testing
 
 struct RepoAutocompleteScoringTests {
     @Test
-    func exactFullNameWins() {
+    func `exact full name wins`() {
         let exact = Self.repo(owner: "steipete", name: "RepoBar")
         let prefix = Self.repo(owner: "steipete", name: "Repo")
 
@@ -18,7 +18,7 @@ struct RepoAutocompleteScoringTests {
     }
 
     @Test
-    func repoNameBeatsOwnerMatch() {
+    func `repo name beats owner match`() {
         let ownerMatch = Self.repo(owner: "repo", name: "alpha")
         let repoMatch = Self.repo(owner: "steipete", name: "repo")
 
@@ -32,14 +32,14 @@ struct RepoAutocompleteScoringTests {
     }
 
     @Test
-    func subsequenceMatchesAreIncluded() {
+    func `subsequence matches are included`() {
         let repo = Self.repo(owner: "steipete", name: "RepoBar")
         let score = RepoAutocompleteScoring.score(repo: repo, query: "rpb")
         #expect(score != nil)
     }
 
     @Test
-    func ownerPlusRepoBeatsRepoOnly() {
+    func `owner plus repo beats repo only`() {
         let exactOwner = Self.repo(owner: "steipete", name: "repo")
         let otherOwner = Self.repo(owner: "other", name: "repo")
 

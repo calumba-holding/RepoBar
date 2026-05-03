@@ -16,6 +16,7 @@ actor ETagCache {
     func cached(for url: URL) -> (etag: String, data: Data)? {
         let key = url.absoluteString
         guard let cached = self.store[key] else { return nil }
+
         self.touch(key)
         return cached
     }
@@ -23,6 +24,7 @@ actor ETagCache {
     func save(url: URL, etag: String?, data: Data) {
         guard let etag else { return }
         guard self.maxEntries > 0 else { return }
+
         let key = url.absoluteString
         self.store[key] = (etag, data)
         self.touch(key)
@@ -35,6 +37,7 @@ actor ETagCache {
 
     func rateLimitUntil(now: Date = Date()) -> Date? {
         guard let until = self.rateLimitedUntil else { return nil }
+
         if until <= now {
             self.rateLimitedUntil = nil
             return nil
@@ -44,6 +47,7 @@ actor ETagCache {
 
     func isRateLimited(now: Date = Date()) -> Bool {
         guard let until = self.rateLimitUntil(now: now) else { return false }
+
         return until > now
     }
 

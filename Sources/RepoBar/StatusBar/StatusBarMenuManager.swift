@@ -104,9 +104,11 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
 
     @objc func menuFiltersChanged() {
         guard let menu = self.mainMenu else { return }
+
         // Defer menu rebuild to next run loop to avoid modifying menu during layout
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
+
             self.recentListCoordinator.clearMenus()
             self.appState.persistSettings()
             let plan = self.menuBuilder.mainMenuPlan()
@@ -123,6 +125,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
 
     @objc func toggleIssueLabelFilter(_ sender: NSMenuItem) {
         guard let label = sender.representedObject as? String else { return }
+
         self.recentListCoordinator.toggleIssueLabelFilter(label: label)
     }
 
@@ -191,6 +194,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
             let shouldRecomputeWidth = self.lastMainMenuWidth == nil || self.lastMainMenuWidthSignature != plan.signature
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
+
                 if shouldRecomputeWidth {
                     let measuredWidth = self.menuBuilder.menuWidth(for: menu)
                     let priorWidth = self.lastMainMenuWidth
@@ -238,6 +242,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
     func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {
         for menuItem in menu.items {
             guard let view = menuItem.view as? MenuItemHighlighting else { continue }
+
             let highlighted = menuItem == item && menuItem.isEnabled
             view.setHighlighted(highlighted)
         }
@@ -315,6 +320,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
     private func startObservingMenuResize(for menu: NSMenu) {
         self.stopObservingMenuResize()
         guard let window = menu.items.compactMap(\.view).first?.window else { return }
+
         self.menuResizeWindow = window
         NotificationCenter.default.addObserver(
             self,
@@ -326,12 +332,14 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
 
     private func stopObservingMenuResize() {
         guard let window = self.menuResizeWindow else { return }
+
         NotificationCenter.default.removeObserver(self, name: NSWindow.didResizeNotification, object: window)
         self.menuResizeWindow = nil
     }
 
     @objc private func menuWindowDidResize(_: Notification) {
         guard let menu = self.mainMenu else { return }
+
         let width = self.menuBuilder.menuWidth(for: menu)
         self.lastMainMenuWidth = width
         self.menuBuilder.refreshMenuViewHeights(in: menu, width: width)
@@ -356,6 +364,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
 
     private func objectID(_ object: AnyObject?) -> String {
         guard let object else { return "nil" }
+
         return String(ObjectIdentifier(object).hashValue)
     }
 
@@ -374,6 +383,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
     func repoModel(from sender: NSMenuItem) -> RepositoryDisplayModel? {
         guard let fullName = self.repoFullName(from: sender) else { return nil }
         guard let repo = self.appState.session.repositories.first(where: { $0.fullName == fullName }) else { return nil }
+
         let local = self.appState.session.localRepoIndex.status(forFullName: fullName)
         return RepositoryDisplayModel(repo: repo, localStatus: local)
     }
@@ -385,6 +395,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
     func openRepoPath(sender: NSMenuItem, path: String) {
         guard let fullName = self.repoFullName(from: sender),
               let url = self.webURLBuilder.repoPathURL(fullName: fullName, path: path) else { return }
+
         self.open(url: url)
     }
 

@@ -40,6 +40,7 @@ public enum ChangelogParser {
             }
 
             guard currentTitle != nil else { continue }
+
             if self.isListItemLine(trimmed) {
                 currentEntries += 1
             }
@@ -54,6 +55,7 @@ public enum ChangelogParser {
 
     public static func headline(parsed: ChangelogParsed) -> String? {
         guard parsed.sections.isEmpty == false else { return nil }
+
         if let release = parsed.sections.first(where: { self.versionMatch(in: $0.title) != nil }) {
             return release.title
         }
@@ -63,7 +65,7 @@ public enum ChangelogParser {
     public static func presentation(parsed: ChangelogParsed, releaseTag: String?) -> ChangelogRowPresentation? {
         guard parsed.sections.isEmpty == false else { return nil }
 
-        if let unreleased = parsed.sections.first(where: { $0.isUnreleased }) {
+        if let unreleased = parsed.sections.first(where: \.isUnreleased) {
             if unreleased.entryCount > 0 {
                 return ChangelogRowPresentation(
                     title: "Changelog • Unreleased",
@@ -103,11 +105,14 @@ public enum ChangelogParser {
     private static func headingTitle(from line: String) -> String? {
         let trimmed = line.trimmingCharacters(in: .whitespaces)
         guard trimmed.hasPrefix("#") else { return nil }
+
         let hashes = trimmed.prefix { $0 == "#" }
         let level = hashes.count
         guard level > 0, level <= 2 else { return nil }
+
         let remainder = trimmed.dropFirst(level)
         guard remainder.first == " " else { return nil }
+
         let title = remainder.dropFirst().trimmingCharacters(in: .whitespaces)
         if level == 1, title.localizedCaseInsensitiveContains("changelog") {
             return nil
@@ -126,11 +131,13 @@ public enum ChangelogParser {
 
     private static func normalizedVersion(from text: String) -> String? {
         guard let match = self.versionMatch(in: text) else { return nil }
+
         return match.lowercased().hasPrefix("v") ? String(match.dropFirst()) : match
     }
 
     private static func sectionMatchesVersion(_ section: ChangelogSection, releaseVersion: String) -> Bool {
         guard let match = self.versionMatch(in: section.title) else { return false }
+
         let normalized = match.lowercased().hasPrefix("v") ? String(match.dropFirst()) : match
         return normalized == releaseVersion
     }
@@ -138,10 +145,12 @@ public enum ChangelogParser {
     private static func versionMatch(in text: String) -> String? {
         let pattern = "(?i)\\bv?\\d+(?:\\.\\d+){1,3}\\b"
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+
         let range = NSRange(location: 0, length: text.utf16.count)
         guard let match = regex.firstMatch(in: text, range: range),
               let range = Range(match.range, in: text)
         else { return nil }
+
         return String(text[range])
     }
 }

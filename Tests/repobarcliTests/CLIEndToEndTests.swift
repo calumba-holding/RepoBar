@@ -7,7 +7,7 @@ import Testing
 struct CLIEndToEndTests {
     @Test
     @MainActor
-    func markdownCommandRendersChangelogContent() async throws {
+    func `markdown command renders changelog content`() async throws {
         let url = try fixtureURL("ChangelogSample")
         let output = try await runCLI([
             "markdown",
@@ -22,7 +22,7 @@ struct CLIEndToEndTests {
 
     @Test
     @MainActor
-    func changelogCommandParsesUnreleasedEntries() async throws {
+    func `changelog command parses unreleased entries`() async throws {
         let url = try fixtureURL("ChangelogSample")
         let output = try await runCLI([
             "changelog",
@@ -40,7 +40,7 @@ struct CLIEndToEndTests {
 
     @Test
     @MainActor
-    func changelogCommandDefaultsToRepoChangelog() async throws {
+    func `changelog command defaults to repo changelog`() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         let changelogURL = tempDir.appendingPathComponent("CHANGELOG.md")
@@ -76,6 +76,7 @@ private func fixtureURL(_ name: String) throws -> URL {
     guard let url = Bundle.module.url(forResource: name, withExtension: "md") else {
         throw FixtureError.missing(name)
     }
+
     return url
 }
 

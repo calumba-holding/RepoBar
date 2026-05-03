@@ -37,6 +37,7 @@ func requireRepoName(_ name: String?) throws -> String {
     guard let name, name.isEmpty == false else {
         throw ValidationError("Missing repository name (owner/name)")
     }
+
     return name
 }
 
@@ -45,5 +46,6 @@ func parseRepoName(_ value: String) throws -> (owner: String, name: String) {
     guard parts.count == 2, parts[0].isEmpty == false, parts[1].isEmpty == false else {
         throw ValidationError("Repository must be in owner/name format")
     }
+
     return (parts[0], parts[1])
 }

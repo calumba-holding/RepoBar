@@ -4,7 +4,7 @@ import Testing
 
 struct TokenStoreTests {
     @Test
-    func debugDefaultStorageDoesNotUseKeychain() throws {
+    func `debug default storage does not use keychain`() throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service, accessGroup: "com.steipete.repobar.shared")
         defer { store.clear() }
@@ -21,7 +21,7 @@ struct TokenStoreTests {
     }
 
     @Test
-    func fileStorageDoesNotUseKeychain() throws {
+    func `file storage does not use keychain`() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("repobar-token-store-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }

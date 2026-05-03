@@ -126,6 +126,7 @@ struct DisplaySettingsView: View {
             },
             set: { isVisible in
                 guard item.isRequired == false else { return }
+
                 var customization = self.session.settings.menuCustomization
                 if isVisible {
                     customization.hiddenMainMenuItems.remove(item)

@@ -4,7 +4,7 @@ import Testing
 
 struct GitHubRestAPITests {
     @Test
-    func userReposQueryItemsIncludeOrgAndVisibility() {
+    func `user repos query items include org and visibility`() {
         let items = GitHubRestAPI.userReposQueryItems()
         let values = Dictionary(uniqueKeysWithValues: items.map { ($0.name, $0.value) })
 
@@ -16,7 +16,7 @@ struct GitHubRestAPITests {
     }
 
     @Test
-    func repoNotVisibleMessageMentionsPrivateOrgInstallation() {
+    func `repo not visible message mentions private org installation`() {
         let message = GitHubRestAPI.repoNotVisibleMessage(owner: "acme", name: "private-repo")
 
         #expect(message.contains("acme/private-repo"))

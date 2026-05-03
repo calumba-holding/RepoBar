@@ -4,7 +4,7 @@ import Testing
 
 struct RepositoryPipelineCoverageTests {
     @Test
-    func pinPriority_sortsPinnedFirstThenByPinnedOrder() {
+    func `pin priority sorts pinned first then by pinned order`() {
         let a = Repository(
             id: "1",
             name: "A",
@@ -66,7 +66,7 @@ struct RepositoryPipelineCoverageTests {
     }
 
     @Test
-    func hiddenScope_and_negativeLimit() {
+    func `hidden scope and negative limit`() {
         let a = Repository(
             id: "1",
             name: "A",
@@ -111,7 +111,7 @@ struct RepositoryPipelineCoverageTests {
     }
 
     @Test
-    func ageCutoff_defaults() {
+    func `age cutoff defaults`() {
         let now = Date(timeIntervalSinceReferenceDate: 5_000_000)
         #expect(RepositoryQueryDefaults.ageCutoff(now: now, scope: .pinned) == nil)
         #expect(RepositoryQueryDefaults.ageCutoff(now: now, scope: .all, ageDays: 0) == nil)
@@ -119,7 +119,7 @@ struct RepositoryPipelineCoverageTests {
     }
 
     @Test
-    func apply_withLimitNil_returnsAll() {
+    func `apply with limit nil returns all`() {
         let a = Repository(
             id: "1",
             name: "A",
@@ -141,7 +141,7 @@ struct RepositoryPipelineCoverageTests {
     }
 
     @Test
-    func pinPriority_branchCoverage() {
+    func `pin priority branch coverage`() {
         let a = Repository(
             id: "1",
             name: "A",

@@ -4,7 +4,7 @@ import Testing
 
 struct RepoDetailCapabilityCacheTests {
     @Test
-    func discussionsCapabilityRespectsTTL() throws {
+    func `discussions capability respects TTL`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-capability-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
@@ -41,7 +41,7 @@ struct RepoDetailCapabilityCacheTests {
     }
 
     @Test
-    func discussionsCapabilityPersistsAcrossStores() throws {
+    func `discussions capability persists across stores`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-capability-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 

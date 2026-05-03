@@ -22,11 +22,13 @@ extension StatusBarMenuManager {
     @objc func openRepo(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender),
               let url = self.webURLBuilder.repoURL(fullName: fullName) else { return }
+
         self.open(url: url)
     }
 
     func openRepoFromMenu(fullName: String) {
         guard let url = self.webURLBuilder.repoURL(fullName: fullName) else { return }
+
         self.open(url: url)
     }
 
@@ -73,22 +75,26 @@ extension StatusBarMenuManager {
     @objc func openLatestRelease(_ sender: NSMenuItem) {
         guard let repo = self.repoModel(from: sender),
               let url = repo.source.latestRelease?.url else { return }
+
         self.open(url: url)
     }
 
     @objc func openActivity(_ sender: NSMenuItem) {
         guard let repo = self.repoModel(from: sender),
               let url = repo.activityURL else { return }
+
         self.open(url: url)
     }
 
     @objc func openURLItem(_ sender: NSMenuItem) {
         guard let url = sender.representedObject as? URL else { return }
+
         self.open(url: url)
     }
 
     @objc func openLocalFinder(_ sender: NSMenuItem) {
         guard let url = sender.representedObject as? URL else { return }
+
         self.openLocalFinder(at: url)
     }
 
@@ -98,6 +104,7 @@ extension StatusBarMenuManager {
 
     @objc func openLocalTerminal(_ sender: NSMenuItem) {
         guard let url = sender.representedObject as? URL else { return }
+
         self.openLocalTerminal(at: url)
     }
 
@@ -141,6 +148,7 @@ extension StatusBarMenuManager {
 
     @objc func checkoutRepoFromMenu(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender) else { return }
+
         let settings = self.appState.session.settings.localProjects
         guard let rootPath = settings.rootPath, rootPath.isEmpty == false else {
             let alert = NSAlert()
@@ -153,7 +161,6 @@ extension StatusBarMenuManager {
             }
             return
         }
-
         guard let remoteURL = self.cloneURL(for: fullName) else {
             self.presentAlert(title: "Checkout failed", message: "Invalid repository URL.")
             return
@@ -172,6 +179,7 @@ extension StatusBarMenuManager {
         let rootBookmark = settings.rootBookmarkData
         Task.detached { [weak self] in
             guard let self else { return }
+
             let result = Result {
                 var capturedError: Error?
                 SecurityScopedBookmark.withAccess(to: destination, rootBookmarkData: rootBookmark) {
@@ -200,6 +208,7 @@ extension StatusBarMenuManager {
 
     @objc func copyRepoName(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender) else { return }
+
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(fullName, forType: .string)
@@ -208,6 +217,7 @@ extension StatusBarMenuManager {
     @objc func copyRepoURL(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender),
               let url = self.webURLBuilder.repoURL(fullName: fullName) else { return }
+
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(url.absoluteString, forType: .string)
@@ -215,18 +225,21 @@ extension StatusBarMenuManager {
 
     @objc func pinRepo(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender) else { return }
+
         self.requestMenuReopenAfterClose()
         Task { await self.appState.addPinned(fullName) }
     }
 
     @objc func unpinRepo(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender) else { return }
+
         self.requestMenuReopenAfterClose()
         Task { await self.appState.removePinned(fullName) }
     }
 
     @objc func hideRepo(_ sender: NSMenuItem) {
         guard let fullName = self.repoFullName(from: sender) else { return }
+
         self.requestMenuReopenAfterClose()
         Task { await self.appState.hide(fullName) }
     }
@@ -243,13 +256,16 @@ extension StatusBarMenuManager {
 
     private func moveRepo(sender: NSMenuItem, direction: Int) {
         guard let fullName = self.repoFullName(from: sender) else { return }
+
         var pins = self.appState.session.settings.repoList.pinnedRepositories
         guard let currentIndex = pins.firstIndex(where: {
             $0.caseInsensitiveCompare(fullName) == .orderedSame
         }) else { return }
+
         let maxIndex = max(pins.count - 1, 0)
         let target = max(0, min(maxIndex, currentIndex + direction))
         guard target != currentIndex else { return }
+
         pins.move(fromOffsets: IndexSet(integer: currentIndex), toOffset: target > currentIndex ? target + 1 : target)
         self.appState.session.settings.repoList.pinnedRepositories = pins
         self.appState.persistSettings()

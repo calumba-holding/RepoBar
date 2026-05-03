@@ -6,7 +6,7 @@ import Testing
 @MainActor
 struct RefreshAndBackoffTests {
     @Test
-    func forceRefreshTriggersTick() {
+    func `force refresh triggers tick`() {
         let scheduler = RefreshScheduler()
         var fired = false
         scheduler.configure(interval: 60, fireImmediately: false) {
@@ -18,7 +18,7 @@ struct RefreshAndBackoffTests {
     }
 
     @Test
-    func backoffTracksCooldown() async throws {
+    func `backoff tracks cooldown`() async throws {
         let tracker = BackoffTracker()
         let url = try #require(URL(string: "https://example.com/path"))
         let initial = await tracker.isCoolingDown(url: url)
@@ -37,19 +37,19 @@ struct RefreshAndBackoffTests {
     }
 
     @Test
-    func mapsCertificateErrors() {
+    func `maps certificate errors`() {
         let error = URLError(.serverCertificateUntrusted)
         #expect(error.userFacingMessage == "Enterprise host certificate is not trusted.")
     }
 
     @Test
-    func mapsCannotParseResponse() {
+    func `maps cannot parse response`() {
         let error = URLError(.cannotParseResponse)
         #expect(error.userFacingMessage == "GitHub returned an unexpected response.")
     }
 
     @Test
-    func authenticationFailureDetection() {
+    func `authentication failure detection`() {
         let unauthorized: Error = GitHubAPIError.badStatus(code: 401, message: nil)
         #expect(unauthorized.isAuthenticationFailure)
 
@@ -64,7 +64,7 @@ struct RefreshAndBackoffTests {
     }
 
     @Test
-    func loopbackParsesCodeAndState() {
+    func `loopback parses code and state`() {
         let request = "GET /callback?code=abc&state=xyz HTTP/1.1\r\nHost: 127.0.0.1:53682\r\n\r\n"
         let parsed = LoopbackServer.parse(request: request)
         #expect(parsed?.code == "abc")

@@ -5,7 +5,7 @@ import Testing
 @MainActor
 struct ContributionHeaderTests {
     @Test
-    func emptyUsernameShowsNothing() {
+    func `empty username shows nothing`() {
         #expect(true)
     }
 }

@@ -28,6 +28,7 @@ public enum RepoAutocompleteScoring {
     ) -> [Scored] {
         repos.compactMap { repo in
             guard let score = Self.score(repo: repo, query: query) else { return nil }
+
             return Scored(repo: repo, score: score + bonus, sourceRank: sourceRank)
         }
     }
@@ -60,6 +61,7 @@ public enum RepoAutocompleteScoring {
     public static func score(repo: Repository, query: String) -> Int? {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
+
         let lowerQuery = trimmed.lowercased()
         let fullName = repo.fullName.lowercased()
         let hasSlash = lowerQuery.contains("/")
@@ -114,6 +116,7 @@ public enum RepoAutocompleteScoring {
                     )
                 )
                 guard let ownerFallback else { return nil }
+
                 score += ownerFallback
             }
         } else if ownerScore == nil, repoScore == nil {
@@ -132,6 +135,7 @@ public enum RepoAutocompleteScoring {
         weights: ComponentScoreWeights
     ) -> Int? {
         guard !query.isEmpty else { return 0 }
+
         let lowerTarget = target.lowercased()
         if lowerTarget == query { return weights.exact }
         if lowerTarget.hasPrefix(query) { return weights.prefix }

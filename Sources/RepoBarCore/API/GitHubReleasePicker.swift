@@ -11,6 +11,7 @@ enum GitHubReleasePicker {
                 return lhsDate > rhsDate
             }
         guard let rel = candidates.first else { return nil }
+
         let published = rel.publishedAt ?? rel.createdAt ?? Date.distantPast
         return Release(name: rel.name ?? rel.tagName, tag: rel.tagName, publishedAt: published, url: rel.htmlUrl)
     }

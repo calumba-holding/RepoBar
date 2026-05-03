@@ -42,6 +42,7 @@ struct MarkdownCommand: CommanderRunnableCommand {
         guard let path, path.isEmpty == false else {
             throw ValidationError("Missing markdown file path")
         }
+
         if let width, width <= 0 {
             throw ValidationError("--width must be greater than 0")
         }

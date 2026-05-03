@@ -5,6 +5,7 @@ extension AppState {
     /// Preloads the user's contribution heatmap so the header can render without remote images.
     func loadContributionHeatmapIfNeeded(for username: String) async {
         guard self.session.settings.appearance.showContributionHeader else { return }
+
         if self.session.contributionUser == username, !self.session.contributionHeatmap.isEmpty { return }
         let hasExisting = self.session.contributionUser == username && !self.session.contributionHeatmap.isEmpty
         if self.session.contributionIsLoading, self.session.contributionUser == username { return }

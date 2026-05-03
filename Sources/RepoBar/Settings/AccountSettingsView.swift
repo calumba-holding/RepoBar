@@ -211,6 +211,7 @@ struct AccountSettingsView: View {
                 self.tokenValidation = .unknown
                 return
             }
+
             await self.validateToken()
         }
     }
@@ -286,6 +287,7 @@ struct AccountSettingsView: View {
                     self.isValidatingPAT = false
                     return
                 }
+
                 self.session.settings.enterpriseHost = enterpriseURL
                 host = enterpriseURL
             } else {
@@ -312,8 +314,10 @@ struct AccountSettingsView: View {
     private func normalizedEnterpriseHost() -> URL? {
         guard !self.enterpriseHost.isEmpty else { return nil }
         guard var components = URLComponents(string: enterpriseHost) else { return nil }
+
         if components.scheme == nil { components.scheme = "https" }
         guard components.scheme?.lowercased() == "https", components.host != nil else { return nil }
+
         components.path = ""
         components.query = nil
         components.fragment = nil
@@ -322,6 +326,7 @@ struct AccountSettingsView: View {
 
     private func validateToken() async {
         guard case .loggedIn = self.session.account else { return }
+
         if self.tokenValidation == .checking { return }
         self.tokenValidation = .checking
         let started = Date()
@@ -348,6 +353,7 @@ struct AccountSettingsView: View {
 
     private func refreshToken() async {
         guard case .loggedIn = self.session.account else { return }
+
         if self.tokenValidation == .checking { return }
         self.tokenValidation = .checking
         let started = Date()
@@ -359,6 +365,7 @@ struct AccountSettingsView: View {
             guard refreshed != nil else {
                 throw URLError(.userAuthenticationRequired)
             }
+
             await self.logAuth("Auth: token refresh ok in \(Self.formatElapsed(since: started))")
             await self.validateToken()
         } catch {

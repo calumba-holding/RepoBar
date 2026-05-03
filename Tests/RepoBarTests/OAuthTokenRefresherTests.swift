@@ -4,7 +4,7 @@ import Testing
 
 struct OAuthTokenRefresherTests {
     @Test
-    func refreshUsesStoredClientCredentials() async throws {
+    func `refresh uses stored client credentials`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -42,7 +42,7 @@ struct OAuthTokenRefresherTests {
     }
 
     @Test
-    func refreshFailureShowsHelpfulMessage() async throws {
+    func `refresh failure shows helpful message`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -74,6 +74,7 @@ struct OAuthTokenRefresherTests {
                 Issue.record("Expected GitHubAPIError.badStatus, got \(error)")
                 return
             }
+
             #expect(code == 400)
             #expect(message?.contains("Please sign in again.") == true)
             #expect(message?.contains("refresh token revoked") == true)
@@ -81,7 +82,7 @@ struct OAuthTokenRefresherTests {
     }
 
     @Test
-    func refreshFailureHandlesMalformedSuccessResponse() async throws {
+    func `refresh failure handles malformed success response`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -113,6 +114,7 @@ struct OAuthTokenRefresherTests {
                 Issue.record("Expected GitHubAPIError.badStatus, got \(error)")
                 return
             }
+
             #expect(code == 200)
             #expect(message?.contains("Please sign in again.") == true)
             #expect(message?.contains("refresh token revoked") == true)
@@ -120,7 +122,7 @@ struct OAuthTokenRefresherTests {
     }
 
     @Test
-    func refreshSkipsWhenRefreshTokenMissing() async throws {
+    func `refresh skips when refresh token missing`() async throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
@@ -208,6 +210,7 @@ private extension OAuthTokenRefresherTests {
         }
 
         guard let stream = request.httpBodyStream else { return nil }
+
         stream.open()
         defer { stream.close() }
 

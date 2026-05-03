@@ -19,6 +19,7 @@ final class RefreshScheduler {
         self.timer?.invalidate()
         self.timer = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true) { [weak self] _ in
             guard let self else { return }
+
             Task { @MainActor in self.tickHandler?() }
         }
         if fireImmediately {

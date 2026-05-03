@@ -8,16 +8,19 @@ struct GeneralSettingsView: View {
 
     private var normalizedCurrentUsername: String? {
         guard case let .loggedIn(user) = self.session.account else { return nil }
+
         return user.username.lowercased()
     }
 
     private var showOnlyMyRepos: Bool {
         guard let username = self.normalizedCurrentUsername else { return false }
+
         return OwnerFilter.normalize(self.session.settings.repoList.ownerFilter) == [username]
     }
 
     private func toggleShowOnlyMyRepos(_ enabled: Bool) {
         guard let username = self.normalizedCurrentUsername else { return }
+
         self.session.settings.repoList.ownerFilter = enabled ? [username] : []
 
         self.appState.persistSettings()

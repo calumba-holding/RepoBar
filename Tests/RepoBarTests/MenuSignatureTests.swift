@@ -5,7 +5,7 @@ import Testing
 
 struct MenuSignatureTests {
     @Test
-    func repoSubmenuSignatureChangesWithRepoCounts() {
+    func `repo submenu signature changes with repo counts`() {
         let now = Date(timeIntervalSinceReferenceDate: 1_000_000)
         let range = HeatmapRange(start: now.addingTimeInterval(-86400), end: now)
         let settings = UserSettings()
@@ -83,7 +83,7 @@ struct MenuSignatureTests {
     }
 
     @Test
-    func menuBuildSignatureChangesWithPinnedRepos() {
+    func `menu build signature changes with pinned repos`() {
         let now = Date(timeIntervalSinceReferenceDate: 2_000_000)
         var settings = UserSettings()
         settings.repoList.pinnedRepositories = []

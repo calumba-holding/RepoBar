@@ -4,7 +4,7 @@ import Testing
 
 struct DiagnosticsLoggerTests {
     @Test
-    func loggerCanBeEnabledAndDisabled() async {
+    func `logger can be enabled and disabled`() async {
         let logger = DiagnosticsLogger.shared
         await logger.setEnabled(false)
         await logger.message("should not log")

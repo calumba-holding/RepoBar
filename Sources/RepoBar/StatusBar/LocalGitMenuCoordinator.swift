@@ -70,6 +70,7 @@ final class LocalGitMenuCoordinator {
             self.menuBuilder.refreshMenuViewHeights(in: menu)
             Task { @MainActor [weak self] in
                 guard let self else { return }
+
                 if entry.includesRemoteBranches {
                     await self.refreshCombinedBranchMenu(menu: menu, entry: entry)
                 } else {
@@ -109,6 +110,7 @@ final class LocalGitMenuCoordinator {
     func resetLocalRepo(_ status: LocalRepoStatus) {
         let confirmed = self.confirmHardReset(for: status)
         guard confirmed else { return }
+
         self.runLocalGitTask(
             title: "Reset failed",
             status: status,
@@ -119,6 +121,7 @@ final class LocalGitMenuCoordinator {
 
     func switchLocalBranch(_ sender: NSMenuItem) {
         guard let action = sender.representedObject as? LocalBranchAction else { return }
+
         self.runLocalGitTask(
             title: "Switch branch failed",
             status: nil,
@@ -129,16 +132,19 @@ final class LocalGitMenuCoordinator {
 
     func switchLocalWorktree(_ sender: NSMenuItem) {
         guard let action = sender.representedObject as? LocalWorktreeAction else { return }
+
         self.switchLocalWorktree(path: action.path, fullName: action.fullName)
     }
 
     func createLocalBranch(_ sender: NSMenuItem) {
         guard let repoURL = sender.representedObject as? URL else { return }
+
         let name = self.promptForText(
             title: "Create branch",
             message: "Enter a new branch name."
         )
         guard let name, name.isEmpty == false else { return }
+
         self.runLocalGitTask(
             title: "Create branch failed",
             status: nil,
@@ -149,11 +155,13 @@ final class LocalGitMenuCoordinator {
 
     func createLocalWorktree(_ sender: NSMenuItem) {
         guard let repoURL = sender.representedObject as? URL else { return }
+
         let branchName = self.promptForText(
             title: "Create worktree",
             message: "Enter a branch name for the new worktree."
         )
         guard let branchName, branchName.isEmpty == false else { return }
+
         let folderName = self.appState.session.settings.localProjects.worktreeFolderName
         let defaultPath = repoURL
             .appendingPathComponent(folderName, isDirectory: true)
@@ -164,6 +172,7 @@ final class LocalGitMenuCoordinator {
             defaultValue: defaultPath.path
         )
         guard let pathText, pathText.isEmpty == false else { return }
+
         let worktreeURL = URL(fileURLWithPath: pathText, isDirectory: true)
         do {
             let parent = worktreeURL.deletingLastPathComponent()
@@ -257,7 +266,6 @@ final class LocalGitMenuCoordinator {
             )
             return
         }
-
         guard let (owner, name) = self.ownerAndName(from: fullName) else {
             self.populateCombinedBranchMenu(
                 menu: menu,
@@ -271,8 +279,8 @@ final class LocalGitMenuCoordinator {
             )
             return
         }
-
         guard let descriptor = self.recentMenuService.descriptor(for: .branches) else { return }
+
         let cachedItems = descriptor.cached(fullName, now, self.recentMenuService.cacheTTL)
             ?? descriptor.stale(fullName)
         let cachedBranches = self.remoteBranches(from: cachedItems)
@@ -290,6 +298,7 @@ final class LocalGitMenuCoordinator {
         )
 
         guard needsRefresh else { return }
+
         do {
             let items = try await descriptor.load(fullName, owner, name, self.recentMenuService.listLimit)
             let branches = self.remoteBranches(from: items)
@@ -494,6 +503,7 @@ final class LocalGitMenuCoordinator {
     private func addRemoteBranchMenuItem(_ summary: RepoBranchSummary, repoFullName: String, to menu: NSMenu) {
         let view = BranchMenuItemView(summary: summary) { [weak self] in
             guard let self, let url = self.webURLBuilder.branchURL(fullName: repoFullName, branch: summary.name) else { return }
+
             self.actionHandler.open(url: url)
         }
         let item = self.menuItemFactory.makeItem(for: view, enabled: true, highlightable: true)
@@ -530,11 +540,13 @@ final class LocalGitMenuCoordinator {
     private func ownerAndName(from fullName: String) -> (String, String)? {
         let parts = fullName.split(separator: "/", maxSplits: 1)
         guard parts.count == 2 else { return nil }
+
         return (String(parts[0]), String(parts[1]))
     }
 
     private func remoteBranches(from items: RecentMenuItems?) -> [RepoBranchSummary]? {
         guard case let .branches(branches) = items else { return nil }
+
         return branches
     }
 
@@ -547,6 +559,7 @@ final class LocalGitMenuCoordinator {
         let rootBookmark = self.appState.session.settings.localProjects.rootBookmarkData
         Task.detached { [weak self] in
             guard let self else { return }
+
             let result = Result {
                 var capturedError: Error?
                 SecurityScopedBookmark.withAccess(to: action.repoURL, rootBookmarkData: rootBookmark) {
@@ -601,6 +614,7 @@ final class LocalGitMenuCoordinator {
         alert.addButton(withTitle: "Cancel")
         let response = alert.runModal()
         guard response == .alertFirstButtonReturn else { return nil }
+
         return field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
@@ -610,6 +624,7 @@ final class LocalGitMenuCoordinator {
             self.presentAlert(title: "Worktree missing", message: "Could not find \(pathString).")
             return
         }
+
         self.appState.session.settings.localProjects.preferredLocalPathsByFullName[fullName] = pathString
         self.appState.persistSettings()
         self.appState.refreshLocalProjects()

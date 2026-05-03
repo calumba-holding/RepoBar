@@ -125,6 +125,7 @@ struct DebugSettingsView: View {
             self.diagnostics = .empty
             return
         }
+
         self.diagnostics = await self.appState.diagnostics()
     }
 

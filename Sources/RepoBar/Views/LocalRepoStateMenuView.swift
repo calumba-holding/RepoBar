@@ -233,6 +233,7 @@ private struct LocalRepoActionButton: View {
 
     private var hoverBackground: Color {
         guard self.isHovered else { return .clear }
+
         if self.isHighlighted {
             return MenuHighlightStyle.selectionText.opacity(0.18)
         }

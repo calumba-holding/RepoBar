@@ -12,6 +12,7 @@ public actor DiagnosticsLogger {
 
     public func message(_ text: String) {
         guard self.enabled else { return }
+
         self.log.info("\(text)")
     }
 }

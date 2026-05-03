@@ -4,7 +4,7 @@ import Testing
 
 struct UserSettingsCoverageTests {
     @Test
-    func labelsAndSeconds_coverEnumSwitches() {
+    func `labels and seconds cover enum switches`() {
         #expect(LocalProjectsRefreshInterval.oneMinute.seconds == 60)
         #expect(LocalProjectsRefreshInterval.fifteenMinutes.seconds == 900)
         #expect(LocalProjectsRefreshInterval.twoMinutes.label == "2 minutes")

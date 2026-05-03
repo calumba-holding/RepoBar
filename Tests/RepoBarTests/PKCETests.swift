@@ -4,7 +4,7 @@ import Testing
 
 struct PKCETests {
     @Test
-    func verifierAndChallengeNotEmpty() {
+    func `verifier and challenge not empty`() {
         let pkce = PKCE.generate()
         #expect(!pkce.verifier.isEmpty)
         #expect(!pkce.challenge.isEmpty)

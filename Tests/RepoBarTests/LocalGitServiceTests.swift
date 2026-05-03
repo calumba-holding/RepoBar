@@ -4,7 +4,7 @@ import Testing
 
 struct LocalGitServiceTests {
     @Test
-    func smartSync_fastForwardsBehindRepo() throws {
+    func `smart sync fast forwards behind repo`() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -38,7 +38,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func smartSync_errorsWithoutUpstream() throws {
+    func `smart sync errors without upstream`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
         let repo = root.appendingPathComponent("repo", isDirectory: true)
@@ -54,7 +54,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func rebaseOntoUpstream_errorsWhenDirty() throws {
+    func `rebase onto upstream errors when dirty`() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -81,7 +81,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func createBranch_createsAndSwitches() throws {
+    func `create branch creates and switches`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -97,7 +97,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func createWorktree_createsNewWorktree() throws {
+    func `create worktree creates new worktree`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -115,7 +115,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func cloneRepo_clonesIntoDestination() throws {
+    func `clone repo clones into destination`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -133,7 +133,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func branches_marksCurrentBranch() throws {
+    func `branches marks current branch`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -144,13 +144,13 @@ struct LocalGitServiceTests {
         try LocalGitService().createBranch(at: repo, name: "feature/test")
 
         let branches = try LocalGitService().branches(at: repo)
-        let current = branches.first { $0.isCurrent }?.name
+        let current = branches.first(where: \.isCurrent)?.name
         #expect(current == "feature/test")
         #expect(branches.contains(where: { $0.name == "main" }))
     }
 
     @Test
-    func worktrees_parsesDetachedEntry() throws {
+    func `worktrees parses detached entry`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -165,14 +165,12 @@ struct LocalGitServiceTests {
         let detachedEntry = worktrees.first { $0.path.standardizedFileURL == detached.standardizedFileURL }
         #expect(detachedEntry?.branch == nil)
         #expect(detachedEntry?.isCurrent == false)
-        let hasCurrent = worktrees.contains(where: { worktree in
-            worktree.isCurrent
-        })
+        let hasCurrent = worktrees.contains(where: \.isCurrent)
         #expect(hasCurrent)
     }
 
     @Test
-    func hardResetToUpstream_discardsLocalCommit() throws {
+    func `hard reset to upstream discards local commit`() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -201,7 +199,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func smartSync_errorsWhenDetached() throws {
+    func `smart sync errors when detached`() throws {
         let root = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -219,7 +217,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func smartSync_pushesWhenAhead() throws {
+    func `smart sync pushes when ahead`() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -245,7 +243,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func branchDetails_reportsUpstreamAndAhead() throws {
+    func `branch details reports upstream and ahead`() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -274,7 +272,7 @@ struct LocalGitServiceTests {
     }
 
     @Test
-    func worktrees_includeMetadata() throws {
+    func `worktrees include metadata`() throws {
         let base = try makeTempDirectory()
         defer { try? FileManager.default.removeItem(at: base) }
 
@@ -292,7 +290,7 @@ struct LocalGitServiceTests {
         try runGit(["push", "-u", "origin", "main"], in: repo)
 
         let worktrees = try LocalGitService().worktrees(at: repo)
-        let current = worktrees.first { $0.isCurrent }
+        let current = worktrees.first(where: \.isCurrent)
         #expect(current?.branch == "main")
         #expect(current?.upstream != nil)
         #expect(current?.lastCommitAuthor == "RepoBar Tests")

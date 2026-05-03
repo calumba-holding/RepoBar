@@ -37,6 +37,7 @@ struct ReleaseAssetMenuItemView: View {
 
     private var sizeText: String? {
         guard let bytes = self.summary.sizeBytes else { return nil }
+
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         return formatter.string(fromByteCount: Int64(bytes))

@@ -4,7 +4,7 @@ import Testing
 
 struct GlobalActivityTests {
     @Test
-    func repoEventActivityEventFromRepo_buildsEvent() throws {
+    func `repo event activity event from repo builds event`() throws {
         let data = Data("""
         {
           "type": "PushEvent",
@@ -28,7 +28,7 @@ struct GlobalActivityTests {
     }
 
     @Test
-    func repoEventActivityEventFromRepo_fallsBackToRepoURL() throws {
+    func `repo event activity event from repo falls back to repo URL`() throws {
         let data = Data("""
         {
           "type": "PushEvent",
@@ -50,7 +50,7 @@ struct GlobalActivityTests {
     }
 
     @Test
-    func commitSummaries_useEnterpriseHost() throws {
+    func `commit summaries use enterprise host`() throws {
         let data = Data("""
         {
           "type": "PushEvent",
@@ -81,7 +81,7 @@ struct GlobalActivityTests {
     }
 
     @Test
-    func globalActivityScope_labels() {
+    func `global activity scope labels`() {
         #expect(GlobalActivityScope.allActivity.label == "All activity")
         #expect(GlobalActivityScope.myActivity.label == "My activity")
     }

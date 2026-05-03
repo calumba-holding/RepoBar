@@ -5,7 +5,7 @@ import Testing
 
 struct ForkFilteringTests {
     @Test
-    func repositoryFilterExcludesForksByDefault() {
+    func `repository filter excludes forks by default`() {
         let repos = [
             Self.repo(name: "A", isFork: false),
             Self.repo(name: "B", isFork: true),
@@ -16,7 +16,7 @@ struct ForkFilteringTests {
     }
 
     @Test
-    func repositoryFilterKeepsPinnedForks() {
+    func `repository filter keeps pinned forks`() {
         let pinnedFork = Self.repo(owner: "me", name: "PinnedFork", isFork: true)
         let otherFork = Self.repo(owner: "me", name: "OtherFork", isFork: true)
         let normal = Self.repo(owner: "me", name: "Normal", isFork: false)
@@ -31,7 +31,7 @@ struct ForkFilteringTests {
     }
 
     @Test
-    func selectVisibleHidesUnpinnedForksButKeepsPinnedForks() {
+    func `select visible hides unpinned forks but keeps pinned forks`() {
         let pinnedFork = Self.repo(owner: "me", name: "PinnedFork", isFork: true)
         let otherFork = Self.repo(owner: "me", name: "OtherFork", isFork: true)
         let normal = Self.repo(owner: "me", name: "Normal", isFork: false)

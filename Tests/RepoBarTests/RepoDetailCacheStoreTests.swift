@@ -4,7 +4,7 @@ import Testing
 
 struct RepoDetailCacheStoreTests {
     @Test
-    func saveAndLoadRoundTrip() throws {
+    func `save and load round trip`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
@@ -63,7 +63,7 @@ struct RepoDetailCacheStoreTests {
     }
 
     @Test
-    func loadCorruptCacheRemovesFile() throws {
+    func `load corrupt cache removes file`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 
@@ -83,7 +83,7 @@ struct RepoDetailCacheStoreTests {
     }
 
     @Test
-    func clearRemovesCacheDirectory() throws {
+    func `clear removes cache directory`() throws {
         let baseURL = FileManager.default.temporaryDirectory.appending(path: "repobar-cache-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: baseURL) }
 

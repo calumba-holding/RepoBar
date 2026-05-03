@@ -5,7 +5,7 @@ import Testing
 struct RecentListMenuTests {
     @MainActor
     @Test
-    func recentListCache_evictsLeastRecentlyUsedEntry() {
+    func `recent list cache evicts least recently used entry`() {
         let cache = RecentListCache<Int>(maxEntries: 2)
         let now = Date(timeIntervalSinceReferenceDate: 1000)
 
@@ -22,7 +22,7 @@ struct RecentListMenuTests {
 
     @MainActor
     @Test
-    func recentListMenus_surviveMainMenuOpen() {
+    func `recent list menus survive main menu open`() {
         let appState = AppState()
         let manager = StatusBarMenuManager(appState: appState)
         let mainMenu = NSMenu()

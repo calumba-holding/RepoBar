@@ -28,6 +28,7 @@ struct OnlyWithSelection: ExpressibleFromArgument {
         }
 
         guard requireIssues || requirePRs else { return nil }
+
         self.filter = RepositoryOnlyWith(requireIssues: requireIssues, requirePRs: requirePRs)
     }
 }
