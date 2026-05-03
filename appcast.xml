@@ -3,6 +3,17 @@
     <channel>
         <title>RepoBar</title>
         <item>
+            <title>0.3.0</title>
+            <pubDate>Sun, 03 May 2026 17:01:36 +0100</pubDate>
+            <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
+            <description><![CDATA[<ul><li>Stop requesting broad OAuth repository scopes for the built-in GitHub.com GitHub App login; custom Enterprise OAuth still requests `repo read:org`.</li><li>Clarify private organization repository access: Accounts now links to the RepoBar GitHub App installation, docs explain the installation/PAT boundary, and direct repo 404s say when a repo is not visible to the current token.</li><li>Fix release signing defaults so Developer ID builds strip the shared keychain access group unless explicitly enabled with a provisioning profile (#44, thanks @Chefski).</li><li>Sign bundled helper binaries without app-only entitlements so the CLI is not rejected by AMFI.</li><li>Default SwiftPM debug CLI/test auth to file-backed storage so local runs do not trigger Keychain prompts.</li><li>Fix owner-filtered CLI repo lists so `--limit` is applied after filtering by owner.</li><li>Turn the Repositories settings tab into a searchable browser for accessible repos with pinned/hidden state.</li><li>Improve macOS 26 menubar attachment compatibility by updating MenuBarExtraAccess and using its required modifier order (#47, thanks @jviehhauser).</li><li>Prevent duplicate repository entries from crashing refresh or menu rendering.</li><li>Fix awkward cooldown error copy.</li><li>Bound long-lived menu/API caches to avoid gradual memory growth.</li><li>Update README install/setup guidance for the 0.3.0 flow and point Homebrew users at the official cask.</li><li>Add the MIT license.</li><li>Update Swift package and npm dependencies, including MenuBarExtraAccess compatibility work.</li><li>Update GitHub Actions pins, opt actions into the Node 24 runtime, and make CI Homebrew tool installation idempotent.</li><li>Strengthen SwiftLint and SwiftFormat rules and apply the current formatter output.</li></ul>
+]]></description>
+            <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.3.0/RepoBar-0.3.0.zip" length="15406943" type="application/octet-stream" sparkle:edSignature="0Lb7Y0YjsXGGNZTJ5OGPkfdWa/H2k8JiCGArVpFe6fxwizEp/hh5UTpdM/poYkT8a2G2baeaRQrLXlYKXpe/BA=="/>
+        </item>
+        <item>
             <title>0.2.0</title>
             <pubDate>Thu, 22 Jan 2026 06:25:29 +0000</pubDate>
             <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
@@ -23,17 +34,6 @@
             <description><![CDATA[<ul><li>iOS app preview (not finished, not in the App Store yet): repo list/cards, activity feed, detail drill‑downs, login/settings, icons/branding, and continued auth/UI polish.</li><li>CLI parity expansion: new repo list subcommands (releases, CI runs, discussions, tags, branches, contributors, commits, activity) plus `--owner/--mine` filters.</li><li>CLI local actions + settings: sync/rebase/reset/checkout, branch/worktree listings, Finder/Terminal open; pin/hide and settings show/set; installer for `repobar`.</li><li>Changelog UX: submenu preview improvements plus Markdown rendering upgrades (block layout, scrollable preview, header alignment).</li><li>Changelog UX: show the first released section headline in the submenu badge (skips Unreleased).</li><li>Changelog UX: prefetch on repo submenu open and refresh the badge after load.</li><li>Changelog UX: switch to Swift Markdown AST parsing for cross-platform block rendering.</li><li>Releases submenu: show latest release name next to the count badge.</li><li>Menu customization: Display settings to reorder/hide main menu and repo submenu items (reset to defaults), with spacing tweaks.</li><li>Logging/diagnostics: swift-log integration with OSLog + optional file logging; debug logging settings for macOS/iOS.</li><li>Reliability: menu rehydrate on attach, invalidate empty menu cache, stabilize contribution header heatmap size, limit “More” submenus to 20 entries.</li><li>Repo access + errors: include org/collaborator repos, improve repo detail error messaging, cache discussions capability and hide disabled entries.</li></ul>
 ]]></description>
             <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.1.2/RepoBar-0.1.2.zip" length="14747018" type="application/octet-stream" sparkle:edSignature="CC6sk/wStzPOmGAaxiwo8f/JVJocglx5ZFtlZbNUor0d3tIVLqrlgrlsM0mWqBuVKkher5U3Bnu+L9EntzZ6Bw=="/>
-        </item>
-        <item>
-            <title>0.1.1</title>
-            <pubDate>Wed, 31 Dec 2025 03:08:30 +0100</pubDate>
-            <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
-            <sparkle:version>2</sparkle:version>
-            <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
-            <description><![CDATA[<ul><li>Fix CLI: allow invoking bundled `repobarcli` directly (argv0 normalization).</li></ul>
-]]></description>
-            <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.1.1/RepoBar-0.1.1.zip" length="11338886" type="application/octet-stream" sparkle:edSignature="nJ4XzYOz3dPYXdEXPJUnYCNJjdnR/j9l7yy5lgT7vxvr8yhe3e39B9Gh4Maf+Nqg5pNsL3xVPcCgbAraiXj9Ag=="/>
         </item>
     </channel>
 </rss>
