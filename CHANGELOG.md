@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 - Unreleased
+## 0.4.0 - 2026-05-03
 
 - Fix Issues submenus when GitHub returns pull requests in the REST issues feed before actual issues, surface GitHub rate limits in the menu UI, and add usable recent-list/REST logs for debugging stuck submenu loads.
 - Keep cached repo submenus wired to their recent Issues/PR loaders after menu filter rebuilds so nested lists do not stay stuck on “Loading…”.
