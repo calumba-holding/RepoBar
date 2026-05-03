@@ -61,7 +61,7 @@ public enum RepositoryQueryDefaults {
 
 public enum RepositoryPipeline {
     public static func apply(_ repos: [Repository], query: RepositoryQuery) -> [Repository] {
-        var filtered = repos
+        var filtered = RepositoryUniquing.byFullName(repos)
         let pinnedSet = Set(query.pinned.map { $0.lowercased() })
         let hiddenSet = Set(query.hidden.map { $0.lowercased() })
 

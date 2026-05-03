@@ -29,6 +29,11 @@ public enum TokenStoreError: Error {
     case loadFailed
 }
 
+public enum TokenStoreStorage: Sendable {
+    case keychain
+    case file(URL)
+}
+
 public struct TokenStore: Sendable {
     public static var shared: TokenStore {
         TokenStore()
@@ -36,14 +41,17 @@ public struct TokenStore: Sendable {
 
     private let service: String
     private let accessGroup: String?
+    private let storage: TokenStoreStorage
     private let logger = RepoBarLogging.logger("token-store")
 
     public init(
         service: String = "com.steipete.repobar.auth",
-        accessGroup: String? = nil
+        accessGroup: String? = nil,
+        storage: TokenStoreStorage? = nil
     ) {
         self.service = service
         self.accessGroup = accessGroup ?? Self.defaultAccessGroup()
+        self.storage = storage ?? Self.defaultStorage()
     }
 
     public func save(tokens: OAuthTokens) throws {
@@ -91,6 +99,8 @@ public struct TokenStore: Sendable {
 
 extension TokenStore {
     static let sharedAccessGroupSuffix = "com.steipete.repobar.shared"
+    private static let storageModeInfoKey = "RepoBarTokenStore"
+    private static let storageModeEnvKey = "REPOBAR_TOKEN_STORE"
 
     static func defaultAccessGroup() -> String? {
         #if os(macOS)
@@ -112,10 +122,34 @@ extension TokenStore {
             return nil
         #endif
     }
+
+    static func defaultStorage() -> TokenStoreStorage {
+        let configured = ProcessInfo.processInfo.environment[Self.storageModeEnvKey]
+            ?? Bundle.main.object(forInfoDictionaryKey: Self.storageModeInfoKey) as? String
+        switch configured?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "file", "disk":
+            return .file(Self.defaultFileDirectory())
+        default:
+            return .keychain
+        }
+    }
+
+    static func defaultFileDirectory() -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first ?? FileManager.default.homeDirectoryForCurrentUser
+        return base
+            .appendingPathComponent("RepoBar", isDirectory: true)
+            .appendingPathComponent("DebugAuth", isDirectory: true)
+    }
 }
 
 private extension TokenStore {
     func save(data: Data, account: String) throws {
+        if case let .file(directory) = self.storage {
+            try self.saveFile(data: data, account: account, directory: directory)
+            return
+        }
+
         let accessGroups = self.accessGroupsForOperation()
         var lastStatus: OSStatus = errSecSuccess
         for (index, group) in accessGroups.enumerated() {
@@ -139,6 +173,10 @@ private extension TokenStore {
     }
 
     func loadData(account: String) throws -> Data? {
+        if case let .file(directory) = self.storage {
+            return try self.loadFile(account: account, directory: directory)
+        }
+
         let accessGroups = self.accessGroupsForOperation()
         var lastStatus: OSStatus = errSecSuccess
         for (index, group) in accessGroups.enumerated() {
@@ -162,6 +200,11 @@ private extension TokenStore {
     }
 
     func clear(account: String) {
+        if case let .file(directory) = self.storage {
+            try? FileManager.default.removeItem(at: self.fileURL(account: account, directory: directory))
+            return
+        }
+
         let accessGroups = self.accessGroupsForOperation()
         for group in accessGroups {
             let query = self.baseQuery(account: account, accessGroup: group)
@@ -204,5 +247,33 @@ private extension TokenStore {
         } else {
             self.logger.error("Keychain \(action) failed: OSStatus \(status)")
         }
+    }
+
+    func saveFile(data: Data, account: String, directory: URL) throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let url = self.fileURL(account: account, directory: directory)
+        try data.write(to: url, options: [.atomic])
+        try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
+    }
+
+    func loadFile(account: String, directory: URL) throws -> Data? {
+        let url = self.fileURL(account: account, directory: directory)
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return try Data(contentsOf: url)
+    }
+
+    func fileURL(account: String, directory: URL) -> URL {
+        let serviceName = self.sanitizedFileComponent(self.service)
+        let accountName = self.sanitizedFileComponent(account)
+        return directory.appendingPathComponent("\(serviceName)-\(accountName).json", isDirectory: false)
+    }
+
+    func sanitizedFileComponent(_ value: String) -> String {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: ".-_"))
+        let scalars = value.unicodeScalars.map { scalar in
+            allowed.contains(scalar) ? Character(scalar) : "-"
+        }
+        let result = String(scalars)
+        return result.isEmpty ? "value" : result
     }
 }

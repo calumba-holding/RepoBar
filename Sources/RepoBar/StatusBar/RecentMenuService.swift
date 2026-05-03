@@ -219,7 +219,10 @@ final class RecentMenuService {
                 }
                 defer { self.recentCommitsCache.clearInflight(for: key) }
                 let items = try await AsyncTimeout.value(within: self.loadTimeout, task: task)
-                self.recentCommitsCache.store(items, for: key, fetchedAt: Date())
+                let evictedKeys = self.recentCommitsCache.store(items, for: key, fetchedAt: Date())
+                for evictedKey in evictedKeys {
+                    self.recentCommitCounts[evictedKey] = nil
+                }
                 return RecentMenuItems.commits(items)
             }
         )
@@ -250,7 +253,7 @@ final class RecentMenuService {
                 }
                 defer { config.cache.clearInflight(for: key) }
                 let items = try await AsyncTimeout.value(within: self.loadTimeout, task: task)
-                config.cache.store(items, for: key, fetchedAt: Date())
+                _ = config.cache.store(items, for: key, fetchedAt: Date())
                 return config.wrap(items)
             }
         )
@@ -325,17 +328,26 @@ final class RecentListCache<Item: Sendable> {
         var items: [Item]
     }
 
+    private let maxEntries: Int
     private var entries: [String: Entry] = [:]
+    private var entryOrder: [String] = []
     private var inflight: [String: Task<[Item], Error>] = [:]
+
+    init(maxEntries: Int = AppLimits.RecentLists.cacheEntries) {
+        self.maxEntries = max(0, maxEntries)
+    }
 
     func cached(for key: String, now: Date, maxAge: TimeInterval) -> [Item]? {
         guard let entry = self.entries[key] else { return nil }
         guard now.timeIntervalSince(entry.fetchedAt) <= maxAge else { return nil }
+        self.touch(key)
         return entry.items
     }
 
     func stale(for key: String) -> [Item]? {
-        self.entries[key]?.items
+        guard let entry = self.entries[key] else { return nil }
+        self.touch(key)
+        return entry.items
     }
 
     func needsRefresh(for key: String, now: Date, maxAge: TimeInterval) -> Bool {
@@ -354,7 +366,31 @@ final class RecentListCache<Item: Sendable> {
         self.inflight[key] = nil
     }
 
-    func store(_ items: [Item], for key: String, fetchedAt: Date) {
+    @discardableResult
+    func store(_ items: [Item], for key: String, fetchedAt: Date) -> [String] {
+        guard self.maxEntries > 0 else { return [] }
         self.entries[key] = Entry(fetchedAt: fetchedAt, items: items)
+        self.touch(key)
+        return self.evictIfNeeded()
+    }
+
+    func count() -> Int {
+        self.entries.count
+    }
+
+    private func touch(_ key: String) {
+        self.entryOrder.removeAll { $0 == key }
+        self.entryOrder.append(key)
+    }
+
+    private func evictIfNeeded() -> [String] {
+        var evicted: [String] = []
+        while self.entries.count > self.maxEntries, let oldest = self.entryOrder.first {
+            self.entryOrder.removeFirst()
+            if self.entries.removeValue(forKey: oldest) != nil {
+                evicted.append(oldest)
+            }
+        }
+        return evicted
     }
 }

@@ -6,6 +6,7 @@ import RepoBarCore
 final class Session {
     var account: AccountState = .loggedOut
     var hasStoredTokens = false
+    var accessibleRepositories: [Repository] = []
     var repositories: [Repository] = []
     var menuSnapshot: MenuSnapshot?
     var menuDisplayIndex: [String: RepositoryDisplayModel] = [:]

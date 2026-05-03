@@ -165,6 +165,7 @@ final class StatusBarMenuBuilder {
         case .repoList:
             let isLoggedIn = session.account.isLoggedIn
             let isLocalScope = session.menuRepoSelection.isLocalScope
+            let uniqueRepos = self.uniqueDisplayModels(repos)
             // Allow repo list for logged in users, or for local scope when logged out
             guard isLoggedIn || isLocalScope else { return [] }
             if isLoggedIn, !session.hasLoadedRepositories {
@@ -173,7 +174,7 @@ final class StatusBarMenuBuilder {
                     .padding(.vertical, MenuStyle.sectionVerticalPadding)
                 return [self.viewItem(for: loading, enabled: false)]
             }
-            if repos.isEmpty {
+            if uniqueRepos.isEmpty {
                 let (title, subtitle) = self.emptyStateMessage(for: session)
                 let emptyState = MenuEmptyStateView(title: title, subtitle: subtitle)
                     .padding(.horizontal, MenuStyle.sectionHorizontalPadding)
@@ -182,7 +183,7 @@ final class StatusBarMenuBuilder {
             }
             var items: [NSMenuItem] = []
             var usedRepoKeys: Set<String> = []
-            for (index, repo) in repos.enumerated() {
+            for (index, repo) in uniqueRepos.enumerated() {
                 let isPinned = settings.repoList.pinnedRepositories.contains {
                     $0.trimmingCharacters(in: .whitespacesAndNewlines)
                         .caseInsensitiveCompare(repo.title) == .orderedSame
@@ -190,7 +191,7 @@ final class StatusBarMenuBuilder {
                 let item = self.repoMenuItem(for: repo, isPinned: isPinned)
                 item.representedObject = repo.title
                 items.append(item)
-                if index < repos.count - 1 {
+                if index < uniqueRepos.count - 1 {
                     items.append(self.repoCardSeparator())
                 }
                 usedRepoKeys.insert(repo.id)
@@ -208,6 +209,13 @@ final class StatusBarMenuBuilder {
             return [self.actionItem(title: "Restart to update", action: #selector(self.target.checkForUpdates))]
         case .quit:
             return [self.actionItem(title: "Quit RepoBar", action: #selector(self.target.quitApp), keyEquivalent: "q")]
+        }
+    }
+
+    private func uniqueDisplayModels(_ repos: [RepositoryDisplayModel]) -> [RepositoryDisplayModel] {
+        var seen: Set<String> = []
+        return repos.filter { repo in
+            seen.insert(repo.title.lowercased()).inserted
         }
     }
 

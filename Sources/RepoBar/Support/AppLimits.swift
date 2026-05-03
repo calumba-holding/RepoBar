@@ -24,6 +24,7 @@ enum AppLimits {
         static let limit: Int = 20
         static let previewLimit: Int = 5
         static let cacheTTL: TimeInterval = 90
+        static let cacheEntries: Int = 128
         static let loadTimeout: TimeInterval = 12
         static let issueLabelChipLimit: Int = 6
     }
@@ -38,6 +39,7 @@ enum AppLimits {
         static let maxCharacters: Int = 4000
         static let maxLines: Int = 80
         static let cacheTTL: TimeInterval = 10 * 60
+        static let cacheEntries: Int = 128
     }
 
     enum LocalRepo {

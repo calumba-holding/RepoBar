@@ -3,6 +3,7 @@ summary: "RepoBar CLI command reference."
 read_when:
   - Using or documenting RepoBar CLI commands
   - Updating CLI flags or output
+  - Debugging CLI auth/token storage
 ---
 
 # RepoBar CLI
@@ -13,6 +14,16 @@ Binary name: `repobar`
 
 The CLI covers the data surfaces shown in the menubar and repo submenus, plus
 the local actions and settings that can be scripted.
+
+## Auth Storage
+
+By default, release CLI/app auth uses the macOS Keychain. For local debug or autonomous runs, set `REPOBAR_TOKEN_STORE=file` to use the same file-backed debug store as the debug app:
+
+```sh
+REPOBAR_TOKEN_STORE=file repobar status
+```
+
+The file store lives under `~/Library/Application Support/RepoBar/DebugAuth`. See `docs/auth-storage.md` for the exact precedence and release rules.
 
 ## Help
 

@@ -10,6 +10,7 @@ final class ChangelogMenuCoordinator {
     private let menuItemFactory: MenuItemViewFactory
     private var menus: [ObjectIdentifier: ChangelogMenuEntry] = [:]
     private var cache: [String: ChangelogCacheEntry] = [:]
+    private var cacheOrder: [String] = []
     private var inflight: [String: Task<ChangelogFetchResult, Never>] = [:]
 
     init(appState: AppState, menuBuilder: StatusBarMenuBuilder, menuItemFactory: MenuItemViewFactory) {
@@ -46,16 +47,19 @@ final class ChangelogMenuCoordinator {
         else { return nil }
         let key = releaseTag ?? "__none__"
         if let cached = entry.presentationCache[key] {
+            self.touchCache(fullName)
             return cached
         }
         guard let presentation = ChangelogParser.presentation(parsed: parsed, releaseTag: releaseTag) else { return nil }
         entry.presentationCache[key] = presentation
         self.cache[fullName] = entry
+        self.touchCache(fullName)
         return presentation
     }
 
     func cachedHeadline(fullName: String) -> String? {
         guard let parsed = self.cache[fullName]?.parsed else { return nil }
+        self.touchCache(fullName)
         return ChangelogParser.headline(parsed: parsed)
     }
 
@@ -66,13 +70,14 @@ final class ChangelogMenuCoordinator {
             if let cached = self.cache[fullName] {
                 let isFresh = now.timeIntervalSince(cached.fetchedAt) <= AppLimits.Changelog.cacheTTL
                 if isFresh {
+                    self.touchCache(fullName)
                     self.menuBuilder.updateChangelogRow(fullName: fullName, releaseTag: releaseTag)
                     return
                 }
             }
 
             let fetch = await self.loadChangelog(fullName: fullName, localPath: localPath)
-            self.cache[fullName] = self.makeCacheEntry(fetch: fetch)
+            self.storeCacheEntry(self.makeCacheEntry(fetch: fetch), for: fullName)
             self.menuBuilder.updateChangelogRow(fullName: fullName, releaseTag: releaseTag)
         }
     }
@@ -82,6 +87,7 @@ final class ChangelogMenuCoordinator {
         if let cached = self.cache[entry.fullName] {
             let isFresh = now.timeIntervalSince(cached.fetchedAt) <= AppLimits.Changelog.cacheTTL
             if isFresh {
+                self.touchCache(entry.fullName)
                 self.applyResult(cached.result, to: menu)
                 self.updateChangelogRow(fullName: entry.fullName)
                 return
@@ -95,7 +101,7 @@ final class ChangelogMenuCoordinator {
         }
 
         let fetch = await self.loadChangelog(fullName: entry.fullName, localPath: entry.localPath)
-        self.cache[entry.fullName] = self.makeCacheEntry(fetch: fetch)
+        self.storeCacheEntry(self.makeCacheEntry(fetch: fetch), for: entry.fullName)
         self.applyResult(fetch.result, to: menu)
         self.updateChangelogRow(fullName: entry.fullName)
     }
@@ -265,6 +271,20 @@ final class ChangelogMenuCoordinator {
             parsed: fetch.parsed,
             presentationCache: [:]
         )
+    }
+
+    private func storeCacheEntry(_ entry: ChangelogCacheEntry, for fullName: String) {
+        self.cache[fullName] = entry
+        self.touchCache(fullName)
+        while self.cache.count > AppLimits.Changelog.cacheEntries, let oldest = self.cacheOrder.first {
+            self.cacheOrder.removeFirst()
+            self.cache[oldest] = nil
+        }
+    }
+
+    private func touchCache(_ fullName: String) {
+        self.cacheOrder.removeAll { $0 == fullName }
+        self.cacheOrder.append(fullName)
     }
 }
 

@@ -150,9 +150,10 @@ extension AppState {
     }
 
     nonisolated static func selectVisible(all repos: [Repository], options: VisibleSelectionOptions) -> [Repository] {
+        let uniqueRepos = RepositoryUniquing.byFullName(repos)
         let pinnedSet = Set(options.pinned.map { $0.lowercased() })
         let hiddenSet = Set(options.hidden.map { $0.lowercased() })
-        let filtered = repos.filter { !hiddenSet.contains($0.fullName.lowercased()) }
+        let filtered = uniqueRepos.filter { !hiddenSet.contains($0.fullName.lowercased()) }
         let visible = RepositoryFilter.apply(
             filtered,
             includeForks: options.includeForks,

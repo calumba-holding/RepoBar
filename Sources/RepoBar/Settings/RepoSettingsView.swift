@@ -6,17 +6,33 @@ struct RepoSettingsView: View {
     let appState: AppState
     @State private var newRepoInput = ""
     @State private var newRepoVisibility: RepoVisibility = .pinned
+    @State private var searchQuery = ""
     @State private var selection = Set<String>()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Manage which repositories are pinned in the menubar and which are hidden.")
+            Text("Browse repositories RepoBar can access and choose what stays pinned or hidden.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
+            HStack(spacing: 8) {
+                TextField("Search repositories", text: self.$searchQuery)
+                    .textFieldStyle(.roundedBorder)
+
+                Button {
+                    self.searchQuery = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Clear search")
+                .disabled(self.searchQuery.isEmpty)
+            }
+
             RepoInputRow(
                 placeholder: "owner/name",
-                buttonTitle: "Add",
+                buttonTitle: "Add Rule",
                 text: self.$newRepoInput,
                 onCommit: self.addNewRepo,
                 session: self.session,
@@ -31,16 +47,65 @@ struct RepoSettingsView: View {
                 .frame(width: 200)
             }
 
-            Table(self.rows, selection: self.$selection) {
+            Table(self.filteredRows, selection: self.$selection) {
                 TableColumn("Repository") { row in
-                    Text(row.name).lineLimit(1).truncationMode(.middle)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(row.fullName)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+
+                        HStack(spacing: 6) {
+                            if row.isFork {
+                                Label("Fork", systemImage: "tuningfork")
+                                    .labelStyle(.titleAndIcon)
+                            }
+                            if row.isArchived {
+                                Label("Archived", systemImage: "archivebox")
+                                    .labelStyle(.titleAndIcon)
+                            }
+                            if row.isManual {
+                                Label("Manual", systemImage: "pencil")
+                                    .labelStyle(.titleAndIcon)
+                            }
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    }
                 }
-                .width(min: 180, ideal: 240, max: .infinity)
+                .width(min: 220, ideal: 300, max: .infinity)
+
+                TableColumn("Issues") { row in
+                    Text(row.issueLabel)
+                        .monospacedDigit()
+                        .foregroundStyle(row.isManual ? .secondary : .primary)
+                }
+                .width(min: 56, ideal: 64, max: 76)
+
+                TableColumn("PRs") { row in
+                    Text(row.pullRequestLabel)
+                        .monospacedDigit()
+                        .foregroundStyle(row.isManual ? .secondary : .primary)
+                }
+                .width(min: 44, ideal: 52, max: 64)
+
+                TableColumn("Stars") { row in
+                    Text(row.starLabel)
+                        .monospacedDigit()
+                        .foregroundStyle(row.isManual ? .secondary : .primary)
+                }
+                .width(min: 52, ideal: 64, max: 76)
+
+                TableColumn("Updated") { row in
+                    Text(row.updatedLabel)
+                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                }
+                .width(min: 80, ideal: 96, max: 120)
 
                 TableColumn("Visibility") { row in
                     Picker("", selection: Binding(
                         get: { row.visibility },
-                        set: { newValue in Task { await self.set(row.name, to: newValue) } }
+                        set: { newValue in Task { await self.set(row.fullName, to: newValue) } }
                     )) {
                         ForEach(RepoVisibility.allCases) { vis in
                             Text(vis.label).tag(vis)
@@ -52,7 +117,7 @@ struct RepoSettingsView: View {
                 .width(min: 140, ideal: 160, max: 180)
             }
             .tableStyle(.inset(alternatesRowBackgrounds: true))
-            .frame(minHeight: 240)
+            .frame(minHeight: 280)
             .onDeleteCommand { self.deleteSelection() }
             .contextMenu(forSelectionType: String.self) { selection in
                 Button("Pin") { Task { await self.bulkSet(selection, to: .pinned) } }
@@ -61,14 +126,23 @@ struct RepoSettingsView: View {
             }
 
             HStack(spacing: 10) {
-                Button {
-                    self.deleteSelection()
-                } label: {
-                    Label("Remove", systemImage: "trash")
+                Text(self.statusLine)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Button("Pin") {
+                    Task { await self.bulkSet(self.selection, to: .pinned) }
                 }
                 .disabled(self.selection.isEmpty)
 
-                Spacer()
+                Button {
+                    self.deleteSelection()
+                } label: {
+                    Label("Set Visible", systemImage: "eye")
+                }
+                .disabled(self.selection.isEmpty)
 
                 Button("Refresh Now") {
                     self.appState.requestRefresh(cancelInFlight: true)
@@ -81,18 +155,41 @@ struct RepoSettingsView: View {
         }
     }
 
-    private var rows: [RepoRow] {
-        var out: [RepoRow] = []
-        for (index, name) in self.session.settings.repoList.pinnedRepositories.enumerated() {
-            out.append(RepoRow(name: name, visibility: .pinned, sortKey: index))
+    private var allRows: [RepoBrowserRow] {
+        RepoBrowserRows.make(
+            repositories: self.browserRepositories,
+            pinnedRepositories: self.session.settings.repoList.pinnedRepositories,
+            hiddenRepositories: self.session.settings.repoList.hiddenRepositories,
+            now: Date()
+        )
+    }
+
+    private var filteredRows: [RepoBrowserRow] {
+        let query = self.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return self.allRows }
+        return self.allRows.filter { $0.matches(query) }
+    }
+
+    private var browserRepositories: [Repository] {
+        if !self.session.accessibleRepositories.isEmpty {
+            return self.session.accessibleRepositories
         }
-        for name in self.session.settings.repoList.hiddenRepositories where !out.contains(where: { $0.name == name }) {
-            out.append(RepoRow(name: name, visibility: .hidden, sortKey: Int.max))
+        if let snapshotRepos = self.session.menuSnapshot?.repositories, !snapshotRepos.isEmpty {
+            return snapshotRepos
         }
-        return out.sorted { lhs, rhs in
-            if lhs.sortKey != rhs.sortKey { return lhs.sortKey < rhs.sortKey }
-            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        return self.session.repositories
+    }
+
+    private var statusLine: String {
+        let total = self.allRows.count
+        let visible = self.filteredRows.count
+        let loaded = self.allRows.count(where: { !$0.isManual })
+        let pinned = self.allRows.count(where: { $0.visibility == .pinned })
+        let hidden = self.allRows.count(where: { $0.visibility == .hidden })
+        if visible == total {
+            return "\(total) repositories, \(loaded) loaded, \(pinned) pinned, \(hidden) hidden"
         }
+        return "\(visible) of \(total) repositories, \(pinned) pinned, \(hidden) hidden"
     }
 
     private func addNewRepo(_ value: String) {
@@ -107,8 +204,9 @@ struct RepoSettingsView: View {
     }
 
     private func bulkSet(_ ids: Set<String>, to visibility: RepoVisibility) async {
-        for id in ids {
-            await self.set(id, to: visibility)
+        let selectedRows = self.allRows.filter { ids.contains($0.id) }
+        for row in selectedRows {
+            await self.set(row.fullName, to: visibility)
         }
         await MainActor.run { self.selection.removeAll() }
     }
@@ -123,14 +221,141 @@ struct RepoSettingsView: View {
 
 // MARK: - Autocomplete helper
 
-private struct RepoRow: Identifiable, Hashable {
-    var id: String {
-        self.name
+struct RepoBrowserRow: Identifiable, Hashable {
+    let id: String
+    let fullName: String
+    let owner: String
+    let name: String
+    let visibility: RepoVisibility
+    let isFork: Bool
+    let isArchived: Bool
+    let isManual: Bool
+    let openIssues: Int?
+    let openPulls: Int?
+    let stars: Int?
+    let pushedAt: Date?
+    let updatedLabel: String
+
+    var issueLabel: String {
+        self.openIssues.map(String.init) ?? "-"
     }
 
-    let name: String
-    var visibility: RepoVisibility
-    let sortKey: Int
+    var pullRequestLabel: String {
+        self.openPulls.map(String.init) ?? "-"
+    }
+
+    var starLabel: String {
+        self.stars.map(String.init) ?? "-"
+    }
+
+    func matches(_ query: String) -> Bool {
+        let terms = query
+            .split(whereSeparator: \.isWhitespace)
+            .map { String($0).lowercased() }
+        guard !terms.isEmpty else { return true }
+        let haystack = [
+            self.fullName,
+            self.owner,
+            self.name,
+            self.visibility.label,
+            self.isFork ? "fork" : "",
+            self.isArchived ? "archived" : "",
+            self.isManual ? "manual" : ""
+        ]
+        .joined(separator: " ")
+        .lowercased()
+        return terms.allSatisfy { haystack.contains($0) }
+    }
+}
+
+enum RepoBrowserRows {
+    static func make(
+        repositories: [Repository],
+        pinnedRepositories: [String],
+        hiddenRepositories: [String],
+        now: Date
+    ) -> [RepoBrowserRow] {
+        let pinnedSet = Set(pinnedRepositories.map(Self.normalized))
+        let hiddenSet = Set(hiddenRepositories.map(Self.normalized))
+        let uniqueRepos = RepositoryUniquing.byFullName(repositories)
+
+        var rows = uniqueRepos.map { repo in
+            let key = Self.normalized(repo.fullName)
+            let visibility: RepoVisibility = if hiddenSet.contains(key) {
+                .hidden
+            } else if pinnedSet.contains(key) {
+                .pinned
+            } else {
+                .visible
+            }
+            return RepoBrowserRow(
+                id: key,
+                fullName: repo.fullName,
+                owner: repo.owner,
+                name: repo.name,
+                visibility: visibility,
+                isFork: repo.isFork,
+                isArchived: repo.isArchived,
+                isManual: false,
+                openIssues: repo.stats.openIssues,
+                openPulls: repo.stats.openPulls,
+                stars: repo.stats.stars,
+                pushedAt: repo.stats.pushedAt,
+                updatedLabel: repo.stats.pushedAt.map { RelativeFormatter.string(from: $0, relativeTo: now) } ?? "-"
+            )
+        }
+
+        let loadedKeys = Set(rows.map(\.id))
+        for name in pinnedRepositories where !loadedKeys.contains(Self.normalized(name)) {
+            rows.append(Self.manualRow(fullName: name, visibility: .pinned))
+        }
+        for name in hiddenRepositories where !loadedKeys.contains(Self.normalized(name)) {
+            rows.append(Self.manualRow(fullName: name, visibility: .hidden))
+        }
+
+        return rows.sorted { lhs, rhs in
+            if lhs.visibility.sortPriority != rhs.visibility.sortPriority {
+                return lhs.visibility.sortPriority < rhs.visibility.sortPriority
+            }
+            return lhs.fullName.localizedCaseInsensitiveCompare(rhs.fullName) == .orderedAscending
+        }
+    }
+
+    private static func manualRow(fullName: String, visibility: RepoVisibility) -> RepoBrowserRow {
+        let trimmed = fullName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: "/", maxSplits: 1).map(String.init)
+        let owner = parts.count == 2 ? parts[0] : ""
+        let name = parts.count == 2 ? parts[1] : trimmed
+        return RepoBrowserRow(
+            id: Self.normalized(trimmed),
+            fullName: trimmed,
+            owner: owner,
+            name: name,
+            visibility: visibility,
+            isFork: false,
+            isArchived: false,
+            isManual: true,
+            openIssues: nil,
+            openPulls: nil,
+            stars: nil,
+            pushedAt: nil,
+            updatedLabel: "-"
+        )
+    }
+
+    private static func normalized(_ fullName: String) -> String {
+        fullName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+}
+
+private extension RepoVisibility {
+    var sortPriority: Int {
+        switch self {
+        case .pinned: 0
+        case .visible: 1
+        case .hidden: 2
+        }
+    }
 }
 
 private struct RepoInputRow<Accessory: View>: View {

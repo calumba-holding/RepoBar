@@ -109,7 +109,7 @@ fi
 log "Signing auxiliary binaries"
 for bin in "$APP_PATH/Contents/MacOS/"*; do
   if [ -f "$bin" ] && [ "$bin" != "$APP_PATH/Contents/MacOS/RepoBar" ]; then
-    codesign --force --options runtime --timestamp --entitlements "$TMP_ENTITLEMENTS" --sign "$IDENTITY" "$bin"
+    codesign --force --options runtime --timestamp --sign "$IDENTITY" "$bin"
   fi
 done
 

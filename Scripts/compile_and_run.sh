@@ -82,11 +82,13 @@ print(buf.value.decode("utf-8", errors="replace"))
 PY
   }
 
+  EXPECTED_PROCESS_COMPARE="$(printf '%s' "${EXPECTED_PROCESS_RESOLVED}" | tr '[:upper:]' '[:lower:]')"
   launched_from_checkout=0
   for _ in {1..50}; do
     while read -r pid; do
       path="$(proc_pidpath "${pid}" 2>/dev/null || true)"
-      if [ -n "${path}" ] && [ "${path}" = "${EXPECTED_PROCESS_RESOLVED}" ]; then
+      path_compare="$(printf '%s' "${path}" | tr '[:upper:]' '[:lower:]')"
+      if [ -n "${path}" ] && [ "${path_compare}" = "${EXPECTED_PROCESS_COMPARE}" ]; then
         launched_from_checkout=1
         break
       fi

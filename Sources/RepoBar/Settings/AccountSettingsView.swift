@@ -156,7 +156,7 @@ struct AccountSettingsView: View {
                             .disabled(self.session.account == .loggingIn)
                             .buttonStyle(.borderedProminent)
                         }
-                        Text("Uses browser-based OAuth. Tokens are stored in the system Keychain.")
+                        Text("Uses browser-based OAuth. Tokens are stored by RepoBar's configured auth store.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

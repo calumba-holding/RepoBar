@@ -239,7 +239,8 @@ struct ReposCommand: CommanderRunnableCommand {
             break
         }
 
-        let repos = try await client.activityRepositories(limit: limit)
+        let fetchLimit = Self.activityFetchLimit(requestedLimit: limit, ownerFilter: ownerFilter)
+        let repos = try await client.activityRepositories(limit: fetchLimit)
         let ownerFiltered = ownerFilter?.applying(to: repos) ?? repos
         let filteredRepos = RepositoryPipeline.apply(ownerFiltered, query: query)
         try await self.renderResults(
@@ -330,6 +331,10 @@ struct ReposCommand: CommanderRunnableCommand {
             }
             return results.compactMap(\.self)
         }
+    }
+
+    nonisolated static func activityFetchLimit(requestedLimit: Int?, ownerFilter: RepoOwnerFilter?) -> Int? {
+        ownerFilter == nil ? requestedLimit : nil
     }
 }
 

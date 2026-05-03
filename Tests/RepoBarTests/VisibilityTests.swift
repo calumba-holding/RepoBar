@@ -64,4 +64,33 @@ struct VisibilityTests {
         #expect(visible.count == 3)
         #expect(!visible.contains(where: { $0.fullName == "me/r1" }))
     }
+
+    @Test
+    func collapsesDuplicateReposBeforeMenuSelection() {
+        let repos = [
+            Repository(id: "1", name: "Repo", owner: "Owner", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 1, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
+            Repository(id: "2", name: "repo", owner: "owner", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 9, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: []),
+            Repository(id: "3", name: "Other", owner: "owner", sortOrder: nil, error: nil, rateLimitedUntil: nil, ciStatus: .unknown, openIssues: 2, openPulls: 0, latestRelease: nil, latestActivity: nil, traffic: nil, heatmap: [])
+        ]
+        let visible = AppState.selectVisible(
+            all: repos,
+            options: AppState.VisibleSelectionOptions(
+                pinned: [],
+                hidden: [],
+                includeForks: true,
+                includeArchived: true,
+                limit: 10,
+                ownerFilter: []
+            )
+        )
+        let matchingFullNames = visible
+            .map { $0.fullName.lowercased() }
+            .filter { $0 == "owner/repo" }
+        let keptIssues = visible
+            .first { $0.fullName.lowercased() == "owner/repo" }?
+            .openIssues
+
+        #expect(matchingFullNames.count == 1)
+        #expect(keptIssues == 1)
+    }
 }

@@ -89,6 +89,29 @@ struct RepositoryPipelineTests {
         #expect(result.map(\.fullName) == ["Owner/Repo"])
     }
 
+    @Test("Duplicate repositories are collapsed case-insensitively")
+    func duplicateRepositoriesAreCollapsedCaseInsensitively() {
+        let first = Self.makeRepo("Owner/Repo", issues: 1, pulls: 0)
+        let duplicate = Self.makeRepo("owner/repo", issues: 99, pulls: 0)
+        let other = Self.makeRepo("owner/other", issues: 2, pulls: 0)
+
+        let query = RepositoryQuery(
+            includeForks: true,
+            includeArchived: true,
+            sortKey: .issues
+        )
+        let result = RepositoryPipeline.apply([first, duplicate, other], query: query)
+        let matchingFullNames = result
+            .map { $0.fullName.lowercased() }
+            .filter { $0 == "owner/repo" }
+        let keptFirstDuplicate = result.contains { repo in
+            repo.fullName == first.fullName && repo.openIssues == first.openIssues
+        }
+
+        #expect(matchingFullNames.count == 1)
+        #expect(keptFirstDuplicate)
+    }
+
     @Test("Default age cutoff applies only to all scope")
     func ageCutoffDefaults() {
         let now = Date()

@@ -120,6 +120,10 @@ cat > "${INFO_PLIST}" <<PLIST
     <key>LSUIElement</key><true/>
     <key>LSMultipleInstancesProhibited</key><true/>
     <key>NSHighResolutionCapable</key><true/>
+$(if [ "${CONFIGURATION}" = "debug" ]; then cat <<'PLIST_DEBUG_AUTH'
+    <key>RepoBarTokenStore</key><string>file</string>
+PLIST_DEBUG_AUTH
+fi)
     <key>CFBundleIconFile</key><string>Icon</string>
     <key>CFBundleURLTypes</key>
     <array>

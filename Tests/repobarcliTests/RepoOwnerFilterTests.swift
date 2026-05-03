@@ -61,4 +61,12 @@ struct RepoOwnerFilterTests {
         #expect(filtered.count == 1)
         #expect(filtered.first?.fullName == "mine/one")
     }
+
+    @Test
+    func ownerFilteredActivityFetchDoesNotPreLimitGlobalRepos() throws {
+        let filter = try #require(RepoOwnerFilter.parse(["amantus-ai"]))
+
+        #expect(ReposCommand.activityFetchLimit(requestedLimit: 50, ownerFilter: nil) == 50)
+        #expect(ReposCommand.activityFetchLimit(requestedLimit: 50, ownerFilter: filter) == nil)
+    }
 }
