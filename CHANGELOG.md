@@ -13,6 +13,7 @@
 - Add CLI cache diagnostics/clear commands and archive status/validate/update commands so the new cache/archive surfaces are script-testable.
 - Make RepoBar's SQLite ETag cache authoritative by bypassing URLSession's local HTTP cache for conditional GitHub REST requests.
 - Add persistent GraphQL response caching, native gzip archive import, archive issue/PR readers with rate-limit fallback, and Settings archive update/status controls.
+- Fix release tagging when Git is configured to sign tags by default.
 
 ## 0.3.0 - 2026-05-03
 

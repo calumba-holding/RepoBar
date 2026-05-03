@@ -34,7 +34,7 @@ NOTES_MD=$(mktemp /tmp/repobar-notes.XXXX.md)
 "$ROOT/Scripts/generate-release-notes.sh" "$MARKETING_VERSION" "$NOTES_MD"
 trap 'rm -f "$KEY_FILE" "$NOTES_MD"' EXIT
 
-git tag -f "$TAG"
+git tag -f "$TAG" -m "${APP_NAME} ${MARKETING_VERSION}"
 git push -f origin "$TAG"
 
 gh release create "$TAG" ${APP_NAME}-${MARKETING_VERSION}.zip ${APP_NAME}-${MARKETING_VERSION}.dSYM.zip \
