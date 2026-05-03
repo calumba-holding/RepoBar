@@ -100,7 +100,7 @@ _Last updated: 2025-11-24_
 
 ## Storage
 - Secure release storage: Keychain for access/refresh tokens, client secret, private key.
-- Debug storage: `Scripts/package_app.sh debug` writes `RepoBarTokenStore=file` into the generated app bundle, so `TokenStore.shared` stores auth JSON under `~/Library/Application Support/RepoBar/DebugAuth` instead of touching Keychain. See `docs/auth-storage.md`.
+- Debug storage: debug app bundles set `RepoBarTokenStore=file`, and SwiftPM debug CLI/test binaries fall back to file storage in code. `TokenStore.shared` stores auth JSON under `~/Library/Application Support/RepoBar/DebugAuth` instead of touching Keychain unless `REPOBAR_TOKEN_STORE=keychain` is explicitly set. See `docs/auth-storage.md`.
 - UserDefaults/AppStorage for settings (interval, repo list, show contribution image, launch at login, GHE base URL, port).
 - In-memory cache for ETags and recent responses; lightweight disk cache if needed.
 

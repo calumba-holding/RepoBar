@@ -18,9 +18,10 @@ RepoBar has two token storage modes:
 
 1. `REPOBAR_TOKEN_STORE` environment variable.
 2. `RepoBarTokenStore` in the app bundle `Info.plist`.
-3. Keychain fallback.
+3. Debug-build file storage fallback.
+4. Release-build Keychain fallback.
 
-Accepted non-Keychain values are `file` and `disk`. Any other value uses Keychain.
+Accepted file values are `file` and `disk`. Set `REPOBAR_TOKEN_STORE=keychain` to force Keychain in debug builds.
 
 ## Debug App Builds
 
@@ -32,7 +33,9 @@ Accepted non-Keychain values are `file` and `disk`. Any other value uses Keychai
 
 That means `pnpm start` and `pnpm restart` use file-backed auth and must not trigger macOS Keychain prompts during autonomous development. The debug app still signs normally, but it also strips `keychain-access-groups` when no provisioning profile is configured.
 
-To force the same behavior for a CLI/debug process:
+SwiftPM debug CLI/test binaries do not have the app bundle `Info.plist`, so debug builds also default to file-backed storage in code. Local `swift test`, `pnpm test`, `.build/debug/repobarcli`, and the packaged debug app therefore share the same non-Keychain backend unless explicitly overridden.
+
+To force the same behavior for an installed release CLI/debug process:
 
 ```sh
 REPOBAR_TOKEN_STORE=file repobar status
@@ -42,6 +45,7 @@ To force Keychain while debugging:
 
 ```sh
 REPOBAR_TOKEN_STORE=keychain pnpm start
+REPOBAR_TOKEN_STORE=keychain .build/debug/repobarcli status
 ```
 
 ## Release Builds

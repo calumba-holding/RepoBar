@@ -129,8 +129,14 @@ extension TokenStore {
         switch configured?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
         case "file", "disk":
             return .file(Self.defaultFileDirectory())
-        default:
+        case "keychain":
             return .keychain
+        default:
+            #if DEBUG
+                return .file(Self.defaultFileDirectory())
+            #else
+                return .keychain
+            #endif
         }
     }
 

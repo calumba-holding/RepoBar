@@ -4,6 +4,7 @@
 
 - Fix release signing defaults so Developer ID builds strip the shared keychain access group unless explicitly enabled with a provisioning profile (#44, thanks @Chefski).
 - Sign bundled helper binaries without app-only entitlements so the CLI is not rejected by AMFI.
+- Default SwiftPM debug CLI/test auth to file-backed storage so local runs do not trigger Keychain prompts.
 - Fix owner-filtered CLI repo lists so `--limit` is applied after filtering by owner.
 - Turn the Repositories settings tab into a searchable browser for accessible repos with pinned/hidden state.
 - Improve macOS 26 menubar attachment compatibility by updating MenuBarExtraAccess and using its required modifier order (#47, thanks @jviehhauser).

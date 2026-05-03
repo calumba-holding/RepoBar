@@ -17,7 +17,7 @@ the local actions and settings that can be scripted.
 
 ## Auth Storage
 
-By default, release CLI/app auth uses the macOS Keychain. For local debug or autonomous runs, set `REPOBAR_TOKEN_STORE=file` to use the same file-backed debug store as the debug app:
+By default, release CLI/app auth uses the macOS Keychain. SwiftPM debug CLI builds use the same file-backed debug store as the debug app, so local `.build/debug/repobarcli` commands and tests do not prompt for Keychain access. For installed release builds, set `REPOBAR_TOKEN_STORE=file` when you explicitly want the file-backed debug store:
 
 ```sh
 REPOBAR_TOKEN_STORE=file repobar status

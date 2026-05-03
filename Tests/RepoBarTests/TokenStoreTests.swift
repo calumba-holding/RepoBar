@@ -4,7 +4,7 @@ import Testing
 
 struct TokenStoreTests {
     @Test
-    func saveLoadFallsBackWithoutAccessGroupEntitlement() throws {
+    func debugDefaultStorageDoesNotUseKeychain() throws {
         let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service, accessGroup: "com.steipete.repobar.shared")
         defer { store.clear() }
