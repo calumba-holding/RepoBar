@@ -79,6 +79,13 @@ struct AccountSettingsView: View {
                             }
                         }
                         .buttonStyle(.bordered)
+                        if self.session.settings.authMethod == .oauth, self.session.settings.enterpriseHost == nil {
+                            Text("Private organization repositories are visible only after the RepoBar GitHub App is installed on that organization or selected repository.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Link("Manage GitHub App installation", destination: RepoBarAuthDefaults.appInstallURL)
+                                .font(.caption)
+                        }
                     }
                     .padding(.vertical, 4)
                 default:
@@ -143,6 +150,11 @@ struct AccountSettingsView: View {
                             Text("Uses the built-in GitHub.com OAuth app.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            Text("Private organization repositories require the RepoBar GitHub App installation to include that organization or repository.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Link("Install RepoBar GitHub App", destination: RepoBarAuthDefaults.appInstallURL)
+                                .font(.caption)
                         }
                         HStack(spacing: 8) {
                             if self.session.account == .loggingIn {

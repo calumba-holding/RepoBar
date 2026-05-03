@@ -14,4 +14,14 @@ struct GitHubRestAPITests {
         #expect(values["affiliation"] == "owner,collaborator,organization_member")
         #expect(values["visibility"] == "all")
     }
+
+    @Test
+    func repoNotVisibleMessageMentionsPrivateOrgInstallation() {
+        let message = GitHubRestAPI.repoNotVisibleMessage(owner: "acme", name: "private-repo")
+
+        #expect(message.contains("acme/private-repo"))
+        #expect(message.contains("private organization repositories"))
+        #expect(message.contains("RepoBar GitHub App"))
+        #expect(message.contains("PAT"))
+    }
 }

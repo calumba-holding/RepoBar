@@ -76,6 +76,7 @@ _Last updated: 2025-11-24_
 - Organization: none required beyond installation scope; install on orgs to reach private repos.
 - Account: none.
 - Events: none (polling only).
+- Private organization repositories are visible only when the RepoBar GitHub App installation includes that organization/repository, or when the user signs in with a PAT that has `repo` + `read:org`.
 
 ## Refresh Strategy
 - Global refresh interval configurable (1/2/5/15 min; default 5).

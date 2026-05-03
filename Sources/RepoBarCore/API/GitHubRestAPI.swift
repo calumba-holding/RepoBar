@@ -103,8 +103,21 @@ struct GitHubRestAPI {
         let token = try await tokenProvider()
         let baseURL = await self.apiHost()
         let url = baseURL.appending(path: "/repos/\(owner)/\(name)")
-        let (data, _) = try await authorizedGet(url: url, token: token)
+        let data: Data
+        do {
+            (data, _) = try await self.authorizedGet(url: url, token: token)
+        } catch let error as GitHubAPIError {
+            if case .badStatus(404, _) = error {
+                throw GitHubAPIError.badStatus(code: 404, message: Self.repoNotVisibleMessage(owner: owner, name: name))
+            }
+            throw error
+        }
         return try GitHubDecoding.decode(RepoItem.self, from: data)
+    }
+
+    static func repoNotVisibleMessage(owner: String, name: String) -> String {
+        "\(owner)/\(name) was not found or is not visible to RepoBar's token. " +
+            "For private organization repositories, install the RepoBar GitHub App on that organization/repository or sign in with a PAT that has repo access."
     }
 
     func ciStatus(owner: String, name: String) async throws -> CIStatusDetails {
