@@ -29,7 +29,7 @@ struct MenuRepoFiltersView: View {
     }
 
     var body: some View {
-        HStack(spacing: 1) {
+        VStack(alignment: .leading, spacing: 5) {
             Picker("Filter", selection: self.filterSelection) {
                 ForEach(self.availableFilters, id: \.self) { selection in
                     Text(selection.label).tag(selection)
@@ -41,7 +41,6 @@ struct MenuRepoFiltersView: View {
             .controlSize(.small)
             .fixedSize()
 
-            Spacer(minLength: 2)
             Picker("Sort", selection: self.$session.settings.repoList.menuSortKey) {
                 ForEach(RepositorySortKey.menuCases, id: \.self) { sortKey in
                     Label(sortKey.menuLabel, systemImage: sortKey.menuSymbolName)
@@ -57,7 +56,7 @@ struct MenuRepoFiltersView: View {
             .fixedSize()
         }
         .padding(.horizontal, MenuStyle.filterHorizontalPadding)
-        .padding(.vertical, MenuStyle.filterVerticalPadding)
+        .padding(.vertical, MenuStyle.filterVerticalPadding + 2)
         .frame(maxWidth: .infinity, alignment: .leading)
         .onChange(of: self.session.settings.repoList.menuSortKey) { _, _ in
             NotificationCenter.default.post(name: .menuFiltersDidChange, object: nil)

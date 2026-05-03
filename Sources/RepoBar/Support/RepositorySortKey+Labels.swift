@@ -37,7 +37,7 @@ extension RepositorySortKey {
         case .issues: "exclamationmark.circle"
         case .pulls: "arrow.triangle.branch"
         case .stars: "star"
-        case .name: "textformat.abc"
+        case .name: "textformat"
         case .event: "bolt.horizontal"
         }
     }
