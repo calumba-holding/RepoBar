@@ -2,6 +2,7 @@
 
 ## 0.3.0 - Unreleased
 
+- Stop requesting broad OAuth repository scopes for the built-in GitHub.com GitHub App login; custom Enterprise OAuth still requests `repo read:org`.
 - Clarify private organization repository access: Accounts now links to the RepoBar GitHub App installation, docs explain the installation/PAT boundary, and direct repo 404s say when a repo is not visible to the current token.
 - Fix release signing defaults so Developer ID builds strip the shared keychain access group unless explicitly enabled with a provisioning profile (#44, thanks @Chefski).
 - Sign bundled helper binaries without app-only entitlements so the CLI is not rejected by AMFI.

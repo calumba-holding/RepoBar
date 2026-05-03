@@ -38,7 +38,7 @@ Point RepoBar at a local projects folder (e.g. `~/Projects`). It scans the folde
 
 ## Authentication
 
-RepoBar signs in via browser OAuth and stores tokens securely in the macOS Keychain. It supports both GitHub.com and GitHub Enterprise (HTTPS). No tokens are logged.
+RepoBar signs in via browser OAuth and stores tokens securely in the macOS Keychain. It supports both GitHub.com and GitHub Enterprise (HTTPS). No tokens are logged. GitHub.com uses RepoBar's GitHub App user token without requesting broad OAuth repository scopes.
 
 Private organization repositories require the [RepoBar GitHub App](https://github.com/apps/repobar/installations/new) to be installed on that organization or on the selected repositories. If an organization uses SAML SSO or you need access outside the app installation, sign in with a PAT that has `repo` and `read:org`.
 

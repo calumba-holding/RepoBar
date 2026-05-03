@@ -52,7 +52,7 @@ public struct OAuthLoginFlow {
         clientSecret: String,
         host: URL,
         loopbackPort: Int,
-        scope: String = "repo read:org",
+        scope: String? = nil,
         timeout: TimeInterval = 180
     ) async throws -> OAuthTokens {
         let normalizedHost = try Self.normalizeHost(host)
@@ -67,14 +67,17 @@ public struct OAuthLoginFlow {
         let redirectURL = try server.start()
 
         var components = URLComponents(url: authEndpoint, resolvingAgainstBaseURL: false)!
-        components.queryItems = [
+        var queryItems = [
             URLQueryItem(name: "client_id", value: clientID),
             URLQueryItem(name: "redirect_uri", value: redirectURL.absoluteString),
             URLQueryItem(name: "state", value: state),
-            URLQueryItem(name: "scope", value: scope),
             URLQueryItem(name: "code_challenge", value: pkce.challenge),
             URLQueryItem(name: "code_challenge_method", value: "S256")
         ]
+        if let scope, scope.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            queryItems.append(URLQueryItem(name: "scope", value: scope))
+        }
+        components.queryItems = queryItems
         guard let authorizeURL = components.url else { throw URLError(.badURL) }
         try self.openURL(authorizeURL)
 
@@ -138,7 +141,7 @@ private extension OAuthLoginFlow {
 private struct TokenResponse: Decodable {
     let accessToken: String
     let tokenType: String
-    let scope: String
+    let scope: String?
     let expiresIn: Int?
     let refreshToken: String?
 

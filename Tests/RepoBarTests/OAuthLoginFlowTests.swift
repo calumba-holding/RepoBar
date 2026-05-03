@@ -45,6 +45,7 @@ struct OAuthLoginFlowTests {
                 let redirect = query.first(where: { $0.name == "redirect_uri" })?.value
                 guard state == "state-123" else { throw URLError(.badServerResponse) }
                 guard redirect == fakeRedirectURL.absoluteString else { throw URLError(.badURL) }
+                #expect(query.contains { $0.name == "scope" } == false)
             },
             dataProvider: { request in
                 let (tagged, boxed) = Self.taggedRequest(request, handlerID: handlerID)
@@ -69,6 +70,56 @@ struct OAuthLoginFlowTests {
         #expect(try store.load()?.accessToken == "tok")
         #expect(try store.loadClientCredentials()?.clientID == "cid")
         #expect(try store.loadClientCredentials()?.clientSecret == "csecret")
+    }
+
+    @Test
+    @MainActor
+    func loginIncludesExplicitScopeWhenRequested() async throws {
+        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let store = TokenStore(service: service)
+        defer { store.clear() }
+
+        let session = URLSession(configuration: Self.sessionConfiguration())
+        let handlerID = UUID().uuidString
+        Self.MockURLProtocol.register(handlerID: handlerID) { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = Data("""
+            {"access_token":"tok","token_type":"bearer","expires_in":3600,"refresh_token":"ref"}
+            """.utf8)
+            return (data, response)
+        }
+        defer { Self.MockURLProtocol.unregister(handlerID: handlerID) }
+
+        let fakeRedirectURL = try #require(URL(string: "http://127.0.0.1:12345/callback"))
+        let server = FakeLoopbackServer(
+            redirectURL: fakeRedirectURL,
+            result: (code: "code-123", state: "state-123")
+        )
+        let host = try #require(URL(string: "https://example.com"))
+
+        let flow = OAuthLoginFlow(
+            tokenStore: store,
+            openURL: { url in
+                let query = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
+                #expect(query.first(where: { $0.name == "scope" })?.value == "repo read:org")
+            },
+            dataProvider: { request in
+                let (tagged, boxed) = Self.taggedRequest(request, handlerID: handlerID)
+                _ = boxed
+                return try await session.data(for: tagged)
+            },
+            makeLoopbackServer: { _ in server },
+            stateProvider: { "state-123" }
+        )
+
+        _ = try await flow.login(
+            clientID: "cid",
+            clientSecret: "csecret",
+            host: host,
+            loopbackPort: 12345,
+            scope: "repo read:org",
+            timeout: 2
+        )
     }
 
     @Test

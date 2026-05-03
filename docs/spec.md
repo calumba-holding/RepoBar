@@ -72,11 +72,13 @@ _Last updated: 2025-11-24_
 - App/UI code should not add new GitHub network calls directly; instead add a `RepoBarCore` API and consume it from the app/CLI.
 
 ## Permissions to request in GitHub App
+- GitHub.com OAuth: do not request OAuth scopes. GitHub App user access tokens are limited by the app's installed repository permissions and the signed-in user's access.
 - Repository: Metadata (implicit), Contents: Read, Issues: Read, Pull requests: Read, Actions: Read, Checks: Read, Administration: Read (for traffic clones/views), Environments: Read (optional, for richer CI), Commit statuses.
 - Organization: none required beyond installation scope; install on orgs to reach private repos.
 - Account: none.
 - Events: none (polling only).
 - Private organization repositories are visible only when the RepoBar GitHub App installation includes that organization/repository, or when the user signs in with a PAT that has `repo` + `read:org`.
+- GitHub Enterprise custom OAuth apps still request `repo read:org` because classic GitHub OAuth has no read-only private repository scope.
 
 ## Refresh Strategy
 - Global refresh interval configurable (1/2/5/15 min; default 5).

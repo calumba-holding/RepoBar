@@ -254,7 +254,8 @@ struct AccountSettingsView: View {
                     clientID: effectiveClientID,
                     clientSecret: effectiveClientSecret,
                     host: self.session.settings.enterpriseHost ?? self.session.settings.githubHost,
-                    loopbackPort: self.session.settings.loopbackPort
+                    loopbackPort: self.session.settings.loopbackPort,
+                    scope: usingEnterprise ? "repo read:org" : nil
                 )
                 self.session.settings.authMethod = .oauth
                 self.appState.persistSettings()
