@@ -42,6 +42,26 @@ struct RecentListMenuTests {
 
     @MainActor
     @Test
+    func `recent list menus survive filter rebuild`() async throws {
+        let appState = AppState()
+        let manager = StatusBarMenuManager(appState: appState)
+        let mainMenu = NSMenu()
+        let submenu = NSMenu()
+
+        manager.setMainMenuForTesting(mainMenu)
+        manager.registerRecentListMenu(
+            submenu,
+            context: RepoRecentMenuContext(fullName: "owner/repo", kind: .issues)
+        )
+
+        manager.menuFiltersChanged()
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(manager.isRecentListMenu(submenu))
+    }
+
+    @MainActor
+    @Test
     func `recent list failures show user facing reason`() {
         let error = GitHubAPIError.badStatus(code: 403, message: "Requires repository issues access.")
 

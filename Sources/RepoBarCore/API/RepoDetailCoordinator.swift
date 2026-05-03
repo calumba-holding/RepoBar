@@ -199,6 +199,33 @@ actor RepoDetailCoordinator {
         )
     }
 
+    func cachedRepositories(from items: [RepoItem], now: Date = Date()) async -> [Repository] {
+        let apiHost = await self.restAPI.apiHost()
+        return items.compactMap { self.cachedRepository(from: $0, apiHost: apiHost, now: now) }
+    }
+
+    private func cachedRepository(from item: RepoItem, apiHost: URL, now: Date) -> Repository? {
+        let cache = self.store.load(apiHost: apiHost, owner: item.owner.login, name: item.name)
+        guard let openPulls = cache.openPulls else { return nil }
+
+        let cacheState = self.policy.state(for: cache, now: now)
+        let ciDetails = cache.ciDetails
+        return Repository.from(
+            item: item,
+            openPulls: openPulls,
+            issues: max(item.openIssuesCount - openPulls, 0),
+            ciStatus: ciDetails?.status ?? .unknown,
+            ciRunCount: ciDetails?.runCount,
+            latestRelease: cache.latestRelease,
+            latestActivity: cache.latestActivity,
+            activityEvents: cache.activityEvents ?? [],
+            traffic: cache.traffic,
+            heatmap: cache.heatmap ?? [],
+            detailCacheState: cacheState,
+            discussionsEnabled: cache.discussionsEnabled
+        )
+    }
+
     func clearCache() {
         self.logger.info("Clearing repo detail cache (disk + memory)")
         self.store.clear()

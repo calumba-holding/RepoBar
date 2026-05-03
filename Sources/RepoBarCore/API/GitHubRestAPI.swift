@@ -39,6 +39,41 @@ struct GitHubRestAPI {
         )
     }
 
+    func cachedUserReposPaginated(limit: Int?) async throws -> [RepoItem] {
+        guard let cache = HTTPResponseDiskCache.standard() else { return [] }
+
+        let pageSize = 100
+        let baseURL = await apiHost()
+        var collected: [RepoItem] = []
+        var page = 1
+
+        while true {
+            var components = URLComponents(url: baseURL.appending(path: "/user/repos"), resolvingAgainstBaseURL: false)!
+            var items = Self.userReposQueryItems()
+            items.append(URLQueryItem(name: "per_page", value: "\(pageSize)"))
+            items.append(URLQueryItem(name: "page", value: "\(page)"))
+            components.queryItems = items
+
+            guard let cached = cache.cached(url: components.url!) else { break }
+
+            let pageItems = try GitHubDecoding.decode([RepoItem].self, from: cached.data)
+            collected.append(contentsOf: pageItems)
+
+            if let limit, collected.count >= limit {
+                break
+            }
+            if pageItems.count < pageSize {
+                break
+            }
+            page += 1
+        }
+
+        if let limit {
+            return Array(collected.prefix(limit))
+        }
+        return collected
+    }
+
     func fetchCurrentUser() async throws -> CurrentUser {
         let token = try await tokenProvider()
         let baseURL = await self.apiHost()
@@ -260,7 +295,7 @@ struct GitHubRestAPI {
             URLQueryItem(name: "per_page", value: "1"),
             URLQueryItem(name: "page", value: "1")
         ]
-        let (data, response) = try await authorizedGet(url: components.url!, token: token)
+        let (data, response) = try await authorizedGet(url: components.url!, token: token, useETag: false)
         let pulls = try GitHubDecoding.decode([PullRequestListItem].self, from: data)
 
         if let link = response.value(forHTTPHeaderField: "Link"), let last = GitHubPagination.lastPage(from: link) {
@@ -278,7 +313,7 @@ struct GitHubRestAPI {
             resolvingAgainstBaseURL: false
         )!
         components.queryItems = [URLQueryItem(name: "per_page", value: "1")]
-        let (data, response) = try await authorizedGet(url: components.url!, token: token)
+        let (data, response) = try await authorizedGet(url: components.url!, token: token, useETag: false)
         if let link = response.value(forHTTPHeaderField: "Link"), let last = GitHubPagination.lastPage(from: link) {
             return last
         }

@@ -100,8 +100,15 @@ Current behavior:
 - GraphQL calls use the persistent cache for 15 minutes and fall back to stale
   cached response bodies when GitHub is rate-limited, offline, or temporarily
   unavailable.
+- On menu refresh, RepoBar seeds the first visible repository rows from cached
+  `/user/repos` pages plus cached repo-detail PR counts before live GitHub
+  hydration finishes. Rows without cached PR counts stay out of that seed so
+  GitHub's `open_issues_count` is never shown as an issue-only value.
 - `repobar cache status --json` reports DB path, row counts, recent responses,
   and stored rate limits.
+- The main menu includes a GitHub Rate Limits submenu that combines live
+  in-memory REST/GraphQL snapshots with the latest persisted REST resource
+  headers, so rate-budget state is visible before a hard limit is hit.
 - `repobar cache clear --json` clears persisted REST responses, GraphQL
   responses, and rate limits.
 

@@ -1,4 +1,5 @@
 import AppKit
+import RepoBarCore
 import SwiftUI
 
 extension StatusBarMenuBuilder {
@@ -106,6 +107,116 @@ extension StatusBarMenuBuilder {
     func infoMessageItem(_ title: String) -> NSMenuItem {
         let view = MenuInfoTextRowView(text: title, lineLimit: 5)
         return self.viewItem(for: view, enabled: false)
+    }
+
+    func rateLimitsMenuItem(now: Date = Date()) -> NSMenuItem {
+        let item = NSMenuItem(title: "GitHub Rate Limits", action: nil, keyEquivalent: "")
+        item.image = self.cachedSystemImage(named: "speedometer")
+        let submenu = NSMenu()
+        submenu.autoenablesItems = false
+        submenu.delegate = self.target
+
+        let diagnostics = self.appState.session.rateLimitDiagnostics
+        var addedRows = false
+        if let rest = diagnostics.restRateLimit {
+            submenu.addItem(self.rateLimitRow(title: "REST", snapshot: rest, now: now))
+            addedRows = true
+        }
+        if let graphQL = diagnostics.graphQLRateLimit {
+            submenu.addItem(self.rateLimitRow(title: "GraphQL", snapshot: graphQL, now: now))
+            addedRows = true
+        }
+        if let reset = diagnostics.rateLimitReset {
+            submenu.addItem(self.infoMessageItem("Blocked until \(RelativeFormatter.string(from: reset, relativeTo: now))."))
+            addedRows = true
+        }
+        if let error = diagnostics.lastRateLimitError {
+            submenu.addItem(self.infoMessageItem(error))
+            addedRows = true
+        }
+
+        let summary = try? RepoBarPersistentCache.summary(limit: 100)
+        let observed = Self.observedRateLimitRows(from: summary)
+        if observed.isEmpty == false {
+            if addedRows { submenu.addItem(.separator()) }
+            submenu.addItem(self.infoItem("Observed REST Resources"))
+            for row in observed {
+                submenu.addItem(self.infoMessageItem(self.rateLimitSummaryText(row, now: now)))
+            }
+            addedRows = true
+        }
+
+        if let activeLimits = summary?.rateLimits, activeLimits.isEmpty == false {
+            if addedRows { submenu.addItem(.separator()) }
+            submenu.addItem(self.infoItem("Active Limits"))
+            for limit in activeLimits {
+                submenu.addItem(self.infoMessageItem(self.activeRateLimitText(limit, now: now)))
+            }
+            addedRows = true
+        }
+
+        if !addedRows {
+            submenu.addItem(self.infoItem("No rate-limit data yet"))
+        }
+
+        item.submenu = submenu
+        return item
+    }
+
+    private func rateLimitRow(title: String, snapshot: RateLimitSnapshot, now: Date) -> NSMenuItem {
+        self.infoMessageItem("\(title): \(Self.rateLimitText(resource: snapshot.resource, remaining: snapshot.remaining, limit: snapshot.limit, reset: snapshot.reset, now: now))")
+    }
+
+    private func rateLimitSummaryText(_ row: RepoBarCachedResponseSummary, now: Date) -> String {
+        Self.rateLimitText(
+            resource: row.rateLimitResource,
+            remaining: row.rateLimitRemaining,
+            limit: nil,
+            reset: row.rateLimitReset,
+            now: now
+        )
+    }
+
+    private func activeRateLimitText(_ row: RepoBarRateLimitSummary, now: Date) -> String {
+        let reset = RelativeFormatter.string(from: row.resetAt, relativeTo: now)
+        let remaining = row.remaining.map { "\($0) left" } ?? "blocked"
+        if let error = row.lastError, error.isEmpty == false {
+            return "\(row.resource): \(remaining), resets \(reset) · \(error)"
+        }
+        return "\(row.resource): \(remaining), resets \(reset)"
+    }
+
+    private static func rateLimitText(
+        resource: String?,
+        remaining: Int?,
+        limit: Int?,
+        reset: Date?,
+        now: Date
+    ) -> String {
+        var parts = [resource ?? "unknown"]
+        if let remaining, let limit {
+            parts.append("\(remaining)/\(limit) left")
+        } else if let remaining {
+            parts.append("\(remaining) left")
+        }
+        if let reset {
+            parts.append("resets \(RelativeFormatter.string(from: reset, relativeTo: now))")
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    private static func observedRateLimitRows(from summary: RepoBarCacheSummary?) -> [RepoBarCachedResponseSummary] {
+        guard let summary else { return [] }
+
+        var seen: Set<String> = []
+        var rows: [RepoBarCachedResponseSummary] = []
+        for response in summary.latestResponses {
+            guard let resource = response.rateLimitResource, resource.isEmpty == false else { continue }
+            guard seen.insert(resource).inserted else { continue }
+
+            rows.append(response)
+        }
+        return rows
     }
 
     func actionItem(

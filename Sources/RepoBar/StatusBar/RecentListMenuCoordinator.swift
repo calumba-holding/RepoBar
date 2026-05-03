@@ -47,10 +47,6 @@ final class RecentListMenuCoordinator {
         self.recentListMenus = self.recentListMenus.filter { $0.value.menu != nil }
     }
 
-    func clearMenus() {
-        self.recentListMenus.removeAll(keepingCapacity: true)
-    }
-
     func handleMenuWillOpen(_ menu: NSMenu) -> Bool {
         guard let entry = self.recentListMenus[ObjectIdentifier(menu)] else { return false }
 

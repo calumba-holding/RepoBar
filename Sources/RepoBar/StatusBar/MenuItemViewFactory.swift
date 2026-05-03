@@ -18,15 +18,16 @@ struct MenuItemViewFactory {
         if highlightable {
             let highlightState = MenuItemHighlightState()
             let indicator = showsSubmenuIndicator ?? (submenu != nil)
-            let wrapped = MenuItemContainerView(
-                highlightState: highlightState,
-                showsSubmenuIndicator: indicator
-            ) {
-                content
-            }
-            item.view = MenuItemHostingView(rootView: AnyView(wrapped), highlightState: highlightState)
+            item.view = MenuItemHostingView(
+                rootView: Self.highlightableRoot(
+                    content,
+                    highlightState: highlightState,
+                    showsSubmenuIndicator: indicator
+                ),
+                highlightState: highlightState
+            )
         } else {
-            item.view = MenuItemHostingView(rootView: AnyView(content))
+            item.view = MenuItemHostingView(rootView: Self.plainRoot(content))
         }
 
         item.submenu = submenu
@@ -54,11 +55,36 @@ struct MenuItemViewFactory {
         }
 
         let indicator = showsSubmenuIndicator ?? (item.submenu != nil)
-        let anyView = AnyView(content)
         if highlightable {
-            hostingView.updateHighlightableRootView(anyView, showsSubmenuIndicator: indicator)
+            hostingView.updateHighlightableRootView(
+                AnyView(content),
+                showsSubmenuIndicator: indicator
+            )
         } else {
-            hostingView.updateRootView(anyView)
+            hostingView.updateRootView(Self.plainRoot(content))
         }
+    }
+
+    private static func plainRoot(_ content: some View) -> AnyView {
+        AnyView(
+            content
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        )
+    }
+
+    private static func highlightableRoot(
+        _ content: some View,
+        highlightState: MenuItemHighlightState,
+        showsSubmenuIndicator: Bool
+    ) -> AnyView {
+        AnyView(
+            MenuItemContainerView(
+                highlightState: highlightState,
+                showsSubmenuIndicator: showsSubmenuIndicator
+            ) {
+                content
+            }
+        )
     }
 }

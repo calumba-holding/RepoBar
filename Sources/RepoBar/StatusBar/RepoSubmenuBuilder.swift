@@ -143,7 +143,7 @@ struct RepoSubmenuBuilder {
                 kind: .issues,
                 openTitle: "Open Issues",
                 openAction: #selector(self.target.openIssues),
-                badgeText: repo.issues > 0 ? StatValueFormatter.compact(repo.issues) : nil
+                badgeText: StatValueFormatter.compact(repo.issues)
             ))]
         case .pulls:
             return [self.recentListSubmenuItem(RecentListConfig(
@@ -153,7 +153,7 @@ struct RepoSubmenuBuilder {
                 kind: .pullRequests,
                 openTitle: "Open Pull Requests",
                 openAction: #selector(self.target.openPulls),
-                badgeText: repo.pulls > 0 ? StatValueFormatter.compact(repo.pulls) : nil
+                badgeText: StatValueFormatter.compact(repo.pulls)
             ))]
         case .releases:
             let cachedReleaseCount = self.target.cachedRecentListCount(fullName: repo.title, kind: .releases)

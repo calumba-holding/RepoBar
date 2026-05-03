@@ -79,6 +79,11 @@ public actor GitHubClient {
         return items.map { Repository.from(item: $0) }
     }
 
+    public func cachedRepositoryList(limit: Int?) async throws -> [Repository] {
+        let items = try await self.restAPI.cachedUserReposPaginated(limit: limit)
+        return await self.repoDetailCoordinator.cachedRepositories(from: items)
+    }
+
     public func defaultRepositories(limit: Int, for _: String) async throws -> [Repository] {
         let repos = try await self.restAPI.userReposSorted(limit: max(limit, 10))
         await self.repoDetailCoordinator.updateDiscussionsCapability(

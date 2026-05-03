@@ -14,6 +14,7 @@ final class Session {
     var settings = UserSettings()
     var settingsSelectedTab: SettingsTab = .general
     var rateLimitReset: Date?
+    var rateLimitDiagnostics: DiagnosticsSummary = .empty
     var lastError: String?
     var contributionHeatmap: [HeatmapCell] = []
     var contributionUser: String?

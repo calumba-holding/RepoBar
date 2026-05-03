@@ -11,6 +11,7 @@ struct MenuBuildSignature: Hashable {
     let settings: MenuSettingsSignature
     let hasLoadedRepositories: Bool
     let rateLimitReset: Date?
+    let rateLimits: RateLimitMenuSignature
     let lastError: String?
     let contribution: ContributionSignature
     let globalActivity: ActivitySignature
@@ -19,6 +20,32 @@ struct MenuBuildSignature: Hashable {
     let heatmapRangeEnd: TimeInterval
     let reposDigest: Int
     let timeBucket: Int
+}
+
+struct RateLimitMenuSignature: Hashable {
+    let reset: Date?
+    let lastError: String?
+    let restResource: String?
+    let restRemaining: Int?
+    let restLimit: Int?
+    let restReset: Date?
+    let graphQLResource: String?
+    let graphQLRemaining: Int?
+    let graphQLLimit: Int?
+    let graphQLReset: Date?
+
+    init(_ diagnostics: DiagnosticsSummary) {
+        self.reset = diagnostics.rateLimitReset
+        self.lastError = diagnostics.lastRateLimitError
+        self.restResource = diagnostics.restRateLimit?.resource
+        self.restRemaining = diagnostics.restRateLimit?.remaining
+        self.restLimit = diagnostics.restRateLimit?.limit
+        self.restReset = diagnostics.restRateLimit?.reset
+        self.graphQLResource = diagnostics.graphQLRateLimit?.resource
+        self.graphQLRemaining = diagnostics.graphQLRateLimit?.remaining
+        self.graphQLLimit = diagnostics.graphQLRateLimit?.limit
+        self.graphQLReset = diagnostics.graphQLRateLimit?.reset
+    }
 }
 
 struct AccountSignature: Hashable {

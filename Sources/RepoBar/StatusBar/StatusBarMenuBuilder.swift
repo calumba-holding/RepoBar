@@ -37,6 +37,7 @@ final class StatusBarMenuBuilder {
             settings: MenuSettingsSignature(settings: settings, selection: session.menuRepoSelection),
             hasLoadedRepositories: session.hasLoadedRepositories,
             rateLimitReset: session.rateLimitReset,
+            rateLimits: RateLimitMenuSignature(session.rateLimitDiagnostics),
             lastError: session.lastError,
             contribution: ContributionSignature(
                 user: session.contributionUser,
@@ -139,7 +140,7 @@ final class StatusBarMenuBuilder {
             .padding(.top, MenuStyle.headerTopPadding)
             .padding(.bottom, MenuStyle.headerBottomPadding)
             let submenu = self.contributionSubmenu(username: username, displayName: displayName)
-            return [self.viewItem(for: header, enabled: true, highlightable: true, submenu: submenu)]
+            return [self.viewItem(for: header, enabled: true, submenu: submenu)]
         case .statusBanner:
             guard case .loggedIn = session.account else { return [] }
 
@@ -156,6 +157,10 @@ final class StatusBarMenuBuilder {
                 return [self.viewItem(for: banner, enabled: false)]
             }
             return []
+        case .rateLimits:
+            guard case .loggedIn = session.account else { return [] }
+
+            return [self.rateLimitsMenuItem()]
         case .filters:
             let isLoggedIn = session.account.isLoggedIn
             let hasLocalFolder = session.settings.localProjects.rootPath?.isEmpty == false
@@ -371,10 +376,8 @@ final class StatusBarMenuBuilder {
     }
 
     private func currentDisplayName() -> String? {
-        guard case let .loggedIn(user) = self.appState.session.account else { return nil }
-
-        let host = user.host.host ?? "github.com"
-        return "\(user.username)@\(host)"
+        if case let .loggedIn(user) = self.appState.session.account { return user.username }
+        return nil
     }
 
     var isLightAppearance: Bool {

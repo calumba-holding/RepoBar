@@ -11,9 +11,18 @@ struct ContributionHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Contributions · \(self.displayName) · last \(self.session.settings.heatmap.span.label)")
-                .font(.caption2)
-                .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
+            HStack(spacing: 6) {
+                Image(systemName: "person.crop.circle")
+                    .font(.caption.weight(.semibold))
+                Text("\(self.displayName) · Contributions · \(self.session.settings.heatmap.span.label)")
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                Spacer(minLength: 6)
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
+            }
+            .foregroundStyle(MenuHighlightStyle.primary(self.isHighlighted))
             self.content
         }
         .frame(maxWidth: .infinity, alignment: .leading)

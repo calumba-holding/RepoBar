@@ -60,6 +60,18 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
         )
         NotificationCenter.default.addObserver(
             self,
+            selector: #selector(self.menuRepositoriesChanged),
+            name: .menuRepositoriesDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.menuRepositoriesChanged),
+            name: .menuDiagnosticsDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
             selector: #selector(self.recentListFiltersChanged),
             name: .recentListFiltersDidChange,
             object: nil
@@ -109,12 +121,36 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
 
-            self.recentListCoordinator.clearMenus()
+            self.recentListCoordinator.pruneMenus()
             self.appState.persistSettings()
             let plan = self.menuBuilder.mainMenuPlan()
             self.menuBuilder.populateMainMenu(menu, repos: plan.repos)
             self.lastMainMenuSignature = plan.signature
             self.menuBuilder.refreshMenuViewHeights(in: menu)
+            menu.update()
+        }
+    }
+
+    @objc private func menuRepositoriesChanged() {
+        guard let menu = self.mainMenu else { return }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+
+            let plan = self.menuBuilder.mainMenuPlan()
+            guard self.lastMainMenuSignature != plan.signature else { return }
+
+            self.recentListCoordinator.pruneMenus()
+            self.localGitMenuCoordinator.pruneMenus()
+            self.changelogMenuCoordinator.pruneMenus()
+            self.menuBuilder.populateMainMenu(menu, repos: plan.repos)
+            self.lastMainMenuSignature = plan.signature
+            self.lastMainMenuWidthSignature = nil
+            if let width = self.lastMainMenuWidth {
+                self.menuBuilder.refreshMenuViewHeights(in: menu, width: width)
+            } else {
+                self.menuBuilder.refreshMenuViewHeights(in: menu)
+            }
             menu.update()
         }
     }

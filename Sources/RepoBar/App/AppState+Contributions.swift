@@ -30,6 +30,7 @@ extension AppState {
                 self.session.contributionError = nil
                 self.session.contributionIsLoading = false
             }
+            await self.refreshRateLimitDiagnosticsForMenu()
             let cache = ContributionCache(
                 username: username,
                 expires: Date().addingTimeInterval(24 * 60 * 60),
@@ -45,6 +46,15 @@ extension AppState {
                 self.session.contributionError = error.userFacingMessage
                 self.session.contributionIsLoading = false
             }
+            await self.refreshRateLimitDiagnosticsForMenu()
+        }
+    }
+
+    private func refreshRateLimitDiagnosticsForMenu() async {
+        let diagnostics = await self.github.diagnostics()
+        await MainActor.run {
+            self.session.rateLimitDiagnostics = diagnostics
+            NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
         }
     }
 

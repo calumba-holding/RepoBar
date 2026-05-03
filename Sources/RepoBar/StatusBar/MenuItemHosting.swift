@@ -24,6 +24,12 @@ private enum MenuItemSelectionBackgroundMetrics {
     static let cornerRadius: CGFloat = 6
 }
 
+private enum MenuItemMeasurementMetrics {
+    static let proposedHeight: CGFloat = 720
+    static let maxHeight: CGFloat = 360
+    static let fallbackHeight: CGFloat = 28
+}
+
 private struct MenuItemSelectionBackground: Shape {
     func path(in rect: CGRect) -> Path {
         let inset = rect.insetBy(
@@ -134,10 +140,11 @@ final class MenuItemHostingView: NSView, MenuItemMeasuring, MenuItemHighlighting
             self.invalidateIntrinsicContentSize()
         }
 
-        let proposed = NSSize(width: width, height: .greatestFiniteMagnitude)
+        let proposed = NSSize(width: width, height: MenuItemMeasurementMetrics.proposedHeight)
         let measured = self.hostingController.sizeThatFits(in: proposed)
+        let safeHeight = self.safeMeasuredHeight(from: measured.height)
         let scale = self.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
-        let rounded = ceil(measured.height * scale) / scale
+        let rounded = ceil(safeHeight * scale) / scale
         self.cachedWidth = width
         self.cachedHeight = rounded
         self.cachedContentVersion = self.contentVersion
@@ -175,5 +182,18 @@ final class MenuItemHostingView: NSView, MenuItemMeasuring, MenuItemHighlighting
         if #available(macOS 13.0, *) {
             self.hostingController.sizingOptions = [.minSize, .intrinsicContentSize]
         }
+    }
+
+    private func safeMeasuredHeight(from height: CGFloat) -> CGFloat {
+        if height.isFinite, height >= 0 {
+            return min(height, MenuItemMeasurementMetrics.maxHeight)
+        }
+
+        let intrinsic = self.hostingController.view.intrinsicContentSize.height
+        if intrinsic.isFinite, intrinsic >= 0 {
+            return min(intrinsic, MenuItemMeasurementMetrics.maxHeight)
+        }
+
+        return MenuItemMeasurementMetrics.fallbackHeight
     }
 }

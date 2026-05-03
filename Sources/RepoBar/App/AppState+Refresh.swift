@@ -57,6 +57,7 @@ extension AppState {
                 await self.applyLoggedOutState(localSnapshot: localSnapshot, lastError: nil)
                 return
             }
+            await self.applyCachedMenuSnapshotIfAvailable(now: now)
             // If we have tokens but no user in session, fetch identity once per launch.
             if case .loggedOut = self.session.account {
                 if let user = try? await self.github.currentUser() {
@@ -68,7 +69,8 @@ extension AppState {
             await self.updateAccessibleRepositories(repos)
             let visible = self.applyVisibilityFilters(to: repos)
             let ordered = self.applyPinnedOrder(to: visible)
-            await self.updateSession(with: ordered, now: now)
+            // The lightweight repository list uses GitHub's open_issues_count, which includes PRs.
+            // Only publish the menu snapshot after hydrating real issue/PR counts.
             let matchNames = self.localMatchRepoNamesForLocalProjects(repos: ordered, includePinned: true)
             let localSnapshotTask = Task {
                 await self.localRepoManager.snapshot(
@@ -118,24 +120,31 @@ extension AppState {
                 self.session.globalActivityError = globalActivity.error
                 self.session.globalCommitEvents = globalActivity.commits
                 self.session.globalCommitError = globalActivity.commitError
+                NotificationCenter.default.post(name: .menuRepositoriesDidChange, object: nil)
             }
             await self.updateMenuDisplayIndex(now: now)
             self.prefetchMenuTargets(from: final, visibleCount: targets.count, token: self.refreshTaskToken)
             let reset = await self.github.rateLimitReset(now: now)
             let message = await self.github.rateLimitMessage(now: now)
+            let diagnostics = await self.github.diagnostics()
             await MainActor.run {
                 self.session.rateLimitReset = reset
+                self.session.rateLimitDiagnostics = diagnostics
                 self.session.lastError = message
+                NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
             }
         } catch {
             if error.isAuthenticationFailure {
                 await self.handleAuthenticationFailure(error)
                 return
             }
+            let diagnostics = await self.github.diagnostics()
             await MainActor.run {
                 self.session.localProjectsScanInProgress = false
                 self.session.rateLimitReset = (error as? GitHubAPIError)?.rateLimitedUntil
+                self.session.rateLimitDiagnostics = diagnostics
                 self.session.lastError = error.userFacingMessage
+                NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
             }
         }
     }
@@ -279,13 +288,25 @@ extension AppState {
         return repos.map { lookup[$0.fullName.lowercased()] ?? $0 }
     }
 
+    private func applyCachedMenuSnapshotIfAvailable(now: Date) async {
+        guard let repos = try? await self.github.cachedRepositoryList(limit: nil), repos.isEmpty == false else { return }
+
+        await self.updateAccessibleRepositories(repos)
+        let visible = self.applyVisibilityFilters(to: repos)
+        let ordered = self.applyPinnedOrder(to: visible)
+        await self.updateSession(with: ordered, now: now)
+    }
+
     private func updateSession(with repos: [Repository], now: Date) async {
+        let index = self.menuDisplayIndex(for: repos, now: now)
         await MainActor.run {
             self.session.repositories = repos
             self.session.menuSnapshot = MenuSnapshot(repositories: repos, capturedAt: now)
+            self.session.menuDisplayIndex = index
             self.session.hasLoadedRepositories = true
             self.session.rateLimitReset = nil
             self.session.lastError = nil
+            NotificationCenter.default.post(name: .menuRepositoriesDidChange, object: nil)
         }
     }
 
@@ -298,17 +319,22 @@ extension AppState {
 
     private func updateMenuDisplayIndex(now: Date) async {
         let repos = self.session.repositories
+        let index = self.menuDisplayIndex(for: repos, now: now)
+        await MainActor.run {
+            self.session.menuDisplayIndex = index
+            NotificationCenter.default.post(name: .menuRepositoriesDidChange, object: nil)
+        }
+    }
+
+    private func menuDisplayIndex(for repos: [Repository], now: Date) -> [String: RepositoryDisplayModel] {
         let localIndex = self.session.localRepoIndex
         let models = repos.map { repo in
             RepositoryDisplayModel(repo: repo, localStatus: localIndex.status(for: repo), now: now)
         }
-        let index = Dictionary(
+        return Dictionary(
             models.map { ($0.title.lowercased(), $0) },
             uniquingKeysWith: { first, _ in first }
         )
-        await MainActor.run {
-            self.session.menuDisplayIndex = index
-        }
     }
 
     private func prefetchMenuTargets(
@@ -351,6 +377,7 @@ extension AppState {
                     models.map { ($0.title.lowercased(), $0) },
                     uniquingKeysWith: { first, _ in first }
                 )
+                NotificationCenter.default.post(name: .menuRepositoriesDidChange, object: nil)
             }
         }
     }

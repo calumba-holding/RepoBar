@@ -1,8 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 - Unreleased
 
 - Fix Issues submenus when GitHub returns pull requests in the REST issues feed before actual issues, surface GitHub rate limits in the menu UI, and add usable recent-list/REST logs for debugging stuck submenu loads.
+- Keep cached repo submenus wired to their recent Issues/PR loaders after menu filter rebuilds so nested lists do not stay stuck on “Loading…”.
+- Rebuild the open menu when hydrated repository counts arrive so PR badges no longer stay at the cheap REST-list placeholder value.
+- Seed first-open menu rows from the persistent cache, using cached repo-detail PR counts instead of showing a loading spinner when SQLite already has data.
+- Rebuild the contribution/profile submenu when global GitHub activity finishes loading, and add a GitHub Rate Limits submenu with live REST/GraphQL plus persisted REST resource limits.
+- Fetch pagination-header-based PR/commit counts without conditional ETag reuse so cached bodies cannot collapse counts to one item.
+- Clamp SwiftUI-hosted menu row measurements and give plain hosted rows intrinsic vertical sizing so first-open menu layout cannot inflate into an oversized scroll well.
 - Add the GRDB-backed persistent REST cache foundation plus RepoBar-owned GitHub archive source settings/CLI commands, explicitly avoiding gitcrawl config discovery.
 - Add CLI cache diagnostics/clear commands and archive status/validate/update commands so the new cache/archive surfaces are script-testable.
 - Make RepoBar's SQLite ETag cache authoritative by bypassing URLSession's local HTTP cache for conditional GitHub REST requests.
