@@ -44,7 +44,18 @@ jobs:
         run: swift package resolve
 
       - name: Install SwiftLint/SwiftFormat
-        run: brew install swiftlint swiftformat
+        run: |
+          for tool in swiftlint swiftformat; do
+            if brew list --formula "$tool" >/dev/null 2>&1; then
+              if brew outdated --quiet "$tool" | grep -qx "$tool"; then
+                brew upgrade "$tool"
+              else
+                brew list --versions "$tool"
+              fi
+            else
+              brew install "$tool"
+            fi
+          done
 
       - name: Run checks
         run: pnpm check
