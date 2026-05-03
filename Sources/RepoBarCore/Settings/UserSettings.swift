@@ -139,7 +139,7 @@ public struct LocalProjectsSettings: Equatable, Codable {
     }
 }
 
-public struct GitHubArchiveSettings: Equatable, Codable {
+public struct GitHubArchiveSettings: Equatable, Codable, Sendable {
     public var sources: [GitHubArchiveSource] = []
     public var preferArchiveWhenRateLimited = true
     public var staleAfterSeconds: TimeInterval = 15 * 60
@@ -147,7 +147,7 @@ public struct GitHubArchiveSettings: Equatable, Codable {
     public init() {}
 }
 
-public struct GitHubArchiveSource: Identifiable, Equatable, Codable {
+public struct GitHubArchiveSource: Identifiable, Equatable, Codable, Sendable {
     public var id: String
     public var name: String
     public var enabled: Bool

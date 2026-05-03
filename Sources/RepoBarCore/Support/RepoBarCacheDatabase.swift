@@ -17,6 +17,7 @@ public struct RepoBarCacheSummary: Codable, Equatable, Sendable {
     public let databasePath: String
     public let exists: Bool
     public let apiResponseCount: Int
+    public let graphQLResponseCount: Int
     public let rateLimitCount: Int
     public let latestResponses: [RepoBarCachedResponseSummary]
     public let rateLimits: [RepoBarRateLimitSummary]
@@ -56,6 +57,7 @@ public enum RepoBarPersistentCache {
                 databasePath: url.path,
                 exists: false,
                 apiResponseCount: 0,
+                graphQLResponseCount: 0,
                 rateLimitCount: 0,
                 latestResponses: [],
                 rateLimits: []
@@ -90,6 +92,7 @@ final class HTTPResponseDiskCache {
     private let queue: DatabaseQueue
     private let path: String
     private let clock: @Sendable () -> Date
+    private let logger = RepoBarLogging.logger("cache-db")
 
     init(path: String, clock: @escaping @Sendable () -> Date = Date.init) throws {
         try FileManager.default.createDirectory(
@@ -111,7 +114,12 @@ final class HTTPResponseDiskCache {
     static func standard() -> HTTPResponseDiskCache? {
         guard let path = standardDatabaseURL()?.path else { return nil }
 
-        return try? HTTPResponseDiskCache(path: path)
+        do {
+            return try HTTPResponseDiskCache(path: path)
+        } catch {
+            RepoBarLogging.logger("cache-db").error("Unable to open persistent cache: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func standardDatabaseURL(fileManager: FileManager = .default) -> URL? {
@@ -126,21 +134,26 @@ final class HTTPResponseDiskCache {
 
     func cached(url: URL) -> PersistentHTTPResponse? {
         let key = Self.key(url: url)
-        return try? self.queue.read { db in
-            guard let row = try Row.fetchOne(
-                db,
-                sql: "select etag, body, fetched_at from api_responses where key = ? and etag is not null",
-                arguments: [key]
-            ) else { return nil }
+        do {
+            return try self.queue.read { db in
+                guard let row = try Row.fetchOne(
+                    db,
+                    sql: "select etag, body, fetched_at from api_responses where key = ? and etag is not null",
+                    arguments: [key]
+                ) else { return nil }
 
-            let etag: String = row["etag"]
-            let body: Data = row["body"]
-            let fetchedAt: Double = row["fetched_at"]
-            return PersistentHTTPResponse(
-                etag: etag,
-                data: body,
-                fetchedAt: Date(timeIntervalSinceReferenceDate: fetchedAt)
-            )
+                let etag: String = row["etag"]
+                let body: Data = row["body"]
+                let fetchedAt: Double = row["fetched_at"]
+                return PersistentHTTPResponse(
+                    etag: etag,
+                    data: body,
+                    fetchedAt: Date(timeIntervalSinceReferenceDate: fetchedAt)
+                )
+            }
+        } catch {
+            self.logger.error("Unable to read cached response: \(error.localizedDescription)")
+            return nil
         }
     }
 
@@ -153,72 +166,86 @@ final class HTTPResponseDiskCache {
         let headersJSON = response.flatMap(Self.headersJSON)
         let key = Self.key(url: url)
 
-        try? self.queue.write { db in
-            try db.execute(
-                sql: """
-                insert into api_responses(
-                    key, method, url, etag, status_code, headers_json, body, fetched_at,
-                    rate_limit_resource, rate_limit_remaining, rate_limit_reset, updated_at
+        do {
+            try self.queue.write { db in
+                try db.execute(
+                    sql: """
+                    insert into api_responses(
+                        key, method, url, etag, status_code, headers_json, body, fetched_at,
+                        rate_limit_resource, rate_limit_remaining, rate_limit_reset, updated_at
+                    )
+                    values (?, 'GET', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    on conflict(key) do update set
+                        etag = excluded.etag,
+                        status_code = excluded.status_code,
+                        headers_json = excluded.headers_json,
+                        body = excluded.body,
+                        fetched_at = excluded.fetched_at,
+                        rate_limit_resource = excluded.rate_limit_resource,
+                        rate_limit_remaining = excluded.rate_limit_remaining,
+                        rate_limit_reset = excluded.rate_limit_reset,
+                        updated_at = excluded.updated_at
+                    """,
+                    arguments: [
+                        key,
+                        url.absoluteString,
+                        etag,
+                        statusCode,
+                        headersJSON,
+                        data,
+                        now.timeIntervalSinceReferenceDate,
+                        resource,
+                        remaining,
+                        reset?.timeIntervalSinceReferenceDate,
+                        now.timeIntervalSinceReferenceDate
+                    ]
                 )
-                values (?, 'GET', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                on conflict(key) do update set
-                    etag = excluded.etag,
-                    status_code = excluded.status_code,
-                    headers_json = excluded.headers_json,
-                    body = excluded.body,
-                    fetched_at = excluded.fetched_at,
-                    rate_limit_resource = excluded.rate_limit_resource,
-                    rate_limit_remaining = excluded.rate_limit_remaining,
-                    rate_limit_reset = excluded.rate_limit_reset,
-                    updated_at = excluded.updated_at
-                """,
-                arguments: [
-                    key,
-                    url.absoluteString,
-                    etag,
-                    statusCode,
-                    headersJSON,
-                    data,
-                    now.timeIntervalSinceReferenceDate,
-                    resource,
-                    remaining,
-                    reset?.timeIntervalSinceReferenceDate,
-                    now.timeIntervalSinceReferenceDate
-                ]
-            )
+            }
+        } catch {
+            self.logger.error("Unable to save cached response: \(error.localizedDescription)")
         }
     }
 
     func setRateLimitReset(resource: String = "core", date: Date, message: String? = nil) {
         let now = self.clock()
-        try? self.queue.write { db in
-            try db.execute(
-                sql: """
-                insert into rate_limits(resource, remaining, reset_at, last_error, updated_at)
-                values (?, 0, ?, ?, ?)
-                on conflict(resource) do update set
-                    remaining = excluded.remaining,
-                    reset_at = excluded.reset_at,
-                    last_error = excluded.last_error,
-                    updated_at = excluded.updated_at
-                """,
-                arguments: [
-                    resource,
-                    date.timeIntervalSinceReferenceDate,
-                    message,
-                    now.timeIntervalSinceReferenceDate
-                ]
-            )
+        do {
+            try self.queue.write { db in
+                try db.execute(
+                    sql: """
+                    insert into rate_limits(resource, remaining, reset_at, last_error, updated_at)
+                    values (?, 0, ?, ?, ?)
+                    on conflict(resource) do update set
+                        remaining = excluded.remaining,
+                        reset_at = excluded.reset_at,
+                        last_error = excluded.last_error,
+                        updated_at = excluded.updated_at
+                    """,
+                    arguments: [
+                        resource,
+                        date.timeIntervalSinceReferenceDate,
+                        message,
+                        now.timeIntervalSinceReferenceDate
+                    ]
+                )
+            }
+        } catch {
+            self.logger.error("Unable to save rate-limit state: \(error.localizedDescription)")
         }
     }
 
     func rateLimitUntil(resource: String = "core", now: Date = Date()) -> Date? {
-        let reset = try? self.queue.read { db -> Double? in
-            try Double.fetchOne(
-                db,
-                sql: "select reset_at from rate_limits where resource = ?",
-                arguments: [resource]
-            )
+        let reset: Double?
+        do {
+            reset = try self.queue.read { db -> Double? in
+                try Double.fetchOne(
+                    db,
+                    sql: "select reset_at from rate_limits where resource = ?",
+                    arguments: [resource]
+                )
+            }
+        } catch {
+            self.logger.error("Unable to read rate-limit state: \(error.localizedDescription)")
+            return nil
         }
         guard let reset else { return nil }
 
@@ -231,14 +258,20 @@ final class HTTPResponseDiskCache {
     }
 
     func count() -> Int {
-        (try? self.queue.read { db in
-            try Int.fetchOne(db, sql: "select count(*) from api_responses") ?? 0
-        }) ?? 0
+        do {
+            return try self.queue.read { db in
+                try Int.fetchOne(db, sql: "select count(*) from api_responses") ?? 0
+            }
+        } catch {
+            self.logger.error("Unable to count cached responses: \(error.localizedDescription)")
+            return 0
+        }
     }
 
     func summary(limit: Int = 10) throws -> RepoBarCacheSummary {
         try self.queue.read { db in
             let apiResponseCount = try Int.fetchOne(db, sql: "select count(*) from api_responses") ?? 0
+            let graphQLResponseCount = try Int.fetchOne(db, sql: "select count(*) from graphql_responses") ?? 0
             let rateLimitCount = try Int.fetchOne(db, sql: "select count(*) from rate_limits") ?? 0
             let responses = try Row.fetchAll(
                 db,
@@ -281,6 +314,7 @@ final class HTTPResponseDiskCache {
                 databasePath: self.path,
                 exists: true,
                 apiResponseCount: apiResponseCount,
+                graphQLResponseCount: graphQLResponseCount,
                 rateLimitCount: rateLimitCount,
                 latestResponses: responses,
                 rateLimits: rateLimits
@@ -289,22 +323,31 @@ final class HTTPResponseDiskCache {
     }
 
     func clear() {
-        try? self.queue.write { db in
-            try db.execute(sql: "delete from api_responses")
-            try db.execute(sql: "delete from rate_limits")
+        do {
+            try self.queue.write { db in
+                try db.execute(sql: "delete from api_responses")
+                try db.execute(sql: "delete from graphql_responses")
+                try db.execute(sql: "delete from rate_limits")
+            }
+        } catch {
+            self.logger.error("Unable to clear persistent cache: \(error.localizedDescription)")
         }
     }
 
     private func clearExpiredRateLimit(resource: String, reset: Double) {
-        try? self.queue.write { db in
-            try db.execute(
-                sql: "delete from rate_limits where resource = ? and reset_at = ?",
-                arguments: [resource, reset]
-            )
+        do {
+            try self.queue.write { db in
+                try db.execute(
+                    sql: "delete from rate_limits where resource = ? and reset_at = ?",
+                    arguments: [resource, reset]
+                )
+            }
+        } catch {
+            self.logger.error("Unable to clear expired rate-limit state: \(error.localizedDescription)")
         }
     }
 
-    private static func migrate(_ queue: DatabaseQueue) throws {
+    static func migrate(_ queue: DatabaseQueue) throws {
         var migrator = DatabaseMigrator()
         migrator.registerMigration("v1") { db in
             try db.create(table: "api_responses", ifNotExists: true) { table in
@@ -330,6 +373,18 @@ final class HTTPResponseDiskCache {
                 table.column("last_error", .text)
                 table.column("updated_at", .double).notNull()
             }
+        }
+        migrator.registerMigration("v2") { db in
+            try db.create(table: "graphql_responses", ifNotExists: true) { table in
+                table.column("key", .text).primaryKey()
+                table.column("endpoint", .text).notNull()
+                table.column("operation", .text).notNull()
+                table.column("body_hash", .text).notNull()
+                table.column("response_body", .blob).notNull()
+                table.column("fetched_at", .double).notNull()
+                table.column("updated_at", .double).notNull()
+            }
+            try db.create(index: "idx_graphql_responses_fetched_at", on: "graphql_responses", columns: ["fetched_at"], ifNotExists: true)
         }
         try migrator.migrate(queue)
     }

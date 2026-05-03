@@ -6,6 +6,7 @@
 - Add the GRDB-backed persistent REST cache foundation plus RepoBar-owned GitHub archive source settings/CLI commands, explicitly avoiding gitcrawl config discovery.
 - Add CLI cache diagnostics/clear commands and archive status/validate/update commands so the new cache/archive surfaces are script-testable.
 - Make RepoBar's SQLite ETag cache authoritative by bypassing URLSession's local HTTP cache for conditional GitHub REST requests.
+- Add persistent GraphQL response caching, native gzip archive import, archive issue/PR readers with rate-limit fallback, and Settings archive update/status controls.
 
 ## 0.3.0 - 2026-05-03
 

@@ -9,6 +9,9 @@ struct GitHubArchiveSettingsSection: View {
     @State private var repositoryPath = ""
     @State private var remoteURL = ""
     @State private var databasePath = ""
+    @State private var statuses: [String: GitHubArchiveSourceStatus] = [:]
+    @State private var updatingIDs = Set<String>()
+    @State private var updateError: String?
 
     var body: some View {
         Section {
@@ -22,6 +25,12 @@ struct GitHubArchiveSettingsSection: View {
                 ForEach(self.settings.sources) { source in
                     self.row(for: source)
                 }
+            }
+
+            if let updateError {
+                Text(updateError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
             }
 
             Divider()
@@ -51,6 +60,12 @@ struct GitHubArchiveSettingsSection: View {
         } footer: {
             Text("RepoBar-owned backup sources. Menu reads never edit crawler config or pull Git repos while opening.")
         }
+        .onAppear {
+            self.refreshStatuses()
+        }
+        .onChange(of: self.settings.sources) {
+            self.refreshStatuses()
+        }
     }
 
     private var fallbackBinding: Binding<Bool> {
@@ -76,6 +91,19 @@ struct GitHubArchiveSettingsSection: View {
                 Toggle(source.name, isOn: self.enabledBinding(for: source.id))
                 Spacer()
                 Button {
+                    self.updateArchive(source)
+                } label: {
+                    if self.updatingIDs.contains(source.id) {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                }
+                .buttonStyle(.borderless)
+                .disabled(self.updatingIDs.contains(source.id))
+                .help("Pull and import archive")
+                Button {
                     self.settings.sources.removeAll { $0.id == source.id }
                     self.persist()
                 } label: {
@@ -90,6 +118,13 @@ struct GitHubArchiveSettingsSection: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
                 .truncationMode(.middle)
+            if let status = self.statuses[source.id] {
+                Text(self.statusLine(for: status))
+                    .font(.caption2)
+                    .foregroundStyle(status.readyForRead ? Color.secondary : Color.orange)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+            }
         }
     }
 
@@ -113,6 +148,20 @@ struct GitHubArchiveSettingsSection: View {
         return "repo: \(repo) · db: \(db)"
     }
 
+    private func statusLine(for status: GitHubArchiveSourceStatus) -> String {
+        var parts = [status.readyForRead ? "ready" : "not ready"]
+        if let rows = status.importedRowCount {
+            parts.append("\(rows) rows")
+        }
+        if let lastImportAt = status.lastImportAt {
+            parts.append("imported \(RelativeFormatter.string(from: lastImportAt, relativeTo: Date()))")
+        }
+        if status.issues.isEmpty == false {
+            parts.append(status.issues.joined(separator: "; "))
+        }
+        return parts.joined(separator: " · ")
+    }
+
     private func addArchive() {
         let trimmedName = self.name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedName.isEmpty == false else { return }
@@ -132,6 +181,36 @@ struct GitHubArchiveSettingsSection: View {
         self.remoteURL = ""
         self.databasePath = ""
         self.persist()
+        self.refreshStatuses()
+    }
+
+    private func updateArchive(_ source: GitHubArchiveSource) {
+        self.updateError = nil
+        self.updatingIDs.insert(source.id)
+        Task.detached {
+            do {
+                let update = try GitHubArchiveStore.update(source: source)
+                await MainActor.run {
+                    if let index = self.settings.sources.firstIndex(where: { $0.id == source.id }) {
+                        self.settings.sources[index] = update.source
+                        self.persist()
+                    }
+                    self.updatingIDs.remove(source.id)
+                    self.refreshStatuses()
+                }
+            } catch {
+                await MainActor.run {
+                    self.updateError = error.localizedDescription
+                    self.updatingIDs.remove(source.id)
+                    self.refreshStatuses()
+                }
+            }
+        }
+    }
+
+    private func refreshStatuses() {
+        let values = (try? GitHubArchiveStore.statuses(settings: self.settings)) ?? []
+        self.statuses = Dictionary(uniqueKeysWithValues: values.map { ($0.id, $0) })
     }
 
     private func chooseDirectory(_ apply: (String) -> Void) {

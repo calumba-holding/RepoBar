@@ -16,8 +16,8 @@ or infer settings from gitcrawl or any other crawler's config file.
 
 - Open menus from local data first.
 - Spend GitHub requests only when data is stale and the rate budget is healthy.
-- Survive app restarts with persistent ETags, response bodies, recent lists, and
-  rate-limit state.
+- Survive app restarts with persistent ETags, REST response bodies, GraphQL
+  response bodies, recent lists, and rate-limit state.
 - Allow one or more GitHub backup archives to be configured directly in
   RepoBar.
 - Treat backup archives as read-only input unless the user explicitly runs an
@@ -83,6 +83,8 @@ Current tables:
 
 - `api_responses`: request key, URL, ETag, status, headers JSON, body, fetch
   time, and rate-limit metadata.
+- `graphql_responses`: endpoint, operation, request-body key, response body,
+  and fetch time for GraphQL calls such as contribution heatmaps.
 - `rate_limits`: GitHub resource name, remaining budget, reset time, and last
   error.
 
@@ -95,9 +97,13 @@ Current behavior:
   masked as cached `200` responses.
 - Rate-limit reset state survives restarts, so RepoBar can avoid immediately
   retrying a known-limited GitHub resource.
+- GraphQL calls use the persistent cache for 15 minutes and fall back to stale
+  cached response bodies when GitHub is rate-limited, offline, or temporarily
+  unavailable.
 - `repobar cache status --json` reports DB path, row counts, recent responses,
   and stored rate limits.
-- `repobar cache clear --json` clears persisted API responses and rate limits.
+- `repobar cache clear --json` clears persisted REST responses, GraphQL
+  responses, and rate limits.
 
 ## Discrawl-Compatible Snapshot
 
@@ -129,14 +135,16 @@ Suggested GitHub tables:
 
 ## Read Policy
 
-RepoBar read order:
+RepoBar issue and pull request list policy:
 
-1. RepoBar SQLite cache.
-2. Configured GitHub archive SQLite database.
-3. Live GitHub API.
+- Use live GitHub while the request budget is healthy so fresh data wins.
+- Use ETags for REST requests so repeated calls spend minimal budget.
+- If GitHub is rate-limited, offline, or temporarily unavailable, read enabled
+  archive databases and return the first non-empty archive result.
 
-If live GitHub is rate-limited or offline, keep showing stale cache/archive data
-with a visible source label such as `Cached 12m` or `Archive 6d`.
+If live GitHub is rate-limited or offline, keep showing stale cache/archive data.
+The next UI improvement is adding a visible source label such as `Cached 12m` or
+`Archive 6d` on every stale row; diagnostics already log the fallback source.
 
 Menu opens should not run `git pull`, import snapshots, or fan out live GitHub
 requests. Snapshot updates belong to explicit commands, explicit settings
@@ -151,7 +159,8 @@ Allowed writes:
 
 - `repobar archives update <id>` may pull/import a configured snapshot into the
   configured `importedDatabasePath`.
-- A Settings button may trigger the same explicit update.
+- A Settings button triggers the same explicit update path and persists the
+  resolved local checkout path for remote-only sources.
 - Future publisher tooling may create a compatible GitHub snapshot, but that is
   separate from the menubar reader.
 
@@ -167,6 +176,7 @@ Disallowed writes:
 Persist:
 
 - API response ETags and bodies.
+- GraphQL response bodies.
 - `X-RateLimit-Resource`, remaining count, reset time, and last error.
 - Per-request backoff for `403`, secondary rate limits, and `202` stats
   endpoints.

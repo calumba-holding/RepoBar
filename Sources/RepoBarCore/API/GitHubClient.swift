@@ -311,11 +311,27 @@ public actor GitHubClient {
     }
 
     public func recentPullRequests(owner: String, name: String, limit: Int = 20) async throws -> [RepoPullRequestSummary] {
-        try await self.restAPI.recentPullRequests(owner: owner, name: name, limit: limit)
+        do {
+            return try await self.restAPI.recentPullRequests(owner: owner, name: name, limit: limit)
+        } catch {
+            if let fallback = self.archivePullRequestFallback(owner: owner, name: name, limit: limit, error: error), fallback.isEmpty == false {
+                await self.diag.message("Using archive PR fallback for \(owner)/\(name) after \(error.userFacingMessage)")
+                return fallback
+            }
+            throw error
+        }
     }
 
     public func recentIssues(owner: String, name: String, limit: Int = 20) async throws -> [RepoIssueSummary] {
-        try await self.restAPI.recentIssues(owner: owner, name: name, limit: limit)
+        do {
+            return try await self.restAPI.recentIssues(owner: owner, name: name, limit: limit)
+        } catch {
+            if let fallback = self.archiveIssueFallback(owner: owner, name: name, limit: limit, error: error), fallback.isEmpty == false {
+                await self.diag.message("Using archive issue fallback for \(owner)/\(name) after \(error.userFacingMessage)")
+                return fallback
+            }
+            throw error
+        }
     }
 
     public func recentReleases(owner: String, name: String, limit: Int = 20) async throws -> [RepoReleaseSummary] {
@@ -407,6 +423,46 @@ public actor GitHubClient {
             accumulator.absorb(error)
             return nil
         }
+    }
+
+    private func archiveIssueFallback(owner: String, name: String, limit: Int, error: Error) -> [RepoIssueSummary]? {
+        guard self.shouldUseArchiveFallback(for: error) else { return nil }
+
+        let archiveSettings = SettingsStore().load().githubArchives
+        guard archiveSettings.preferArchiveWhenRateLimited else { return nil }
+
+        return GitHubArchiveReader.recentIssues(settings: archiveSettings, owner: owner, name: name, limit: limit)
+    }
+
+    private func archivePullRequestFallback(owner: String, name: String, limit: Int, error: Error) -> [RepoPullRequestSummary]? {
+        guard self.shouldUseArchiveFallback(for: error) else { return nil }
+
+        let archiveSettings = SettingsStore().load().githubArchives
+        guard archiveSettings.preferArchiveWhenRateLimited else { return nil }
+
+        return GitHubArchiveReader.recentPullRequests(settings: archiveSettings, owner: owner, name: name, limit: limit)
+    }
+
+    private func shouldUseArchiveFallback(for error: Error) -> Bool {
+        if let gh = error as? GitHubAPIError {
+            switch gh {
+            case .rateLimited, .serviceUnavailable:
+                return true
+            case let .badStatus(code, _):
+                return code == 429 || code == 502 || code == 503 || code == 504
+            case .invalidHost, .invalidPEM:
+                return false
+            }
+        }
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .notConnectedToInternet, .networkConnectionLost, .timedOut, .cannotFindHost, .cannotConnectToHost:
+                return true
+            default:
+                return false
+            }
+        }
+        return false
     }
 }
 

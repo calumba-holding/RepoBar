@@ -35,6 +35,7 @@ struct CacheStatusCommand: CommanderRunnableCommand {
         print("Cache DB: \(PathFormatter.displayString(summary.databasePath))")
         print("Exists: \(summary.exists ? "yes" : "no")")
         print("API responses: \(summary.apiResponseCount)")
+        print("GraphQL responses: \(summary.graphQLResponseCount)")
         print("Rate limits: \(summary.rateLimitCount)")
         if summary.latestResponses.isEmpty == false {
             print("Recent responses:")

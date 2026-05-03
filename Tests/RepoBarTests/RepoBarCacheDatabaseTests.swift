@@ -47,6 +47,26 @@ struct RepoBarCacheDatabaseTests {
         #expect(Self.sqliteValue(database, "select count(*) from threads") == "2")
         #expect(Self.sqliteValue(database, "select title from threads where number = '12'") == "Cache issue")
         #expect(Self.sqliteValue(database, "select cursor from sync_state where scope = 'repobar:last_import'") == "2026-05-03T17:02:00.000Z")
+
+        let reader = GitHubArchiveReader(databasePath: database.path)
+        let issues = try reader.recentIssues(owner: "steipete", name: "RepoBar", limit: 10)
+        let pulls = try reader.recentPullRequests(owner: "steipete", name: "RepoBar", limit: 10)
+        #expect(issues.map(\.number) == [12])
+        #expect(issues.first?.title == "Cache issue")
+        #expect(issues.first?.url.absoluteString == "https://github.com/steipete/RepoBar/issues/12")
+        #expect(pulls.map(\.number) == [13])
+        #expect(pulls.first?.url.absoluteString == "https://github.com/steipete/RepoBar/pull/13")
+
+        let source = GitHubArchiveSource(
+            name: "fixture",
+            localRepositoryPath: root.path,
+            remoteURL: nil,
+            importedDatabasePath: database.path
+        )
+        let status = GitHubArchiveStore.status(for: source)
+        #expect(status.readyForRead)
+        #expect(status.importedRowCount == 2)
+        #expect(status.importedTableCount == 1)
     }
 
     @Test
@@ -70,6 +90,36 @@ struct RepoBarCacheDatabaseTests {
         #expect(summary.exists)
         #expect(summary.apiResponseCount == 1)
         #expect(summary.latestResponses.first?.hasETag == true)
+    }
+
+    @Test
+    func `persistent GraphQL cache round trips responses`() throws {
+        let path = FileManager.default.temporaryDirectory
+            .appending(path: "RepoBarGraphQLCacheDatabaseTests.\(UUID().uuidString)")
+            .appending(path: "Cache.sqlite")
+            .path
+        let cache = try GraphQLResponseDiskCache(
+            path: path,
+            clock: { Date(timeIntervalSinceReferenceDate: 100) }
+        )
+        let endpoint = try #require(URL(string: "https://api.github.com/graphql"))
+        let key = "endpoint\toperation\tbody"
+
+        cache.save(
+            key: key,
+            endpoint: endpoint,
+            operation: "TestOperation",
+            body: Data("request".utf8),
+            responseBody: Data("response".utf8)
+        )
+
+        let reloaded = try GraphQLResponseDiskCache(path: path)
+        #expect(reloaded.cached(key: key, maxAge: 60, now: Date(timeIntervalSinceReferenceDate: 120))?.data == Data("response".utf8))
+        #expect(reloaded.cached(key: key, maxAge: 10, now: Date(timeIntervalSinceReferenceDate: 120)) == nil)
+        #expect(reloaded.stale(key: key)?.data == Data("response".utf8))
+
+        let summary = try HTTPResponseDiskCache(path: path).summary(limit: 0)
+        #expect(summary.graphQLResponseCount == 1)
     }
 
     @Test
@@ -104,6 +154,7 @@ struct RepoBarCacheDatabaseTests {
 
         let summary = try disk.summary()
         #expect(summary.apiResponseCount == 0)
+        #expect(summary.graphQLResponseCount == 0)
         #expect(summary.rateLimitCount == 0)
     }
 

@@ -1,5 +1,6 @@
 import Foundation
 @preconcurrency import GRDB
+import zlib
 
 public struct GitHubArchiveImportResult: Codable, Equatable, Sendable {
     public let sourceName: String
@@ -27,6 +28,7 @@ public enum GitHubArchiveImportError: Error, LocalizedError {
     case missingFile(String)
     case gzipFailed(String)
     case rowIsNotObject(String)
+    case invalidUTF8(String)
 
     public var errorDescription: String? {
         switch self {
@@ -36,6 +38,7 @@ public enum GitHubArchiveImportError: Error, LocalizedError {
         case let .missingFile(path): "Archive manifest references missing file: \(path)"
         case let .gzipFailed(path): "Unable to decompress snapshot file: \(path)"
         case let .rowIsNotObject(path): "Snapshot file contains a JSON row that is not an object: \(path)"
+        case let .invalidUTF8(path): "Snapshot file is not valid UTF-8: \(path)"
         }
     }
 }
@@ -156,7 +159,11 @@ public enum GitHubArchiveImporter {
                 fileManager: context.fileManager
             )
             let data = try self.readSnapshotFile(fileURL)
-            for line in self.utf8String(from: data).split(whereSeparator: \.isNewline) {
+            guard let text = String(bytes: data, encoding: .utf8) else {
+                throw GitHubArchiveImportError.invalidUTF8(relativePath)
+            }
+
+            for line in text.split(whereSeparator: \.isNewline) {
                 let rowData = Data(line.utf8)
                 let object = try self.decodeRow(rowData, filePath: relativePath)
                 try self.insert(object: object, into: table, db: db)
@@ -304,21 +311,55 @@ public enum GitHubArchiveImporter {
     }
 
     private static func gunzippedData(from url: URL) throws -> Data {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/gzip")
-        process.arguments = ["-dc", url.path]
-        let output = Pipe()
-        let error = Pipe()
-        process.standardOutput = output
-        process.standardError = error
-        try process.run()
-        let data = try output.fileHandleForReading.readToEnd() ?? Data()
-        process.waitUntilExit()
-        guard process.terminationStatus == 0 else {
+        let data = try Data(contentsOf: url)
+        var stream = z_stream()
+        let initStatus = inflateInit2_(
+            &stream,
+            16 + MAX_WBITS,
+            ZLIB_VERSION,
+            Int32(MemoryLayout<z_stream>.size)
+        )
+        guard initStatus == Z_OK else {
             throw GitHubArchiveImportError.gzipFailed(url.path)
         }
 
-        return data
+        defer { inflateEnd(&stream) }
+
+        var output = Data()
+        let chunkSize = 64 * 1024
+        let result = data.withUnsafeBytes { inputBuffer in
+            guard let inputBase = inputBuffer.bindMemory(to: Bytef.self).baseAddress else {
+                return Z_DATA_ERROR
+            }
+
+            stream.next_in = UnsafeMutablePointer<Bytef>(mutating: inputBase)
+            stream.avail_in = uInt(data.count)
+
+            while true {
+                var chunk = Data(count: chunkSize)
+                let status = chunk.withUnsafeMutableBytes { outputBuffer in
+                    stream.next_out = outputBuffer.bindMemory(to: Bytef.self).baseAddress
+                    stream.avail_out = uInt(chunkSize)
+                    return inflate(&stream, Z_NO_FLUSH)
+                }
+
+                let written = chunkSize - Int(stream.avail_out)
+                output.append(chunk.prefix(written))
+
+                if status == Z_STREAM_END {
+                    return status
+                }
+                guard status == Z_OK else {
+                    return status
+                }
+            }
+        }
+
+        guard result == Z_STREAM_END else {
+            throw GitHubArchiveImportError.gzipFailed(url.path)
+        }
+
+        return output
     }
 
     private static func decodeRow(_ data: Data, filePath: String) throws -> [String: Any] {

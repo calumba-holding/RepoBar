@@ -197,11 +197,12 @@ final class RecentListMenuCoordinator {
             self.logger.info(
                 "Recent list refresh ok kind=\(String(describing: context.kind)) repo=\(context.fullName) count=\(items.count) dur=\(Self.formatDuration(since: startedAt))"
             )
+            let rateLimitExtras = await self.currentRateLimitExtras()
             self.populateRecentListMenu(
                 menu,
                 header: header,
                 actions: actions,
-                extras: self.recentListExtras(for: context, items: items),
+                extras: rateLimitExtras + self.recentListExtras(for: context, items: items),
                 content: .items(items, emptyTitle: descriptor.emptyTitle, render: { menu, items in
                     self.renderRecentItems(items, for: context.kind, repoFullName: context.fullName, menu: menu)
                 })
@@ -284,6 +285,15 @@ final class RecentListMenuCoordinator {
 
         self.appState.session.rateLimitReset = reset
         self.appState.session.lastError = error.userFacingMessage
+    }
+
+    private func currentRateLimitExtras() async -> [NSMenuItem] {
+        guard let reset = await self.appState.github.rateLimitReset(now: Date()) else { return [] }
+
+        self.appState.session.rateLimitReset = reset
+        return self.rateLimitExtras(
+            message: "GitHub rate limited; resets \(RelativeFormatter.string(from: reset, relativeTo: Date()))."
+        )
     }
 
     private func rateLimitExtras(message: String) -> [NSMenuItem] {
