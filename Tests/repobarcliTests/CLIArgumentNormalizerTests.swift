@@ -51,6 +51,69 @@ struct CLIArgumentNormalizerTests {
     }
 
     @Test
+    func `normalizes archive subcommands`() {
+        let listArgs = CLIArgumentNormalizer.normalize(["repobar", "archives", "list"])
+        #expect(listArgs[1] == "archives-list")
+
+        let statusArgs = CLIArgumentNormalizer.normalize(["repobar", "archives", "status", "openclaw"])
+        #expect(statusArgs[1] == "archives-status")
+        #expect(statusArgs.dropFirst(2).first == "openclaw")
+
+        let validateArgs = CLIArgumentNormalizer.normalize(["repobar", "archives", "validate"])
+        #expect(validateArgs[1] == "archives-validate")
+
+        let updateArgs = CLIArgumentNormalizer.normalize(["repobar", "archives", "update", "openclaw"])
+        #expect(updateArgs[1] == "archives-update")
+        #expect(updateArgs.dropFirst(2).first == "openclaw")
+
+        let addArgs = CLIArgumentNormalizer.normalize(["repobar", "archives", "add", "openclaw", "--repo", "~/backup"])
+        #expect(addArgs[1] == "archives-add")
+        #expect(addArgs.dropFirst(2).first == "openclaw")
+    }
+
+    @Test
+    func `normalizes cache subcommands`() {
+        let statusArgs = CLIArgumentNormalizer.normalize(["repobar", "cache", "status"])
+        #expect(statusArgs[1] == "cache-status")
+
+        let clearArgs = CLIArgumentNormalizer.normalize(["repobar", "cache", "clear"])
+        #expect(clearArgs[1] == "cache-clear")
+    }
+
+    @Test
+    @MainActor
+    func `normalized archive args resolve`() throws {
+        let argv = CLIArgumentNormalizer.normalize(["repobar", "archives", "list"])
+        let program = Program(descriptors: [RepoBarRoot.descriptor()])
+        let invocation = try program.resolve(argv: argv)
+        #expect(invocation.path.last == ArchivesListCommand.commandName)
+    }
+
+    @Test
+    @MainActor
+    func `archive add binds custom options`() throws {
+        let argv = CLIArgumentNormalizer.normalize([
+            "repobar",
+            "archives",
+            "add",
+            "openclaw",
+            "--repo",
+            "/tmp/repo",
+            "--remote",
+            "https://github.com/example/archive.git",
+            "--db",
+            "/tmp/archive.sqlite"
+        ])
+        let program = Program(descriptors: [RepoBarRoot.descriptor()])
+        let invocation = try program.resolve(argv: argv)
+        let command = try #require(RepoBarCLI.makeCommand(from: invocation) as? ArchivesAddCommand)
+
+        #expect(command.repoPath == "/tmp/repo")
+        #expect(command.remoteURL == "https://github.com/example/archive.git")
+        #expect(command.databasePath == "/tmp/archive.sqlite")
+    }
+
+    @Test
     func `normalizes open subcommands`() {
         let finderArgs = CLIArgumentNormalizer.normalize(["repobar", "open", "finder", "~/Projects"])
         #expect(finderArgs[1] == "open-finder")

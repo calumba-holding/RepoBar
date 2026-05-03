@@ -4,6 +4,18 @@ import Testing
 
 struct GitHubRequestRunnerTests {
     @Test
+    func `etag requests bypass URLSession local cache`() throws {
+        let url = try #require(URL(string: "https://api.github.com/repos/owner/repo/releases"))
+
+        let request = GitHubRequestRunner.makeRequest(url: url, token: "token", useETag: true)
+        let uncachedRequest = GitHubRequestRunner.makeRequest(url: url, token: "token", useETag: false)
+
+        #expect(request.cachePolicy == .reloadIgnoringLocalCacheData)
+        #expect(uncachedRequest.cachePolicy == .useProtocolCachePolicy)
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer token")
+    }
+
+    @Test
     func `cooldown message reads naturally`() async throws {
         let url = try #require(URL(string: "https://api.github.com/repos/owner/repo/stats/commit_activity"))
         let backoff = BackoffTracker()

@@ -186,7 +186,7 @@ private struct RepoBarLogHandler: LogHandler {
     func log(event: Logging.LogEvent) {
         let combined = self.mergedMetadata(extra: event.metadata)
         let renderedMessage = self.renderMessage(event.message, metadata: combined)
-        self.osLogger.log(level: self.osLogType(for: event.level), "\(renderedMessage)")
+        self.osLogger.log(level: self.osLogType(for: event.level), "\(renderedMessage, privacy: .public)")
         let fileLine = self.renderFileLine(level: event.level, message: renderedMessage)
         self.state.logToFile(fileLine)
     }

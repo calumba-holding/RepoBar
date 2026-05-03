@@ -134,6 +134,7 @@ extension AppState {
             }
             await MainActor.run {
                 self.session.localProjectsScanInProgress = false
+                self.session.rateLimitReset = (error as? GitHubAPIError)?.rateLimitedUntil
                 self.session.lastError = error.userFacingMessage
             }
         }

@@ -5,6 +5,7 @@ public struct UserSettings: Equatable, Codable {
     public var heatmap = HeatmapSettings()
     public var repoList = RepoListSettings()
     public var localProjects = LocalProjectsSettings()
+    public var githubArchives = GitHubArchiveSettings()
     public var menuCustomization = MenuCustomization()
     public var refreshInterval: RefreshInterval = .fiveMinutes
     public var launchAtLogin = false
@@ -18,6 +19,65 @@ public struct UserSettings: Equatable, Codable {
     public var authMethod: AuthMethod = .oauth
 
     public init() {}
+
+    enum CodingKeys: String, CodingKey {
+        case appearance
+        case heatmap
+        case repoList
+        case localProjects
+        case githubArchives
+        case menuCustomization
+        case refreshInterval
+        case launchAtLogin
+        case debugPaneEnabled
+        case diagnosticsEnabled
+        case loggingVerbosity
+        case fileLoggingEnabled
+        case githubHost
+        case enterpriseHost
+        case loopbackPort
+        case authMethod
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.appearance = try container.decodeIfPresent(AppearanceSettings.self, forKey: .appearance) ?? AppearanceSettings()
+        self.heatmap = try container.decodeIfPresent(HeatmapSettings.self, forKey: .heatmap) ?? HeatmapSettings()
+        self.repoList = try container.decodeIfPresent(RepoListSettings.self, forKey: .repoList) ?? RepoListSettings()
+        self.localProjects = try container.decodeIfPresent(LocalProjectsSettings.self, forKey: .localProjects) ?? LocalProjectsSettings()
+        self.githubArchives = try container.decodeIfPresent(GitHubArchiveSettings.self, forKey: .githubArchives) ?? GitHubArchiveSettings()
+        self.menuCustomization = try container.decodeIfPresent(MenuCustomization.self, forKey: .menuCustomization) ?? MenuCustomization()
+        self.refreshInterval = try container.decodeIfPresent(RefreshInterval.self, forKey: .refreshInterval) ?? .fiveMinutes
+        self.launchAtLogin = try container.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? false
+        self.debugPaneEnabled = try container.decodeIfPresent(Bool.self, forKey: .debugPaneEnabled) ?? false
+        self.diagnosticsEnabled = try container.decodeIfPresent(Bool.self, forKey: .diagnosticsEnabled) ?? false
+        self.loggingVerbosity = try container.decodeIfPresent(LogVerbosity.self, forKey: .loggingVerbosity) ?? .info
+        self.fileLoggingEnabled = try container.decodeIfPresent(Bool.self, forKey: .fileLoggingEnabled) ?? false
+        self.githubHost = try container.decodeIfPresent(URL.self, forKey: .githubHost) ?? URL(string: "https://github.com")!
+        self.enterpriseHost = try container.decodeIfPresent(URL.self, forKey: .enterpriseHost)
+        self.loopbackPort = try container.decodeIfPresent(Int.self, forKey: .loopbackPort) ?? 53682
+        self.authMethod = try container.decodeIfPresent(AuthMethod.self, forKey: .authMethod) ?? .oauth
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.appearance, forKey: .appearance)
+        try container.encode(self.heatmap, forKey: .heatmap)
+        try container.encode(self.repoList, forKey: .repoList)
+        try container.encode(self.localProjects, forKey: .localProjects)
+        try container.encode(self.githubArchives, forKey: .githubArchives)
+        try container.encode(self.menuCustomization, forKey: .menuCustomization)
+        try container.encode(self.refreshInterval, forKey: .refreshInterval)
+        try container.encode(self.launchAtLogin, forKey: .launchAtLogin)
+        try container.encode(self.debugPaneEnabled, forKey: .debugPaneEnabled)
+        try container.encode(self.diagnosticsEnabled, forKey: .diagnosticsEnabled)
+        try container.encode(self.loggingVerbosity, forKey: .loggingVerbosity)
+        try container.encode(self.fileLoggingEnabled, forKey: .fileLoggingEnabled)
+        try container.encode(self.githubHost, forKey: .githubHost)
+        try container.encodeIfPresent(self.enterpriseHost, forKey: .enterpriseHost)
+        try container.encode(self.loopbackPort, forKey: .loopbackPort)
+        try container.encode(self.authMethod, forKey: .authMethod)
+    }
 }
 
 public enum AuthMethod: String, CaseIterable, Equatable, Codable, Sendable {
@@ -76,6 +136,55 @@ public struct LocalProjectsSettings: Equatable, Codable {
         #if DEBUG
             self.rootPath = "~/Projects"
         #endif
+    }
+}
+
+public struct GitHubArchiveSettings: Equatable, Codable {
+    public var sources: [GitHubArchiveSource] = []
+    public var preferArchiveWhenRateLimited = true
+    public var staleAfterSeconds: TimeInterval = 15 * 60
+
+    public init() {}
+}
+
+public struct GitHubArchiveSource: Identifiable, Equatable, Codable {
+    public var id: String
+    public var name: String
+    public var enabled: Bool
+    public var localRepositoryPath: String?
+    public var remoteURL: String?
+    public var branch: String
+    public var importedDatabasePath: String
+    public var format: GitHubArchiveFormat
+
+    public init(
+        id: String = UUID().uuidString,
+        name: String,
+        enabled: Bool = true,
+        localRepositoryPath: String?,
+        remoteURL: String?,
+        branch: String = "main",
+        importedDatabasePath: String,
+        format: GitHubArchiveFormat = .discrawlSnapshot
+    ) {
+        self.id = id
+        self.name = name
+        self.enabled = enabled
+        self.localRepositoryPath = localRepositoryPath
+        self.remoteURL = remoteURL
+        self.branch = branch
+        self.importedDatabasePath = importedDatabasePath
+        self.format = format
+    }
+}
+
+public enum GitHubArchiveFormat: String, Equatable, Codable, Sendable {
+    case discrawlSnapshot
+
+    public var label: String {
+        switch self {
+        case .discrawlSnapshot: "Discrawl snapshot"
+        }
     }
 }
 

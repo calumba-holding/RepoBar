@@ -58,6 +58,7 @@
             let process = Process()
             process.executableURL = url
             process.arguments = ["--version"]
+            process.currentDirectoryURL = FileManager.default.temporaryDirectory
             let out = Pipe()
             let err = Pipe()
             process.standardOutput = out

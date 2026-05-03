@@ -68,6 +68,38 @@ enum CLIArgumentNormalizer {
             }
         }
 
+        if normalized.count > 2, normalized[1] == "archives" {
+            let subcommand = normalized[2].lowercased()
+            let mapped: String? = switch subcommand {
+            case "list": "archives-list"
+            case "status": "archives-status"
+            case "validate": "archives-validate"
+            case "update": "archives-update"
+            case "add": "archives-add"
+            case "remove", "rm": "archives-remove"
+            case "enable": "archives-enable"
+            case "disable": "archives-disable"
+            default: nil
+            }
+            if let mapped {
+                normalized[1] = mapped
+                normalized.remove(at: 2)
+            }
+        }
+
+        if normalized.count > 2, normalized[1] == "cache" {
+            let subcommand = normalized[2].lowercased()
+            let mapped: String? = switch subcommand {
+            case "status": "cache-status"
+            case "clear": "cache-clear"
+            default: nil
+            }
+            if let mapped {
+                normalized[1] = mapped
+                normalized.remove(at: 2)
+            }
+        }
+
         return normalized
     }
 }

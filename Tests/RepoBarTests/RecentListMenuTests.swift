@@ -1,5 +1,6 @@
 import AppKit
 @testable import RepoBar
+import RepoBarCore
 import Testing
 
 struct RecentListMenuTests {
@@ -37,5 +38,32 @@ struct RecentListMenuTests {
         manager.menuWillOpen(mainMenu)
 
         #expect(manager.isRecentListMenu(submenu))
+    }
+
+    @MainActor
+    @Test
+    func `recent list failures show user facing reason`() {
+        let error = GitHubAPIError.badStatus(code: 403, message: "Requires repository issues access.")
+
+        #expect(
+            RecentListMenuCoordinator.failureMessage(for: error) ==
+                "Failed: Requires repository issues access."
+        )
+    }
+
+    @MainActor
+    @Test
+    func `recent list timeouts include configured seconds`() {
+        #expect(RecentListMenuCoordinator.timeoutMessage(timeout: 12) == "Timed out after 12s")
+    }
+
+    @MainActor
+    @Test
+    func `recent list rate limit message is visible`() {
+        let reset = Date(timeIntervalSinceNow: 120)
+        let error = GitHubAPIError.rateLimited(until: reset, message: "GitHub rate limit hit.")
+
+        #expect(RecentListMenuCoordinator.rateLimitMessage(for: error)?.contains("GitHub rate limited; resets") == true)
+        #expect(RecentListMenuCoordinator.rateLimitMessage(for: URLError(.timedOut)) == nil)
     }
 }

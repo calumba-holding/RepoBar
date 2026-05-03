@@ -23,7 +23,16 @@ enum GitHubRecentDecoders {
 
     static func decodeRecentIssues(from data: Data) throws -> [RepoIssueSummary] {
         let responses = try GitHubDecoding.decode([IssueRecentResponse].self, from: data)
-        return responses
+        return self.issueSummaries(from: responses)
+    }
+
+    static func decodeRecentIssuePage(from data: Data) throws -> RecentIssuePage {
+        let responses = try GitHubDecoding.decode([IssueRecentResponse].self, from: data)
+        return RecentIssuePage(rawCount: responses.count, issues: self.issueSummaries(from: responses))
+    }
+
+    private static func issueSummaries(from responses: [IssueRecentResponse]) -> [RepoIssueSummary] {
+        responses
             .filter { $0.pullRequest == nil }
             .map {
                 RepoIssueSummary(
@@ -38,6 +47,11 @@ enum GitHubRecentDecoders {
                     labels: $0.labels.map { RepoIssueLabel(name: $0.name, colorHex: $0.color) }
                 )
             }
+    }
+
+    struct RecentIssuePage {
+        let rawCount: Int
+        let issues: [RepoIssueSummary]
     }
 
     static func decodeRecentReleases(from data: Data) throws -> [RepoReleaseSummary] {

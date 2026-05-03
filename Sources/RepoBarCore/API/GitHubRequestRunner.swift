@@ -4,12 +4,13 @@ actor GitHubRequestRunner {
     private let etagCache: ETagCache
     private let backoff: BackoffTracker
     private let diag: DiagnosticsLogger
+    private let logger = RepoBarLogging.logger("github-rest")
     private var lastRateLimitReset: Date?
     private var lastRateLimitError: String?
     private var latestRestRateLimit: RateLimitSnapshot?
 
     init(
-        etagCache: ETagCache = ETagCache(),
+        etagCache: ETagCache = ETagCache.persistent(),
         backoff: BackoffTracker = BackoffTracker(),
         diag: DiagnosticsLogger = .shared
     ) {
@@ -42,8 +43,10 @@ actor GitHubRequestRunner {
         useETag: Bool = true
     ) async throws -> (Data, HTTPURLResponse) {
         let startedAt = Date()
+        self.logger.debug("GET \(url.pathWithQueryForLogging)")
         await self.diag.message("GET \(url.absoluteString)")
         if await self.etagCache.isRateLimited(), let until = await etagCache.rateLimitUntil() {
+            self.logger.warning("Blocked by local rate limit until \(until)")
             await self.diag.message("Blocked by local rateLimit until \(until)")
             throw GitHubAPIError.rateLimited(
                 until: until,
@@ -51,6 +54,7 @@ actor GitHubRequestRunner {
             )
         }
         if let cooldown = await backoff.cooldown(for: url) {
+            self.logger.warning("Cooldown active for \(url.pathWithQueryForLogging) until \(cooldown)")
             await self.diag.message("Cooldown active for \(url.absoluteString) until \(cooldown)")
             throw GitHubAPIError.serviceUnavailable(
                 retryAfter: cooldown,
@@ -58,12 +62,7 @@ actor GitHubRequestRunner {
             )
         }
 
-        var request = URLRequest(url: url)
-        // GitHub requires "Bearer" for OAuth access tokens; "token" is for classic tokens.
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        for (header, value) in headers {
-            request.addValue(value, forHTTPHeaderField: header)
-        }
+        var request = Self.makeRequest(url: url, token: token, headers: headers, useETag: useETag)
         if useETag, let cached = await etagCache.cached(for: url) {
             request.addValue(cached.etag, forHTTPHeaderField: "If-None-Match")
         }
@@ -75,6 +74,7 @@ actor GitHubRequestRunner {
 
         let status = response.statusCode
         if status == 304, useETag, let cached = await etagCache.cached(for: url) {
+            self.logger.debug("HTTP GET \(url.pathWithQueryForLogging) status=304 cached=true")
             await self.diag.message("304 Not Modified for \(url.lastPathComponent); using cached")
             return (cached.data, response)
         }
@@ -84,6 +84,7 @@ actor GitHubRequestRunner {
             await self.backoff.setCooldown(url: response.url ?? url, until: retryAfter)
             let retryText = RelativeFormatter.string(from: retryAfter, relativeTo: Date())
             let message = "GitHub is generating repository stats; some numbers may be stale. RepoBar will retry \(retryText)."
+            self.logger.warning("HTTP GET \(url.pathWithQueryForLogging) status=202 retryAfter=\(retryAfter)")
             await self.diag.message("202 for \(url.lastPathComponent); cooldown until \(retryAfter)")
             throw GitHubAPIError.serviceUnavailable(
                 retryAfter: retryAfter,
@@ -97,6 +98,7 @@ actor GitHubRequestRunner {
 
             // If we still have quota, this 403 is likely permissions/abuse detection; surface it as a normal error.
             if let remaining, remaining > 0 {
+                self.logger.warning("HTTP GET \(url.pathWithQueryForLogging) status=\(status) remaining=\(remaining)")
                 await self.diag.message("403 with remaining=\(remaining) on \(url.lastPathComponent); treating as bad status")
                 throw GitHubAPIError.badStatus(code: status, message: HTTPURLResponse.localizedString(forStatusCode: status))
             }
@@ -107,11 +109,13 @@ actor GitHubRequestRunner {
             await self.backoff.setCooldown(url: response.url ?? url, until: resetDate)
             self.lastRateLimitError = "GitHub rate limit hit; resets " +
                 "\(RelativeFormatter.string(from: resetDate, relativeTo: Date()))."
+            self.logger.warning("HTTP GET \(url.pathWithQueryForLogging) rateLimited status=\(status) reset=\(resetDate)")
             await self.diag.message("Rate limited on \(url.lastPathComponent); resets \(resetDate)")
             throw GitHubAPIError.rateLimited(until: resetDate, message: self.lastRateLimitError ?? "Rate limited.")
         }
 
         guard allowedStatuses.contains(status) else {
+            self.logger.warning("HTTP GET \(url.pathWithQueryForLogging) unexpectedStatus=\(status)")
             await self.diag.message("Unexpected status \(status) for \(url.lastPathComponent)")
             throw GitHubAPIError.badStatus(
                 code: status,
@@ -120,7 +124,7 @@ actor GitHubRequestRunner {
         }
 
         if useETag, let etag = response.value(forHTTPHeaderField: "ETag") {
-            await self.etagCache.save(url: url, etag: etag, data: data)
+            await self.etagCache.save(url: url, etag: etag, data: data, response: response)
             await self.diag.message("Cached ETag for \(url.lastPathComponent)")
         }
         if let snapshot = RateLimitSnapshot.from(response: response) {
@@ -128,6 +132,24 @@ actor GitHubRequestRunner {
         }
         self.detectRateLimit(from: response)
         return (data, response)
+    }
+
+    static func makeRequest(
+        url: URL,
+        token: String,
+        headers: [String: String] = [:],
+        useETag: Bool = true
+    ) -> URLRequest {
+        var request = URLRequest(
+            url: url,
+            cachePolicy: useETag ? .reloadIgnoringLocalCacheData : .useProtocolCachePolicy
+        )
+        // GitHub requires "Bearer" for OAuth access tokens; "token" is for classic tokens.
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        for (header, value) in headers {
+            request.addValue(value, forHTTPHeaderField: header)
+        }
+        return request
     }
 
     func clear() async {
@@ -169,6 +191,10 @@ actor GitHubRequestRunner {
         await self.diag.message(
             "HTTP \(method) \(url.path) status=\(response.statusCode) res=\(resource) lim=\(limit) rem=\(remaining) used=\(used) reset=\(resetText) dur=\(durationMs)ms"
         )
+        let path = url.pathWithQueryForLogging
+        self.logger.debug(
+            "HTTP \(method) \(path) status=\(response.statusCode) res=\(resource) rem=\(remaining)/\(limit) used=\(used) reset=\(resetText) dur=\(durationMs)ms"
+        )
     }
 
     private func rateLimitDate(from response: HTTPURLResponse) -> Date? {
@@ -197,6 +223,14 @@ actor GitHubRequestRunner {
             self.lastRateLimitReset = nil
             self.lastRateLimitError = nil
         }
+    }
+}
+
+private extension URL {
+    var pathWithQueryForLogging: String {
+        guard let query, !query.isEmpty else { return self.path }
+
+        return "\(self.path)?\(query)"
     }
 }
 

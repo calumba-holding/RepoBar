@@ -134,7 +134,7 @@ public struct OAuthLoginFlow {
 
 private extension OAuthLoginFlow {
     static func formUrlEncoded(_ params: [String: String]) -> Data? {
-        let encoded = params.map { key, value in
+        let encoded: String = params.map { key, value in
             let k = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? key
             let v = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
             return "\(k)=\(v)"

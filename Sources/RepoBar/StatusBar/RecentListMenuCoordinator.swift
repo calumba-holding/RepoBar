@@ -9,6 +9,7 @@ final class RecentListMenuCoordinator {
     let menuBuilder: StatusBarMenuBuilder
     let menuItemFactory: MenuItemViewFactory
     private let menuService: RecentMenuService
+    private let logger = RepoBarLogging.logger("recent-list")
     private var recentListMenus: [ObjectIdentifier: RecentListMenuEntry] = [:]
     let issueLabelChipLimit = AppLimits.RecentLists.issueLabelChipLimit
 
@@ -112,8 +113,13 @@ final class RecentListMenuCoordinator {
             guard let self else { return }
 
             do {
+                self.logger.debug("Prefetch start kind=\(String(describing: kind)) repo=\(fullName)")
                 _ = try await descriptor.load(fullName, owner, name, self.menuService.listLimit)
+                self.logger.debug("Prefetch ok kind=\(String(describing: kind)) repo=\(fullName)")
             } catch {
+                self.logger.warning(
+                    "Prefetch failed kind=\(String(describing: kind)) repo=\(fullName) error=\(error.userFacingMessage)"
+                )
                 await DiagnosticsLogger.shared.message(
                     "Prefetch failed: \(String(describing: kind)) \(fullName) error=\(error.localizedDescription)"
                 )
@@ -159,6 +165,11 @@ final class RecentListMenuCoordinator {
         let cached = descriptor.cached(context.fullName, now, self.menuService.cacheTTL)
         let stale = cached ?? descriptor.stale(context.fullName)
         let staleExtras = self.recentListExtras(for: context, items: stale)
+        let cachedCount = cached?.count.description ?? "nil"
+        let staleCount = stale?.count.description ?? "nil"
+        self.logger.info(
+            "Recent list open kind=\(String(describing: context.kind)) repo=\(context.fullName) cached=\(cachedCount) stale=\(staleCount)"
+        )
         if let stale {
             self.populateRecentListMenu(
                 menu,
@@ -174,10 +185,18 @@ final class RecentListMenuCoordinator {
         }
         menu.update()
 
-        guard descriptor.needsRefresh(context.fullName, now, self.menuService.cacheTTL) else { return }
+        guard descriptor.needsRefresh(context.fullName, now, self.menuService.cacheTTL) else {
+            self.logger.debug("Recent list cache hit kind=\(String(describing: context.kind)) repo=\(context.fullName)")
+            return
+        }
 
+        let startedAt = Date()
+        self.logger.info("Recent list refresh start kind=\(String(describing: context.kind)) repo=\(context.fullName)")
         do {
             let items = try await descriptor.load(context.fullName, owner, name, self.menuService.listLimit)
+            self.logger.info(
+                "Recent list refresh ok kind=\(String(describing: context.kind)) repo=\(context.fullName) count=\(items.count) dur=\(Self.formatDuration(since: startedAt))"
+            )
             self.populateRecentListMenu(
                 menu,
                 header: header,
@@ -188,6 +207,9 @@ final class RecentListMenuCoordinator {
                 })
             )
         } catch is AsyncTimeoutError {
+            self.logger.warning(
+                "Recent list timed out kind=\(String(describing: context.kind)) repo=\(context.fullName) timeout=\(self.menuService.loadTimeout)s"
+            )
             await DiagnosticsLogger.shared.message(
                 "Recent list timed out: \(String(describing: context.kind)) \(context.fullName)"
             )
@@ -197,10 +219,18 @@ final class RecentListMenuCoordinator {
                     header: header,
                     actions: actions,
                     extras: staleExtras,
-                    content: .message("Timed out")
+                    content: .message(Self.timeoutMessage(timeout: self.menuService.loadTimeout))
                 )
             }
         } catch {
+            let message = error.userFacingMessage
+            let errorType = String(describing: type(of: error))
+            let duration = Self.formatDuration(since: startedAt)
+            let rateLimitMessage = Self.rateLimitMessage(for: error)
+            self.recordRateLimitIfNeeded(error)
+            self.logger.warning(
+                "Recent list failed kind=\(String(describing: context.kind)) repo=\(context.fullName) error=\(message) type=\(errorType) dur=\(duration)"
+            )
             await DiagnosticsLogger.shared.message(
                 "Recent list failed: \(String(describing: context.kind)) \(context.fullName) error=\(error.localizedDescription)"
             )
@@ -210,11 +240,63 @@ final class RecentListMenuCoordinator {
                     header: header,
                     actions: actions,
                     extras: staleExtras,
-                    content: .message("Failed to load")
+                    content: .message(Self.failureMessage(for: error))
+                )
+            } else if let stale, let rateLimitMessage {
+                self.populateRecentListMenu(
+                    menu,
+                    header: header,
+                    actions: actions,
+                    extras: self.rateLimitExtras(message: rateLimitMessage) + staleExtras,
+                    content: .items(stale, emptyTitle: descriptor.emptyTitle, render: { menu, items in
+                        self.renderRecentItems(items, for: context.kind, repoFullName: context.fullName, menu: menu)
+                    })
                 )
             }
         }
         menu.update()
+    }
+
+    static func timeoutMessage(timeout: TimeInterval) -> String {
+        "Timed out after \(Int(timeout.rounded()))s"
+    }
+
+    static func failureMessage(for error: Error) -> String {
+        let message = error.userFacingMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !message.isEmpty else { return "Failed to load" }
+
+        return "Failed: \(message)"
+    }
+
+    static func rateLimitMessage(for error: Error) -> String? {
+        guard let reset = (error as? GitHubAPIError)?.rateLimitedUntil else { return nil }
+
+        return "GitHub rate limited; resets \(RelativeFormatter.string(from: reset, relativeTo: Date()))."
+    }
+
+    private static func formatDuration(since start: Date) -> String {
+        let milliseconds = Int((Date().timeIntervalSince(start) * 1000).rounded())
+        return "\(milliseconds)ms"
+    }
+
+    private func recordRateLimitIfNeeded(_ error: Error) {
+        guard let reset = (error as? GitHubAPIError)?.rateLimitedUntil else { return }
+
+        self.appState.session.rateLimitReset = reset
+        self.appState.session.lastError = error.userFacingMessage
+    }
+
+    private func rateLimitExtras(message: String) -> [NSMenuItem] {
+        [
+            self.makeListItem(
+                title: message,
+                action: nil,
+                representedObject: nil,
+                systemImage: "exclamationmark.triangle",
+                isEnabled: false
+            ),
+            .separator()
+        ]
     }
 
     private func renderRecentItems(_ items: RecentMenuItems, for _: RepoRecentMenuKind, repoFullName: String, menu: NSMenu) {

@@ -89,6 +89,18 @@ The file store lives under `~/Library/Application Support/RepoBar/DebugAuth`. Se
   - Flags: `--width`, `--no-wrap`, `--plain`, `--no-color`.
 - `pin <owner/name>` / `unpin <owner/name>`: manage pinned repos.
 - `hide <owner/name>` / `show <owner/name>`: manage hidden repos.
+- `archives list`: list configured GitHub backup archive sources.
+- `archives status [name]`: show path/readiness diagnostics for all archive sources or one source.
+- `archives validate [name]`: fail if archive source configuration is invalid.
+- `archives update <name>`: pull the configured Git snapshot when a remote is set and import the Discrawl-style `manifest.json`/JSONL tables into the configured SQLite database.
+- `archives add <name>`: add a RepoBar-owned GitHub backup archive source.
+  - Flags: `--repo` (local Git snapshot path), `--remote` (Git remote URL),
+    `--branch` (default `main`), `--db` (imported SQLite path).
+- `archives remove <name>`: remove an archive source from RepoBar settings.
+- `archives enable <name>` / `archives disable <name>`: toggle an archive source.
+- `cache status`: show persistent REST cache diagnostics.
+  - Flags: `--limit` (recent response rows to include).
+- `cache clear`: clear persistent REST responses and rate-limit rows.
 - `settings show`: print current settings.
 - `settings set <key> <value>`: update settings (refresh interval, display limit, heatmap, local settings).
 - `login`: browser OAuth login.

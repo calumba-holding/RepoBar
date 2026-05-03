@@ -105,7 +105,7 @@ _Last updated: 2025-11-24_
 - Secure release storage: Keychain for access/refresh tokens, client secret, private key.
 - Debug storage: debug app bundles set `RepoBarTokenStore=file`, and SwiftPM debug CLI/test binaries fall back to file storage in code. `TokenStore.shared` stores auth JSON under `~/Library/Application Support/RepoBar/DebugAuth` instead of touching Keychain unless `REPOBAR_TOKEN_STORE=keychain` is explicitly set. See `docs/auth-storage.md`.
 - UserDefaults/AppStorage for settings (interval, repo list, show contribution image, launch at login, GHE base URL, port).
-- In-memory cache for ETags and recent responses; lightweight disk cache if needed.
+- Persistent SQLite cache for ETags, response bodies, recent lists, repo details, and rate-limit state. RepoBar owns GitHub archive source configuration; it must not read gitcrawl config. Git-backed backup archives should follow the Discrawl-style snapshot/import workflow described in `docs/cache.md`.
 
 ## Dependencies
 - menubarextraaccess (left/right click support for MenuBarExtra)

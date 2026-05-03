@@ -163,6 +163,10 @@ struct AdvancedSettingsView: View {
                 Text("Scans up to the configured depth under the folder, fetches periodically, and can fast-forward pull clean repos.")
             }
 
+            GitHubArchiveSettingsSection(settings: self.$session.settings.githubArchives) {
+                self.appState.persistSettings()
+            }
+
             Section {
                 HStack(spacing: 10) {
                     Button {

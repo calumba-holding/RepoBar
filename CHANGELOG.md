@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Fix Issues submenus when GitHub returns pull requests in the REST issues feed before actual issues, surface GitHub rate limits in the menu UI, and add usable recent-list/REST logs for debugging stuck submenu loads.
+- Add the GRDB-backed persistent REST cache foundation plus RepoBar-owned GitHub archive source settings/CLI commands, explicitly avoiding gitcrawl config discovery.
+- Add CLI cache diagnostics/clear commands and archive status/validate/update commands so the new cache/archive surfaces are script-testable.
+- Make RepoBar's SQLite ETag cache authoritative by bypassing URLSession's local HTTP cache for conditional GitHub REST requests.
+
 ## 0.3.0 - 2026-05-03
 
 - Stop requesting broad OAuth repository scopes for the built-in GitHub.com GitHub App login; custom Enterprise OAuth still requests `repo read:org`.

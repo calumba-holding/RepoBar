@@ -23,11 +23,21 @@ struct SettingsStoreCoverageTests {
         var settings = UserSettings()
         settings.repoList.displayLimit = 9
         settings.githubHost = try #require(URL(string: "https://github.example.com"))
+        settings.githubArchives.sources = [
+            GitHubArchiveSource(
+                name: "openclaw",
+                localRepositoryPath: "~/Backups/openclaw",
+                remoteURL: "https://github.com/example/openclaw-backup.git",
+                importedDatabasePath: "/tmp/openclaw.sqlite"
+            )
+        ]
         store.save(settings)
 
         let loaded = store.load()
         #expect(loaded.repoList.displayLimit == 9)
         #expect(loaded.githubHost == URL(string: "https://github.example.com")!)
+        #expect(loaded.githubArchives.sources.first?.name == "openclaw")
+        #expect(loaded.githubArchives.sources.first?.format == .discrawlSnapshot)
     }
 
     @Test
@@ -63,5 +73,19 @@ struct SettingsStoreCoverageTests {
         defaults.set(Data([0x00, 0x01, 0x02]), forKey: "com.steipete.repobar.settings")
         let store = SettingsStore(defaults: defaults)
         #expect(store.load() == UserSettings())
+    }
+
+    @Test
+    func `load older settings missing archive config`() throws {
+        var original = UserSettings()
+        original.repoList.displayLimit = 4
+        let data = try JSONEncoder().encode(original)
+        var object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        object.removeValue(forKey: "githubArchives")
+        let legacyData = try JSONSerialization.data(withJSONObject: object)
+
+        let loaded = try JSONDecoder().decode(UserSettings.self, from: legacyData)
+        #expect(loaded.repoList.displayLimit == 4)
+        #expect(loaded.githubArchives == GitHubArchiveSettings())
     }
 }

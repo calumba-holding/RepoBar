@@ -27,5 +27,8 @@ struct UserSettingsCoverageTests {
 
         #expect(GlobalActivityScope.allActivity.label == "All activity")
         #expect(GlobalActivityScope.myActivity.label == "My activity")
+
+        #expect(GitHubArchiveSettings().preferArchiveWhenRateLimited)
+        #expect(GitHubArchiveFormat.discrawlSnapshot.label == "Discrawl snapshot")
     }
 }

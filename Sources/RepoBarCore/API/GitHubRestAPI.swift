@@ -302,18 +302,37 @@ struct GitHubRestAPI {
     }
 
     func recentIssues(owner: String, name: String, limit: Int = 20) async throws -> [RepoIssueSummary] {
-        try await self.recentList(
-            owner: owner,
-            name: name,
-            path: "issues",
-            limit: limit,
-            queryItems: [
+        let token = try await tokenProvider()
+        let target = max(1, min(limit, 100))
+        let pageSize = 100
+        let maxPages = 10
+        let baseURL = await apiHost()
+        var collected: [RepoIssueSummary] = []
+        var page = 1
+
+        while collected.count < target, page <= maxPages {
+            var components = URLComponents(
+                url: baseURL.appending(path: "/repos/\(owner)/\(name)/issues"),
+                resolvingAgainstBaseURL: false
+            )!
+            components.queryItems = [
                 URLQueryItem(name: "state", value: "open"),
                 URLQueryItem(name: "sort", value: "updated"),
-                URLQueryItem(name: "direction", value: "desc")
-            ],
-            decode: GitHubRecentDecoders.decodeRecentIssues(from:)
-        )
+                URLQueryItem(name: "direction", value: "desc"),
+                URLQueryItem(name: "per_page", value: "\(pageSize)"),
+                URLQueryItem(name: "page", value: "\(page)")
+            ]
+            let (data, _) = try await authorizedGet(url: components.url!, token: token)
+            let decoded = try GitHubRecentDecoders.decodeRecentIssuePage(from: data)
+            collected.append(contentsOf: decoded.issues)
+
+            if decoded.rawCount < pageSize {
+                break
+            }
+            page += 1
+        }
+
+        return Array(collected.prefix(target))
     }
 
     func recentReleases(owner: String, name: String, limit: Int = 20) async throws -> [RepoReleaseSummary] {
