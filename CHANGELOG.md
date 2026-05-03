@@ -13,6 +13,11 @@
 - Prevent duplicate repository entries from crashing refresh or menu rendering.
 - Fix awkward cooldown error copy.
 - Bound long-lived menu/API caches to avoid gradual memory growth.
+- Update README install/setup guidance for the 0.3.0 flow and point Homebrew users at the official cask.
+- Add the MIT license.
+- Update Swift package and npm dependencies, including MenuBarExtraAccess compatibility work.
+- Update GitHub Actions pins, opt actions into the Node 24 runtime, and make CI Homebrew tool installation idempotent.
+- Strengthen SwiftLint and SwiftFormat rules and apply the current formatter output.
 
 ## 0.2.0 - 2026-01-21
 
