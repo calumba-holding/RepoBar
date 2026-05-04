@@ -110,10 +110,6 @@ struct RateLimitStatusRowView: View {
             }
 
             Spacer(minLength: 8)
-
-            Image(systemName: "chevron.right")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
         }
         .padding(.horizontal, MenuStyle.filterHorizontalPadding)
         .padding(.vertical, 5)
