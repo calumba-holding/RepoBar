@@ -176,7 +176,7 @@ Useful docs:
 
 ## Status
 
-RepoBar is early and moving quickly. The latest released version is 0.4.0, with smarter persistent caching, archive-backed fallback paths, rate-limit visibility, and more robust menu behavior.
+RepoBar is early and moving quickly. The latest released version is 0.4.1, with smarter persistent caching, archive-backed fallback paths, rate-limit visibility, and more robust menu behavior.
 
 ## License
 
