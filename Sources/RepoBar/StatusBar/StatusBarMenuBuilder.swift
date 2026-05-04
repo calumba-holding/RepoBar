@@ -160,7 +160,7 @@ final class StatusBarMenuBuilder {
         case .rateLimits:
             guard case .loggedIn = session.account else { return [] }
 
-            return [self.rateLimitsMenuItem()]
+            return [self.rateLimitsStatusMenuItem()]
         case .filters:
             let isLoggedIn = session.account.isLoggedIn
             let hasLocalFolder = session.settings.localProjects.rootPath?.isEmpty == false

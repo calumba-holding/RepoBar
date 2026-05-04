@@ -39,6 +39,7 @@ enum HelpTarget: String {
     case archivesRemove
     case archivesEnable
     case archivesDisable
+    case rateLimits
     case cacheStatus
     case cacheClear
     case settingsShow
@@ -140,6 +141,8 @@ enum HelpTarget: String {
             return .archivesEnable
         case ArchivesDisableCommand.commandName:
             return .archivesDisable
+        case RateLimitsCommand.commandName:
+            return .rateLimits
         case CacheStatusCommand.commandName:
             return .cacheStatus
         case CacheClearCommand.commandName:
@@ -181,7 +184,7 @@ func printHelp(_ target: HelpTarget) {
           repobar branches <owner/name> [--limit N] [--json] [--plain]
           repobar contributors <owner/name> [--limit N] [--json] [--plain]
           repobar commits [<owner/name>|<login>] [--limit N] [--scope VAL] [--login USER] [--json] [--plain]
-          repobar activity [<owner/name>|<login>] [--limit N] [--scope VAL] [--login USER] [--json] [--plain]
+          repobar activity [<owner/name>|<login>] [--limit N] [--scope VAL] [--login USER] [--include-repos] [--json] [--plain]
           repobar local [--root PATH] [--depth N] [--sync] [--limit N] [--json] [--plain]
           repobar local sync <path|owner/name> [--json] [--plain]
           repobar local rebase <path|owner/name> [--json] [--plain]
@@ -207,6 +210,7 @@ func printHelp(_ target: HelpTarget) {
           repobar archives remove <name> [--json] [--plain]
           repobar archives enable <name> [--json] [--plain]
           repobar archives disable <name> [--json] [--plain]
+          repobar rate-limits [--limit N] [--json] [--plain]
           repobar cache status [--limit N] [--json] [--plain]
           repobar cache clear [--json] [--plain]
           repobar settings show [--json] [--plain]
@@ -400,15 +404,16 @@ func printHelp(_ target: HelpTarget) {
         repobar activity - list recent activity
 
         Usage:
-          repobar activity [<owner/name>|<login>] [--limit N] [--scope VAL] [--login USER] [--json] [--plain]
+          repobar activity [<owner/name>|<login>] [--limit N] [--scope VAL] [--login USER] [--include-repos] [--json] [--plain]
 
         Options:
-          --limit N   Max events to fetch (default: 20)
-          --scope     Activity scope (values: all, my)
-          --login     GitHub login for global activity
-          --json      Output JSON instead of formatted text
-          --plain     Plain output (no links, no colors)
-          --no-color  Disable color output
+          --limit N       Max events to fetch (default: 20)
+          --scope         Activity scope (values: all, my)
+          --login         GitHub login for global activity
+          --include-repos Merge cached repository activity like the menu profile submenu
+          --json          Output JSON instead of formatted text
+          --plain         Plain output (no links, no colors)
+          --no-color      Disable color output
         """
     case .local:
         """
@@ -684,6 +689,15 @@ func printHelp(_ target: HelpTarget) {
 
         Usage:
           repobar cache clear [--json] [--plain]
+        """
+    case .rateLimits:
+        """
+        repobar rate-limits - show GitHub rate-limit state
+
+        Usage:
+          repobar rate-limits [--limit N] [--json] [--plain]
+
+        Options: --limit N, --json, --plain, --no-color
         """
     case .settingsShow:
         """

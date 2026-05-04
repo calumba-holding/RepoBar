@@ -73,3 +73,74 @@ struct CacheClearCommand: CommanderRunnableCommand {
         print("Cleared cache: \(PathFormatter.displayString(summary.databasePath))")
     }
 }
+
+@MainActor
+struct RateLimitsCommand: CommanderRunnableCommand {
+    nonisolated static let commandName = "rate-limits"
+
+    @Option(name: .customLong("limit"), help: "Number of recent cache rows to inspect")
+    var limit: Int = 100
+
+    @OptionGroup
+    var output: OutputOptions
+
+    static var commandDescription: CommandDescription {
+        CommandDescription(commandName: commandName, abstract: "Show GitHub rate-limit state")
+    }
+
+    mutating func bind(_ values: ParsedValues) throws {
+        self.output.bind(values)
+        self.limit = try values.decodeOption("limit") ?? 100
+    }
+
+    mutating func run() async throws {
+        if self.limit < 0 {
+            throw ValidationError("--limit must be >= 0")
+        }
+
+        let summary = try RepoBarPersistentCache.summary(limit: self.limit)
+        let diagnostics = DiagnosticsSummary.empty
+        let sections = RateLimitStatusFormatter.sections(
+            diagnostics: diagnostics,
+            cacheSummary: summary
+        )
+
+        if self.output.jsonOutput {
+            try printJSON(RateLimitsOutput(
+                databasePath: summary.databasePath,
+                exists: summary.exists,
+                apiResponseCount: summary.apiResponseCount,
+                graphQLResponseCount: summary.graphQLResponseCount,
+                rateLimitCount: summary.rateLimitCount,
+                compactSummary: RateLimitStatusFormatter.compactSummary(
+                    diagnostics: diagnostics,
+                    cacheSummary: summary
+                ),
+                sections: sections
+            ))
+            return
+        }
+
+        print("GitHub Rate Limits")
+        print("Cache DB: \(PathFormatter.displayString(summary.databasePath))")
+        for (index, section) in sections.enumerated() {
+            if index > 0 { print("") }
+            if let title = section.title {
+                print(title)
+            }
+            for row in section.rows {
+                print("  \(row)")
+            }
+        }
+    }
+}
+
+private struct RateLimitsOutput: Encodable {
+    let databasePath: String
+    let exists: Bool
+    let apiResponseCount: Int
+    let graphQLResponseCount: Int
+    let rateLimitCount: Int
+    let compactSummary: String
+    let sections: [RateLimitDisplaySection]
+}

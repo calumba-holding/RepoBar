@@ -78,6 +78,12 @@ struct CLIArgumentNormalizerTests {
 
         let clearArgs = CLIArgumentNormalizer.normalize(["repobar", "cache", "clear"])
         #expect(clearArgs[1] == "cache-clear")
+
+        let rateLimitArgs = CLIArgumentNormalizer.normalize(["repobar", "cache", "rate-limits"])
+        #expect(rateLimitArgs[1] == "rate-limits")
+
+        let directArgs = CLIArgumentNormalizer.normalize(["repobar", "limits"])
+        #expect(directArgs[1] == "rate-limits")
     }
 
     @Test
@@ -87,6 +93,16 @@ struct CLIArgumentNormalizerTests {
         let program = Program(descriptors: [RepoBarRoot.descriptor()])
         let invocation = try program.resolve(argv: argv)
         #expect(invocation.path.last == ArchivesListCommand.commandName)
+    }
+
+    @Test
+    @MainActor
+    func `normalized rate limit args resolve`() throws {
+        let argv = CLIArgumentNormalizer.normalize(["repobar", "cache", "rate-limits"])
+        let program = Program(descriptors: [RepoBarRoot.descriptor()])
+        let invocation = try program.resolve(argv: argv)
+        #expect(invocation.path.last == RateLimitsCommand.commandName)
+        #expect(try RepoBarCLI.makeCommand(from: invocation) is RateLimitsCommand)
     }
 
     @Test

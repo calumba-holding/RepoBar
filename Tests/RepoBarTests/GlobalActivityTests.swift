@@ -85,4 +85,55 @@ struct GlobalActivityTests {
         #expect(GlobalActivityScope.allActivity.label == "All activity")
         #expect(GlobalActivityScope.myActivity.label == "My activity")
     }
+
+    @Test
+    func `repository events include latest activity fallback`() throws {
+        let url = try #require(URL(string: "https://github.com/steipete/RepoBar/commit/abc"))
+        let latest = ActivityEvent(
+            title: "Push",
+            actor: "steipete",
+            date: Date(timeIntervalSinceReferenceDate: 100),
+            url: url,
+            eventType: "PushEvent"
+        )
+        let repo = Repository(
+            id: "1",
+            name: "RepoBar",
+            owner: "steipete",
+            sortOrder: nil,
+            error: nil,
+            rateLimitedUntil: nil,
+            ciStatus: .unknown,
+            openIssues: 0,
+            openPulls: 0,
+            latestRelease: nil,
+            latestActivity: latest,
+            activityEvents: [],
+            traffic: nil,
+            heatmap: []
+        )
+
+        let events = GlobalActivityMerger.repositoryEvents(from: [repo])
+
+        #expect(events == [latest])
+    }
+
+    @Test
+    func `global activity merge dedupes and keeps newest actor scoped events`() throws {
+        let firstURL = try #require(URL(string: "https://github.com/steipete/RepoBar/commit/abc"))
+        let secondURL = try #require(URL(string: "https://github.com/steipete/RepoBar/pull/1"))
+        let first = ActivityEvent(title: "Push", actor: "steipete", date: Date(timeIntervalSinceReferenceDate: 100), url: firstURL)
+        let second = ActivityEvent(title: "Pull Request", actor: "steipete", date: Date(timeIntervalSinceReferenceDate: 200), url: secondURL)
+        let other = ActivityEvent(title: "Push", actor: "bot", date: Date(timeIntervalSinceReferenceDate: 300), url: firstURL)
+
+        let events = GlobalActivityMerger.merge(
+            userEvents: [first],
+            repoEvents: [other, second, first],
+            scope: .myActivity,
+            username: "steipete",
+            limit: 10
+        )
+
+        #expect(events == [second, first])
+    }
 }

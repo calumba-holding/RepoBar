@@ -1,4 +1,4 @@
-# RepoBar
+# 🚦 RepoBar
 
 RepoBar is a native macOS menu bar app for keeping GitHub work visible without living in a browser. It shows the repositories you care about, their current issue and PR pressure, recent activity, CI state, releases, local checkout status, and rate-limit health in a compact menu.
 
@@ -114,7 +114,8 @@ repobar repos --owner openclaw --sort prs --plain
 repobar repo openclaw/openclaw --plain
 repobar issues openclaw/openclaw --limit 20 --plain
 repobar pulls openclaw/openclaw --limit 20 --plain
-repobar activity steipete --limit 10 --plain
+repobar activity steipete --include-repos --limit 10 --plain
+repobar rate-limits --plain
 repobar cache status --plain
 ```
 
@@ -175,7 +176,7 @@ Useful docs:
 
 ## Status
 
-RepoBar is early and moving quickly. The latest released version is 0.3.0. The current unreleased 0.4.0 line focuses on smarter persistent caching, archive-backed fallback paths, rate-limit visibility, and more robust menu behavior.
+RepoBar is early and moving quickly. The latest released version is 0.4.0, with smarter persistent caching, archive-backed fallback paths, rate-limit visibility, and more robust menu behavior.
 
 ## License
 

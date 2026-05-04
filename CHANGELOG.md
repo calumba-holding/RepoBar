@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 - Unreleased
+
+- Widen and streamline the Repositories settings browser, including cached row filtering and lighter visibility controls.
+- Add the RepoBar traffic-light emoji to the README title.
+- Move GitHub rate-limit status above the repository filter bar, expose it from the profile submenu, and add CLI/debug output for rate-limit state.
+- Fix profile-submenu activity by merging cached per-repository `latestActivity` events when full activity arrays are not present.
+
 ## 0.4.0 - 2026-05-03
 
 - Fix Issues submenus when GitHub returns pull requests in the REST issues feed before actual issues, surface GitHub rate limits in the menu UI, and add usable recent-list/REST logs for debugging stuck submenu loads.

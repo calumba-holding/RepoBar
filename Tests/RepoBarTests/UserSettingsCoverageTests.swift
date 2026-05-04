@@ -31,4 +31,29 @@ struct UserSettingsCoverageTests {
         #expect(GitHubArchiveSettings().preferArchiveWhenRateLimited)
         #expect(GitHubArchiveFormat.discrawlSnapshot.label == "Discrawl snapshot")
     }
+
+    @Test
+    func `menu normalization keeps rate limits above filters`() throws {
+        var customization = MenuCustomization()
+        customization.mainMenuOrder = [
+            .loggedOutPrompt,
+            .signInAction,
+            .contributionHeader,
+            .statusBanner,
+            .filters,
+            .repoList,
+            .preferences,
+            .about,
+            .restartToUpdate,
+            .quit
+        ]
+
+        customization.normalize()
+
+        let statusIndex = try #require(customization.mainMenuOrder.firstIndex(of: .statusBanner))
+        let rateIndex = try #require(customization.mainMenuOrder.firstIndex(of: .rateLimits))
+        let filterIndex = try #require(customization.mainMenuOrder.firstIndex(of: .filters))
+        #expect(statusIndex < rateIndex)
+        #expect(rateIndex < filterIndex)
+    }
 }

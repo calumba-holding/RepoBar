@@ -88,6 +88,41 @@ struct ErrorBanner: View {
     }
 }
 
+struct RateLimitStatusRowView: View {
+    let summary: String
+    let isLimited: Bool
+    @Environment(\.menuItemHighlighted) private var isHighlighted
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "speedometer")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(self.isLimited ? .orange : MenuHighlightStyle.secondary(self.isHighlighted))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("GitHub Rate Limits")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MenuHighlightStyle.primary(self.isHighlighted))
+                Text(self.summary)
+                    .font(.caption2)
+                    .lineLimit(1)
+                    .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
+            }
+
+            Spacer(minLength: 8)
+
+            Image(systemName: "chevron.right")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
+        }
+        .padding(.horizontal, MenuStyle.filterHorizontalPadding)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("GitHub Rate Limits, \(self.summary)")
+    }
+}
+
 struct MenuInfoTextRowView: View {
     let text: String
     let lineLimit: Int

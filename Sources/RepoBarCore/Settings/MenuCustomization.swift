@@ -179,6 +179,7 @@ public struct MenuCustomization: Equatable, Codable, Hashable, Sendable {
     public mutating func normalize() {
         let originalRepoOrder = self.repoSubmenuOrder
         self.mainMenuOrder = Self.normalizedOrder(self.mainMenuOrder, defaults: Self.defaultMainMenuOrder)
+        Self.moveMainMenuItem(.rateLimits, after: .statusBanner, in: &self.mainMenuOrder)
         self.repoSubmenuOrder = Self.normalizedOrder(self.repoSubmenuOrder, defaults: Self.defaultRepoSubmenuOrder)
         if originalRepoOrder.contains(.changelog) == false {
             self.repoSubmenuOrder.removeAll { $0 == .changelog }
@@ -251,6 +252,19 @@ public struct MenuCustomization: Equatable, Codable, Hashable, Sendable {
             result.append(item)
         }
         return result
+    }
+
+    private static func moveMainMenuItem(
+        _ item: MainMenuItemID,
+        after anchor: MainMenuItemID,
+        in order: inout [MainMenuItemID]
+    ) {
+        guard let itemIndex = order.firstIndex(of: item),
+              let anchorIndex = order.firstIndex(of: anchor) else { return }
+
+        order.remove(at: itemIndex)
+        let adjustedAnchorIndex = itemIndex < anchorIndex ? anchorIndex - 1 : anchorIndex
+        order.insert(item, at: min(adjustedAnchorIndex + 1, order.count))
     }
 }
 

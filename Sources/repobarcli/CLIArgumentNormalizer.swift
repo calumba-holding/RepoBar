@@ -92,12 +92,17 @@ enum CLIArgumentNormalizer {
             let mapped: String? = switch subcommand {
             case "status": "cache-status"
             case "clear": "cache-clear"
+            case "rate-limits", "rate-limit", "limits": "rate-limits"
             default: nil
             }
             if let mapped {
                 normalized[1] = mapped
                 normalized.remove(at: 2)
             }
+        }
+
+        if normalized.count > 1, ["rate-limit", "ratelimits", "limits"].contains(normalized[1]) {
+            normalized[1] = "rate-limits"
         }
 
         return normalized

@@ -13,7 +13,7 @@ extension AppState {
         scope: GlobalActivityScope,
         repos: [Repository]
     ) async -> GlobalActivityResult {
-        let repoEvents = repos.flatMap(\.activityEvents)
+        let repoEvents = GlobalActivityMerger.repositoryEvents(from: repos)
         async let activityResult: Result<[ActivityEvent], Error> = self.capture {
             try await self.github.userActivityEvents(
                 username: username,
@@ -51,7 +51,7 @@ extension AppState {
             commitError = error.userFacingMessage
         }
 
-        let merged = self.mergeGlobalActivityEvents(
+        let merged = GlobalActivityMerger.merge(
             userEvents: activityEvents,
             repoEvents: repoEvents,
             scope: scope,
@@ -65,31 +65,6 @@ extension AppState {
             error: activityError,
             commitError: commitError
         )
-    }
-
-    private func mergeGlobalActivityEvents(
-        userEvents: [ActivityEvent],
-        repoEvents: [ActivityEvent],
-        scope: GlobalActivityScope,
-        username: String,
-        limit: Int
-    ) -> [ActivityEvent] {
-        let combined = userEvents + repoEvents
-        let filtered = scope == .myActivity
-            ? combined.filter { $0.actor.caseInsensitiveCompare(username) == .orderedSame }
-            : combined
-        let sorted = filtered.sorted { $0.date > $1.date }
-        var seen: Set<String> = []
-        var results: [ActivityEvent] = []
-        results.reserveCapacity(limit)
-        for event in sorted {
-            let key = "\(event.url.absoluteString)|\(event.date.timeIntervalSinceReferenceDate)|\(event.actor)"
-            guard seen.insert(key).inserted else { continue }
-
-            results.append(event)
-            if results.count >= limit { break }
-        }
-        return results
     }
 
     private func capture<T>(_ work: @escaping () async throws -> T) async -> Result<T, Error> {

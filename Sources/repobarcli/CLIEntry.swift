@@ -73,6 +73,7 @@ enum RepoBarCLI {
         ArchivesRemoveCommand.commandName: ArchivesRemoveCommand.self,
         ArchivesEnableCommand.commandName: ArchivesEnableCommand.self,
         ArchivesDisableCommand.commandName: ArchivesDisableCommand.self,
+        RateLimitsCommand.commandName: RateLimitsCommand.self,
         CacheStatusCommand.commandName: CacheStatusCommand.self,
         CacheClearCommand.commandName: CacheClearCommand.self,
         SettingsShowCommand.commandName: SettingsShowCommand.self,

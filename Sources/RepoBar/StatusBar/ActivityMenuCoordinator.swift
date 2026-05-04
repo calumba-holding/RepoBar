@@ -19,6 +19,7 @@ final class ActivityMenuCoordinator {
         menu.autoenablesItems = false
         menu.delegate = self.actionHandler
 
+        var hasHeaderItem = false
         if let profileURL = self.profileURL(for: username) {
             menu.addItem(self.menuBuilder.actionItem(
                 title: "Open \(displayName) in GitHub",
@@ -26,7 +27,13 @@ final class ActivityMenuCoordinator {
                 represented: profileURL,
                 systemImage: "person.crop.circle"
             ))
+            hasHeaderItem = true
         }
+
+        if hasHeaderItem {
+            menu.addItem(.separator())
+        }
+        menu.addItem(self.menuBuilder.rateLimitsMenuItem())
 
         let commitEvents = self.appState.session.globalCommitEvents
         let activityEvents = self.appState.session.globalActivityEvents
@@ -36,14 +43,12 @@ final class ActivityMenuCoordinator {
         let activityRemainder = Array(activityEvents.dropFirst(activityPreview.count))
 
         if commitPreview.isEmpty == false {
-            menu.addItem(.separator())
             menu.addItem(self.menuBuilder.infoItem("Commits"))
             commitPreview.forEach { menu.addItem(self.commitMenuItem(for: $0)) }
             if commitRemainder.isEmpty == false {
                 menu.addItem(self.moreCommitsMenuItem(commits: commitRemainder))
             }
         } else if let error = self.appState.session.globalCommitError {
-            menu.addItem(.separator())
             menu.addItem(self.menuBuilder.infoMessageItem(error))
         }
 

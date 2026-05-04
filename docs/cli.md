@@ -66,7 +66,8 @@ The file store lives under `~/Library/Application Support/RepoBar/DebugAuth`. Se
 - `commits [<owner/name>|<login>]`: recent commits (repo or global).
   - Flags: `--limit`, `--scope` (all|my), `--login`.
 - `activity [<owner/name>|<login>]`: recent activity (repo or global).
-  - Flags: `--limit`, `--scope` (all|my), `--login`.
+  - Flags: `--limit`, `--scope` (all|my), `--login`, `--include-repos`.
+  - `--include-repos` merges cached repository activity, matching the profile submenu.
 - `local`: scan local project folder for git repos.
   - Flags: `--root`, `--depth`, `--sync`, `--limit`.
 - `local sync <path|owner/name>`: fast-forward local repo (fetch/rebase/push).
@@ -100,6 +101,8 @@ The file store lives under `~/Library/Application Support/RepoBar/DebugAuth`. Se
 - `archives enable <name>` / `archives disable <name>`: toggle an archive source.
 - `cache status`: show persistent REST and GraphQL cache diagnostics.
   - Flags: `--limit` (recent response rows to include).
+- `rate-limits` / `cache rate-limits`: show observed and active GitHub rate-limit state from the persistent cache.
+  - Flags: `--limit` (recent response rows to inspect).
 - `cache clear`: clear persistent REST responses, GraphQL responses, and rate-limit rows.
 - `settings show`: print current settings.
 - `settings set <key> <value>`: update settings (refresh interval, display limit, heatmap, local settings).

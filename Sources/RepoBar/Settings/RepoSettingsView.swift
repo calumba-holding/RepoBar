@@ -8,6 +8,9 @@ struct RepoSettingsView: View {
     @State private var newRepoVisibility: RepoVisibility = .pinned
     @State private var searchQuery = ""
     @State private var selection = Set<String>()
+    @State private var allRows: [RepoBrowserRow] = []
+    @State private var filteredRows: [RepoBrowserRow] = []
+    @State private var statusLine = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -72,7 +75,7 @@ struct RepoSettingsView: View {
                         .foregroundStyle(.secondary)
                     }
                 }
-                .width(min: 220, ideal: 300, max: .infinity)
+                .width(min: 300, ideal: 420, max: .infinity)
 
                 TableColumn("Issues") { row in
                     Text(row.issueLabel)
@@ -103,18 +106,12 @@ struct RepoSettingsView: View {
                 .width(min: 80, ideal: 96, max: 120)
 
                 TableColumn("Visibility") { row in
-                    Picker("", selection: Binding(
-                        get: { row.visibility },
-                        set: { newValue in Task { await self.set(row.fullName, to: newValue) } }
-                    )) {
-                        ForEach(RepoVisibility.allCases) { vis in
-                            Text(vis.label).tag(vis)
-                        }
+                    RepoVisibilityMenu(visibility: row.visibility) { newValue in
+                        Task { await self.set(row.fullName, to: newValue) }
                     }
-                    .labelsHidden()
-                    .frame(width: 140, alignment: .leading)
+                    .frame(width: 128, alignment: .leading)
                 }
-                .width(min: 140, ideal: 160, max: 180)
+                .width(min: 128, ideal: 136, max: 144)
             }
             .tableStyle(.inset(alternatesRowBackgrounds: true))
             .frame(minHeight: 280)
@@ -151,24 +148,15 @@ struct RepoSettingsView: View {
         }
         .padding()
         .onAppear {
+            self.rebuildRows()
             Task { try? await self.appState.github.prefetchedRepositories() }
         }
-    }
-
-    private var allRows: [RepoBrowserRow] {
-        RepoBrowserRows.make(
-            repositories: self.browserRepositories,
-            pinnedRepositories: self.session.settings.repoList.pinnedRepositories,
-            hiddenRepositories: self.session.settings.repoList.hiddenRepositories,
-            now: Date()
-        )
-    }
-
-    private var filteredRows: [RepoBrowserRow] {
-        let query = self.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return self.allRows }
-
-        return self.allRows.filter { $0.matches(query) }
+        .onChange(of: self.searchQuery) { _, _ in self.applySearch() }
+        .onChange(of: self.session.accessibleRepositories) { _, _ in self.rebuildRows() }
+        .onChange(of: self.session.repositories) { _, _ in self.rebuildRows() }
+        .onChange(of: self.session.menuSnapshot) { _, _ in self.rebuildRows() }
+        .onChange(of: self.session.settings.repoList.pinnedRepositories) { _, _ in self.rebuildRows() }
+        .onChange(of: self.session.settings.repoList.hiddenRepositories) { _, _ in self.rebuildRows() }
     }
 
     private var browserRepositories: [Repository] {
@@ -179,18 +167,6 @@ struct RepoSettingsView: View {
             return snapshotRepos
         }
         return self.session.repositories
-    }
-
-    private var statusLine: String {
-        let total = self.allRows.count
-        let visible = self.filteredRows.count
-        let loaded = self.allRows.count(where: { !$0.isManual })
-        let pinned = self.allRows.count(where: { $0.visibility == .pinned })
-        let hidden = self.allRows.count(where: { $0.visibility == .hidden })
-        if visible == total {
-            return "\(total) repositories, \(loaded) loaded, \(pinned) pinned, \(hidden) hidden"
-        }
-        return "\(visible) of \(total) repositories, \(pinned) pinned, \(hidden) hidden"
     }
 
     private func addNewRepo(_ value: String) {
@@ -219,147 +195,60 @@ struct RepoSettingsView: View {
             await self.bulkSet(ids, to: .visible)
         }
     }
+
+    private func rebuildRows() {
+        self.allRows = RepoBrowserRows.make(
+            repositories: self.browserRepositories,
+            pinnedRepositories: self.session.settings.repoList.pinnedRepositories,
+            hiddenRepositories: self.session.settings.repoList.hiddenRepositories,
+            now: Date()
+        )
+        self.applySearch()
+    }
+
+    private func applySearch() {
+        self.filteredRows = RepoBrowserRows.filter(self.allRows, query: self.searchQuery)
+        self.selection.formIntersection(Set(self.filteredRows.map(\.id)))
+        self.statusLine = RepoBrowserRows.statusLine(allRows: self.allRows, filteredRows: self.filteredRows)
+    }
+}
+
+private struct RepoVisibilityMenu: View {
+    let visibility: RepoVisibility
+    var onChange: (RepoVisibility) -> Void
+
+    var body: some View {
+        Menu {
+            ForEach(RepoVisibility.allCases) { item in
+                Button {
+                    self.onChange(item)
+                } label: {
+                    if item == self.visibility {
+                        Label(item.label, systemImage: "checkmark")
+                    } else {
+                        Text(item.label)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(self.visibility.label)
+                    .lineLimit(1)
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 10)
+            .frame(height: 24)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 // MARK: - Autocomplete helper
-
-struct RepoBrowserRow: Identifiable, Hashable {
-    let id: String
-    let fullName: String
-    let owner: String
-    let name: String
-    let visibility: RepoVisibility
-    let isFork: Bool
-    let isArchived: Bool
-    let isManual: Bool
-    let openIssues: Int?
-    let openPulls: Int?
-    let stars: Int?
-    let pushedAt: Date?
-    let updatedLabel: String
-
-    var issueLabel: String {
-        self.openIssues.map(String.init) ?? "-"
-    }
-
-    var pullRequestLabel: String {
-        self.openPulls.map(String.init) ?? "-"
-    }
-
-    var starLabel: String {
-        self.stars.map(String.init) ?? "-"
-    }
-
-    func matches(_ query: String) -> Bool {
-        let terms = query
-            .split(whereSeparator: \.isWhitespace)
-            .map { String($0).lowercased() }
-        guard !terms.isEmpty else { return true }
-
-        let haystack = [
-            self.fullName,
-            self.owner,
-            self.name,
-            self.visibility.label,
-            self.isFork ? "fork" : "",
-            self.isArchived ? "archived" : "",
-            self.isManual ? "manual" : ""
-        ]
-        .joined(separator: " ")
-        .lowercased()
-        return terms.allSatisfy { haystack.contains($0) }
-    }
-}
-
-enum RepoBrowserRows {
-    static func make(
-        repositories: [Repository],
-        pinnedRepositories: [String],
-        hiddenRepositories: [String],
-        now: Date
-    ) -> [RepoBrowserRow] {
-        let pinnedSet = Set(pinnedRepositories.map(Self.normalized))
-        let hiddenSet = Set(hiddenRepositories.map(Self.normalized))
-        let uniqueRepos = RepositoryUniquing.byFullName(repositories)
-
-        var rows = uniqueRepos.map { repo in
-            let key = Self.normalized(repo.fullName)
-            let visibility: RepoVisibility = if hiddenSet.contains(key) {
-                .hidden
-            } else if pinnedSet.contains(key) {
-                .pinned
-            } else {
-                .visible
-            }
-            return RepoBrowserRow(
-                id: key,
-                fullName: repo.fullName,
-                owner: repo.owner,
-                name: repo.name,
-                visibility: visibility,
-                isFork: repo.isFork,
-                isArchived: repo.isArchived,
-                isManual: false,
-                openIssues: repo.stats.openIssues,
-                openPulls: repo.stats.openPulls,
-                stars: repo.stats.stars,
-                pushedAt: repo.stats.pushedAt,
-                updatedLabel: repo.stats.pushedAt.map { RelativeFormatter.string(from: $0, relativeTo: now) } ?? "-"
-            )
-        }
-
-        let loadedKeys = Set(rows.map(\.id))
-        for name in pinnedRepositories where !loadedKeys.contains(Self.normalized(name)) {
-            rows.append(Self.manualRow(fullName: name, visibility: .pinned))
-        }
-        for name in hiddenRepositories where !loadedKeys.contains(Self.normalized(name)) {
-            rows.append(Self.manualRow(fullName: name, visibility: .hidden))
-        }
-
-        return rows.sorted { lhs, rhs in
-            if lhs.visibility.sortPriority != rhs.visibility.sortPriority {
-                return lhs.visibility.sortPriority < rhs.visibility.sortPriority
-            }
-            return lhs.fullName.localizedCaseInsensitiveCompare(rhs.fullName) == .orderedAscending
-        }
-    }
-
-    private static func manualRow(fullName: String, visibility: RepoVisibility) -> RepoBrowserRow {
-        let trimmed = fullName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let parts = trimmed.split(separator: "/", maxSplits: 1).map(String.init)
-        let owner = parts.count == 2 ? parts[0] : ""
-        let name = parts.count == 2 ? parts[1] : trimmed
-        return RepoBrowserRow(
-            id: Self.normalized(trimmed),
-            fullName: trimmed,
-            owner: owner,
-            name: name,
-            visibility: visibility,
-            isFork: false,
-            isArchived: false,
-            isManual: true,
-            openIssues: nil,
-            openPulls: nil,
-            stars: nil,
-            pushedAt: nil,
-            updatedLabel: "-"
-        )
-    }
-
-    private static func normalized(_ fullName: String) -> String {
-        fullName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-    }
-}
-
-private extension RepoVisibility {
-    var sortPriority: Int {
-        switch self {
-        case .pinned: 0
-        case .visible: 1
-        case .hidden: 2
-        }
-    }
-}
 
 private struct RepoInputRow<Accessory: View>: View {
     let placeholder: String

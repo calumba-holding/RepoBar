@@ -416,6 +416,9 @@ struct ActivityCommand: CommanderRunnableCommand {
     @Option(name: .customLong("scope"), help: "Activity scope (values: all, my)")
     var scope: GlobalActivityScope?
 
+    @Flag(names: [.customLong("include-repos")], help: "Merge cached repository activity like the menu profile submenu")
+    var includeRepos: Bool = false
+
     @OptionGroup
     var output: OutputOptions
 
@@ -429,6 +432,7 @@ struct ActivityCommand: CommanderRunnableCommand {
         self.limit = try values.decodeOption("limit") ?? 20
         self.login = try values.decodeOption("login")
         self.scope = try values.decodeOption("scope")
+        self.includeRepos = values.flag("includeRepos")
         self.output.bind(values)
         if values.positional.count > 1 {
             throw ValidationError("Only one repository or login can be specified")
@@ -441,6 +445,9 @@ struct ActivityCommand: CommanderRunnableCommand {
         let context = try await makeAuthenticatedClient()
 
         if let target, target.contains("/") {
+            if self.includeRepos {
+                throw ValidationError("--include-repos is only available for global activity")
+            }
             let (owner, name) = try parseRepoName(target)
             let repo = try await context.client.fullRepository(owner: owner, name: name)
             let events = Array(repo.activityEvents.prefix(self.limit))
@@ -470,7 +477,20 @@ struct ActivityCommand: CommanderRunnableCommand {
         } else {
             try await context.client.currentUser().username
         }
-        let events = try await context.client.userActivityEvents(username: login, scope: scope, limit: self.limit)
+        let userEvents = try await context.client.userActivityEvents(username: login, scope: scope, limit: self.limit)
+        let events: [ActivityEvent]
+        if self.includeRepos {
+            let repositories = await (try? context.client.cachedRepositoryList(limit: nil)) ?? []
+            events = GlobalActivityMerger.merge(
+                userEvents: userEvents,
+                repoEvents: GlobalActivityMerger.repositoryEvents(from: repositories),
+                scope: scope,
+                username: login,
+                limit: self.limit
+            )
+        } else {
+            events = userEvents
+        }
 
         if self.output.jsonOutput {
             let output = GlobalActivityOutput(
