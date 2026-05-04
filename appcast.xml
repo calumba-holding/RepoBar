@@ -3,6 +3,17 @@
     <channel>
         <title>RepoBar</title>
         <item>
+            <title>0.4.1</title>
+            <pubDate>Mon, 04 May 2026 22:53:26 +0100</pubDate>
+            <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>0.4.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
+            <description><![CDATA[<ul><li>Widen and streamline the Repositories settings browser, including cached row filtering and lighter visibility controls.</li><li>Add the RepoBar traffic-light emoji to the README title.</li><li>Move GitHub rate-limit status above the repository filter bar, expose it from the profile submenu, and add CLI/debug output for rate-limit state.</li><li>Fix profile-submenu activity by merging cached per-repository `latestActivity` events when full activity arrays are not present.</li><li>Fix Settings repository browser issue and pull request counts when GitHub&#x27;s `open_issues_count` includes pull requests.</li><li>Keep hosted recent-list menu rows visible so the Open Actions submenu no longer opens blank.</li><li>Clarify endpoint cooldown messages so per-endpoint backoff does not look like a global GitHub rate-limit failure.</li></ul>
+]]></description>
+            <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.4.1/RepoBar-0.4.1.zip" length="22362383" type="application/octet-stream" sparkle:edSignature="8KhhQXt4nWezpGej8mRLrS8RxeajaqRv27EjD8NvhHtetUsgUG3HLMuEp+ZKR6iaDjRWIfrsT9/7/e/Us/lvAQ=="/>
+        </item>
+        <item>
             <title>0.4.0</title>
             <pubDate>Sun, 03 May 2026 23:52:23 +0100</pubDate>
             <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
@@ -23,17 +34,6 @@
             <description><![CDATA[<ul><li>Stop requesting broad OAuth repository scopes for the built-in GitHub.com GitHub App login; custom Enterprise OAuth still requests `repo read:org`.</li><li>Clarify private organization repository access: Accounts now links to the RepoBar GitHub App installation, docs explain the installation/PAT boundary, and direct repo 404s say when a repo is not visible to the current token.</li><li>Fix release signing defaults so Developer ID builds strip the shared keychain access group unless explicitly enabled with a provisioning profile (#44, thanks @Chefski).</li><li>Sign bundled helper binaries without app-only entitlements so the CLI is not rejected by AMFI.</li><li>Default SwiftPM debug CLI/test auth to file-backed storage so local runs do not trigger Keychain prompts.</li><li>Fix owner-filtered CLI repo lists so `--limit` is applied after filtering by owner.</li><li>Turn the Repositories settings tab into a searchable browser for accessible repos with pinned/hidden state.</li><li>Improve macOS 26 menubar attachment compatibility by updating MenuBarExtraAccess and using its required modifier order (#47, thanks @jviehhauser).</li><li>Prevent duplicate repository entries from crashing refresh or menu rendering.</li><li>Fix awkward cooldown error copy.</li><li>Bound long-lived menu/API caches to avoid gradual memory growth.</li><li>Update README install/setup guidance for the 0.3.0 flow and point Homebrew users at the official cask.</li><li>Add the MIT license.</li><li>Update Swift package and npm dependencies, including MenuBarExtraAccess compatibility work.</li><li>Update GitHub Actions pins, opt actions into the Node 24 runtime, and make CI Homebrew tool installation idempotent.</li><li>Strengthen SwiftLint and SwiftFormat rules and apply the current formatter output.</li></ul>
 ]]></description>
             <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.3.0/RepoBar-0.3.0.zip" length="15406943" type="application/octet-stream" sparkle:edSignature="0Lb7Y0YjsXGGNZTJ5OGPkfdWa/H2k8JiCGArVpFe6fxwizEp/hh5UTpdM/poYkT8a2G2baeaRQrLXlYKXpe/BA=="/>
-        </item>
-        <item>
-            <title>0.2.0</title>
-            <pubDate>Thu, 22 Jan 2026 06:25:29 +0000</pubDate>
-            <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
-            <sparkle:version>4</sparkle:version>
-            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
-            <description><![CDATA[<ul><li>Fix the menu getting stuck on “Loading repositories…” by staging the initial repo list load.</li><li>Fix menubar clicks doing nothing by attaching the status item via a fallback path.</li><li>Add Personal Access Token authentication with persistence + logout fixes (#21, thanks @kkiermasz).</li><li>Add GitHub.com vs Enterprise login picker with OAuth help text (#4).</li><li>Show OAuth errors in Accounts sign-in UI (#6).</li><li>Add token status checks + forced refresh buttons in Settings for debugging auth issues.</li><li>Prevent token check/refresh from hanging; add timeouts and diagnostics logging.</li><li>Detect auth failures (401/refresh errors) and log out cleanly with a clearer message.</li><li>Preserve keychain access groups in signed builds so app + CLI share tokens (#16, thanks @jj3ny).</li><li>Allow importing GitHub CLI tokens with host matching and no refresh loop (#24, thanks @bahag-chaurasiak).</li><li>Surface a clear error when the OAuth loopback port is already in use (#17, thanks @kiranjd).</li><li>Add “Show only my repositories” toggle (owner filter) for repo lists and search.</li><li>Fix the toggle to reset to “show all” when disabled; disable it when signed out.</li><li>Fix commit links to respect GitHub Enterprise host (#9).</li><li>Make pinned/hidden repo matching case-insensitive (fixes private repo pinning edge cases).</li><li>Keep the menu open after pin/unpin/hide/move actions (#25, thanks @bahag-chaurasiak).</li><li>Make Local Projects scan depth configurable (default 4) (#11, thanks @shunkakinoki).</li><li>Stabilize repo settings autocomplete (no spinner layout wiggle), widen the dropdown, show repo stats/badges, fix filtering/hover/scroll, and anchor/size the dropdown to results (no bounce on shrink).</li><li>Widen Enterprise Base URL field and shrink auth progress indicators to avoid layout jumps.</li><li>Derive activity commit links from repo URL when event repo name is missing or malformed.</li><li>iOS: update app icon + logo assets.</li></ul>
-]]></description>
-            <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.2.0/RepoBar-0.2.0.zip" length="15018239" type="application/octet-stream" sparkle:edSignature="qecsK4GJXXmRo7k1JNhRo/hdpqVmL7CWCJtAmZivihkL2IWpXorq3PQk/KE32FobhdKXdIweaZH+oLowVevlAw=="/>
         </item>
     </channel>
 </rss>
