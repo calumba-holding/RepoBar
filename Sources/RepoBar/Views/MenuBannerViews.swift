@@ -1,3 +1,4 @@
+import AppKit
 import RepoBarCore
 import SwiftUI
 
@@ -141,6 +142,122 @@ struct MenuInfoTextRowView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, MenuStyle.cardHorizontalPadding)
         .padding(.vertical, MenuStyle.cardVerticalPadding)
+    }
+}
+
+struct RateLimitSectionHeaderView: View {
+    let title: String
+
+    var body: some View {
+        HStack {
+            Text(self.title.uppercased())
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, RateLimitMenuMetrics.horizontalPadding)
+        .padding(.top, 7)
+        .padding(.bottom, 1)
+    }
+}
+
+struct RateLimitResourceRowView: View {
+    let row: RateLimitDisplayRow
+    @Environment(\.menuItemHighlighted) private var isHighlighted
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            if self.row.resource != nil || self.row.quotaText != nil {
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text(self.row.resource ?? self.row.text)
+                            .font(.caption.weight(.medium))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+
+                        Spacer(minLength: 8)
+
+                        if let quota = self.row.quotaText {
+                            Text(quota)
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+
+                    if let percent = self.row.percentRemaining {
+                        RateLimitProgressBar(
+                            percent: percent,
+                            tint: Self.tint(for: percent),
+                            accessibilityLabel: self.row.resource ?? "GitHub rate limit"
+                        )
+                    }
+
+                    if let reset = self.row.resetText {
+                        Text(reset)
+                            .font(.caption2)
+                            .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
+                            .lineLimit(1)
+                    }
+                }
+            } else {
+                Text(self.row.text)
+                    .font(.caption)
+                    .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
+                    .lineLimit(5)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, RateLimitMenuMetrics.horizontalPadding)
+        .padding(.vertical, 4)
+    }
+
+    private static func tint(for percent: Double) -> Color {
+        if percent <= 10 {
+            return Color(nsColor: .systemRed)
+        }
+        if percent <= 30 {
+            return Color(nsColor: .systemOrange)
+        }
+        return Color(nsColor: .systemGreen)
+    }
+}
+
+private enum RateLimitMenuMetrics {
+    static let horizontalPadding: CGFloat = 28
+}
+
+struct RateLimitProgressBar: View {
+    let percent: Double
+    let tint: Color
+    let accessibilityLabel: String
+    @Environment(\.menuItemHighlighted) private var isHighlighted
+
+    private var clamped: Double {
+        min(100, max(0, self.percent))
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let fillWidth = proxy.size.width * self.clamped / 100
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(MenuHighlightStyle.progressTrack(self.isHighlighted))
+                Capsule()
+                    .fill(MenuHighlightStyle.progressTint(self.isHighlighted, fallback: self.tint))
+                    .frame(width: fillWidth)
+            }
+            .clipped()
+        }
+        .frame(height: 6)
+        .accessibilityLabel(self.accessibilityLabel)
+        .accessibilityValue("\(Int(self.clamped)) percent remaining")
     }
 }
 

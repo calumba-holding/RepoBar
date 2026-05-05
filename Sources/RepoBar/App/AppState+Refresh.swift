@@ -125,14 +125,9 @@ extension AppState {
             }
             await self.updateMenuDisplayIndex(now: now)
             self.prefetchMenuTargets(from: final, visibleCount: targets.count, token: self.refreshTaskToken)
-            let reset = await self.github.rateLimitReset(now: now)
+            await self.refreshRateLimitDisplayState()
             let message = await self.github.rateLimitMessage(now: now)
-            let diagnostics = await self.github.diagnostics()
-            let cacheSummary = try? RepoBarPersistentCache.summary(limit: 100)
             await MainActor.run {
-                self.session.rateLimitReset = reset
-                self.session.rateLimitDiagnostics = diagnostics
-                self.session.rateLimitCacheSummary = cacheSummary
                 self.session.lastError = message
                 NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
             }

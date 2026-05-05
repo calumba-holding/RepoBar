@@ -27,7 +27,8 @@ struct RateLimitJuiceTests {
                 used: 3750,
                 reset: now.addingTimeInterval(60),
                 fetchedAt: now
-            )
+            ),
+            rateLimitResources: nil
         )
 
         let juice = RateLimitJuice(diagnostics: diagnostics, now: now)
@@ -99,7 +100,7 @@ struct RateLimitJuiceTests {
 
         #expect(state.juice.compactRestText == "4.9K")
         #expect(state.compactSummary(now: now).contains("4.9K/5K left"))
-        #expect(state.sections(now: now).first?.rows.first?.contains("4948/5000 left") == true)
+        #expect(state.sections(now: now).first?.rows.first?.contains("4948/5000") == true)
     }
 
     @Test
@@ -112,7 +113,8 @@ struct RateLimitJuiceTests {
             etagEntries: 0,
             backoffEntries: 0,
             restRateLimit: nil,
-            graphQLRateLimit: nil
+            graphQLRateLimit: nil,
+            rateLimitResources: nil
         )
 
         let juice = RateLimitJuice(diagnostics: diagnostics, now: now)
@@ -121,6 +123,54 @@ struct RateLimitJuiceTests {
         #expect(juice.displayRestPercent == 0)
         #expect(juice.compactRestText == "0")
         #expect(juice.hasData)
+    }
+
+    @Test
+    func `uses rate limit endpoint resources before response headers`() throws {
+        let now = Date(timeIntervalSinceReferenceDate: 350)
+        let diagnostics = try DiagnosticsSummary(
+            apiHost: #require(URL(string: "https://api.github.com")),
+            rateLimitReset: nil,
+            lastRateLimitError: nil,
+            etagEntries: 0,
+            backoffEntries: 0,
+            restRateLimit: RateLimitSnapshot(
+                resource: "core",
+                limit: 5000,
+                remaining: 100,
+                used: 4900,
+                reset: now.addingTimeInterval(60),
+                fetchedAt: now
+            ),
+            graphQLRateLimit: nil,
+            rateLimitResources: RateLimitResourcesSnapshot(
+                fetchedAt: now,
+                resources: [
+                    "core": RateLimitSnapshot(
+                        resource: "core",
+                        limit: 5000,
+                        remaining: 4000,
+                        used: 1000,
+                        reset: now.addingTimeInterval(60),
+                        fetchedAt: now
+                    ),
+                    "graphql": RateLimitSnapshot(
+                        resource: "graphql",
+                        limit: 5000,
+                        remaining: 2500,
+                        used: 2500,
+                        reset: now.addingTimeInterval(60),
+                        fetchedAt: now
+                    )
+                ]
+            )
+        )
+
+        let juice = RateLimitJuice(diagnostics: diagnostics, now: now)
+
+        #expect(juice.restPercent == 80)
+        #expect(juice.graphQLPercent == 50)
+        #expect(juice.compactRestText == "4K")
     }
 
     @Test

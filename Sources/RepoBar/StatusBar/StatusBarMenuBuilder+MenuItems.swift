@@ -109,6 +109,14 @@ extension StatusBarMenuBuilder {
         return self.viewItem(for: view, enabled: false)
     }
 
+    func rateLimitSectionHeaderItem(_ title: String) -> NSMenuItem {
+        self.viewItem(for: RateLimitSectionHeaderView(title: title), enabled: false)
+    }
+
+    func rateLimitResourceItem(_ row: RateLimitDisplayRow) -> NSMenuItem {
+        self.viewItem(for: RateLimitResourceRowView(row: row), enabled: false)
+    }
+
     func rateLimitsMenuItem(now: Date = Date()) -> NSMenuItem {
         let item = NSMenuItem(title: "GitHub Rate Limits", action: nil, keyEquivalent: "")
         item.image = self.cachedSystemImage(named: "speedometer")
@@ -145,10 +153,10 @@ extension StatusBarMenuBuilder {
                 submenu.addItem(.separator())
             }
             if let title = section.title {
-                submenu.addItem(self.infoItem(title))
+                submenu.addItem(self.rateLimitSectionHeaderItem(title))
             }
-            for row in section.rows {
-                submenu.addItem(self.infoMessageItem(row))
+            for row in section.resourceRows {
+                submenu.addItem(self.rateLimitResourceItem(row))
             }
         }
 

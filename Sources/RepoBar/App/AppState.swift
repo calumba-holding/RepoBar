@@ -78,6 +78,10 @@ final class AppState {
             self?.requestRefresh()
         }
         Task { await DiagnosticsLogger.shared.setEnabled(self.session.settings.diagnosticsEnabled) }
+        Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(250))
+            await self?.refreshRateLimitDisplayState()
+        }
     }
 
     struct GlobalActivityResult {
@@ -88,7 +92,18 @@ final class AppState {
     }
 
     func diagnostics() async -> DiagnosticsSummary {
-        await self.github.diagnostics()
+        await self.refreshRateLimitDisplayState()
+        return self.session.rateLimitDiagnostics
+    }
+
+    func refreshRateLimitDisplayState() async {
+        _ = try? await self.github.refreshRateLimitResources()
+        let diagnostics = await self.github.diagnostics()
+        let cacheSummary = try? RepoBarPersistentCache.summary(limit: 100)
+        self.session.rateLimitReset = await self.github.rateLimitReset()
+        self.session.rateLimitDiagnostics = diagnostics
+        self.session.rateLimitCacheSummary = cacheSummary
+        NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
     }
 
     func reloadRateLimitCacheSummary(limit: Int = 100) {

@@ -68,6 +68,10 @@ public actor GitHubClient {
         await self.requestRunner.rateLimitMessage(now: now)
     }
 
+    public func refreshRateLimitResources() async throws -> RateLimitResourcesSnapshot {
+        try await self.restAPI.rateLimitResources()
+    }
+
     // MARK: - High level fetchers
 
     public func repositoryList(limit: Int?) async throws -> [Repository] {
@@ -261,14 +265,20 @@ public actor GitHubClient {
 
     public func diagnostics() async -> DiagnosticsSummary {
         let requestDiagnostics = await self.requestRunner.diagnosticsSnapshot()
-        return await DiagnosticsSummary(
+        let graphQLRateLimit: RateLimitSnapshot? = if let graphQL = requestDiagnostics.rateLimitResources?["graphql"] {
+            graphQL
+        } else {
+            await self.graphQL.rateLimitSnapshot()
+        }
+        return DiagnosticsSummary(
             apiHost: self.apiHost,
             rateLimitReset: requestDiagnostics.rateLimitReset,
             lastRateLimitError: requestDiagnostics.lastRateLimitError,
             etagEntries: requestDiagnostics.etagEntries,
             backoffEntries: requestDiagnostics.backoffEntries,
             restRateLimit: requestDiagnostics.restRateLimit,
-            graphQLRateLimit: self.graphQL.rateLimitSnapshot()
+            graphQLRateLimit: graphQLRateLimit,
+            rateLimitResources: requestDiagnostics.rateLimitResources
         )
     }
 
@@ -479,6 +489,7 @@ public struct DiagnosticsSummary: Sendable {
     public let backoffEntries: Int
     public let restRateLimit: RateLimitSnapshot?
     public let graphQLRateLimit: RateLimitSnapshot?
+    public let rateLimitResources: RateLimitResourcesSnapshot?
 
     public static let empty = DiagnosticsSummary(
         apiHost: URL(string: "https://api.github.com")!,
@@ -487,6 +498,7 @@ public struct DiagnosticsSummary: Sendable {
         etagEntries: 0,
         backoffEntries: 0,
         restRateLimit: nil,
-        graphQLRateLimit: nil
+        graphQLRateLimit: nil,
+        rateLimitResources: nil
     )
 }

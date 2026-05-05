@@ -33,6 +33,7 @@ struct RateLimitMenuSignature: Hashable {
     let graphQLRemaining: Int?
     let graphQLLimit: Int?
     let graphQLReset: Date?
+    let liveResources: [LiveRateLimitResourceSignature]
     let cachedResponses: [CachedRateLimitSignature]
     let activeLimits: [ActiveRateLimitSignature]
 
@@ -52,10 +53,29 @@ struct RateLimitMenuSignature: Hashable {
         self.graphQLRemaining = diagnostics.graphQLRateLimit?.remaining
         self.graphQLLimit = diagnostics.graphQLRateLimit?.limit
         self.graphQLReset = diagnostics.graphQLRateLimit?.reset
+        self.liveResources = diagnostics.rateLimitResources?.resources
+            .map { resource, snapshot in
+                LiveRateLimitResourceSignature(resource: resource, snapshot: snapshot)
+            }
+            .sorted { $0.resource < $1.resource } ?? []
         self.cachedResponses = state.cacheSummary
             .map(RateLimitStatusFormatter.observedRateLimitRows(from:))?
             .map(CachedRateLimitSignature.init) ?? []
         self.activeLimits = state.cacheSummary?.rateLimits.map(ActiveRateLimitSignature.init) ?? []
+    }
+}
+
+struct LiveRateLimitResourceSignature: Hashable {
+    let resource: String
+    let remaining: Int?
+    let limit: Int?
+    let reset: Date?
+
+    init(resource: String, snapshot: RateLimitSnapshot) {
+        self.resource = resource
+        self.remaining = snapshot.remaining
+        self.limit = snapshot.limit
+        self.reset = snapshot.reset
     }
 }
 

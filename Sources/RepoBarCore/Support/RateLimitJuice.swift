@@ -15,14 +15,16 @@ public struct RateLimitJuice: Equatable, Sendable {
         cacheSummary: RepoBarCacheSummary? = nil,
         now: Date = Date()
     ) {
+        let resourceCore = diagnostics.rateLimitResources?["core"] ?? diagnostics.rateLimitResources?["rate"]
+        let resourceGraphQL = diagnostics.rateLimitResources?["graphql"]
         let cachedCore = cacheSummary.flatMap { Self.cachedInfo(resource: "core", in: $0) }
         let cachedGraphQL = cacheSummary.flatMap { Self.cachedInfo(resource: "graphql", in: $0) }
         let activeLimits = cacheSummary?.rateLimits.filter { $0.resetAt > now } ?? []
 
-        self.restRemaining = diagnostics.restRateLimit?.remaining ?? cachedCore?.remaining
-        self.restLimit = diagnostics.restRateLimit?.limit ?? cachedCore?.limit
-        self.graphQLRemaining = diagnostics.graphQLRateLimit?.remaining ?? cachedGraphQL?.remaining
-        self.graphQLLimit = diagnostics.graphQLRateLimit?.limit ?? cachedGraphQL?.limit
+        self.restRemaining = resourceCore?.remaining ?? diagnostics.restRateLimit?.remaining ?? cachedCore?.remaining
+        self.restLimit = resourceCore?.limit ?? diagnostics.restRateLimit?.limit ?? cachedCore?.limit
+        self.graphQLRemaining = resourceGraphQL?.remaining ?? diagnostics.graphQLRateLimit?.remaining ?? cachedGraphQL?.remaining
+        self.graphQLLimit = resourceGraphQL?.limit ?? diagnostics.graphQLRateLimit?.limit ?? cachedGraphQL?.limit
         self.restPercent = Self.percent(remaining: self.restRemaining, limit: self.restLimit)
         self.graphQLPercent = Self.percent(remaining: self.graphQLRemaining, limit: self.graphQLLimit)
         self.isRestLimited = diagnostics.rateLimitReset.map { $0 > now } ?? false

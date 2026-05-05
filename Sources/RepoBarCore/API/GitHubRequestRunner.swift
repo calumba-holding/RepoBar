@@ -8,6 +8,7 @@ actor GitHubRequestRunner {
     private var lastRateLimitReset: Date?
     private var lastRateLimitError: String?
     private var latestRestRateLimit: RateLimitSnapshot?
+    private var latestRateLimitResources: RateLimitResourcesSnapshot?
 
     init(
         etagCache: ETagCache = ETagCache.persistent(),
@@ -161,6 +162,16 @@ actor GitHubRequestRunner {
         await self.backoff.clear()
         self.lastRateLimitReset = nil
         self.lastRateLimitError = nil
+        self.latestRestRateLimit = nil
+        self.latestRateLimitResources = nil
+    }
+
+    func recordRateLimitResources(_ snapshot: RateLimitResourcesSnapshot) {
+        self.latestRateLimitResources = snapshot
+        if let core = snapshot.resources["core"] ?? snapshot.resources["rate"] {
+            self.latestRestRateLimit = core
+            self.detectRateLimit(from: core)
+        }
     }
 
     func diagnosticsSnapshot() async -> RequestRunnerDiagnostics {
@@ -171,7 +182,8 @@ actor GitHubRequestRunner {
             lastRateLimitError: self.lastRateLimitError,
             etagEntries: etagCount,
             backoffEntries: backoffCount,
-            restRateLimit: self.latestRestRateLimit
+            restRateLimit: self.latestRestRateLimit,
+            rateLimitResources: self.latestRateLimitResources
         )
     }
 
@@ -229,6 +241,17 @@ actor GitHubRequestRunner {
         }
     }
 
+    private func detectRateLimit(from snapshot: RateLimitSnapshot) {
+        guard let remaining = snapshot.remaining else { return }
+
+        if remaining <= 0 {
+            self.lastRateLimitReset = snapshot.reset
+        } else if let reset = self.lastRateLimitReset, reset <= Date() {
+            self.lastRateLimitReset = nil
+            self.lastRateLimitError = nil
+        }
+    }
+
     private static func endpointDescription(for url: URL) -> String {
         let components = url.path.split(separator: "/").map(String.init)
         let suffix: String = if let repoIndex = components.firstIndex(of: "repos"), components.count > repoIndex + 3 {
@@ -274,4 +297,5 @@ struct RequestRunnerDiagnostics {
     let etagEntries: Int
     let backoffEntries: Int
     let restRateLimit: RateLimitSnapshot?
+    let rateLimitResources: RateLimitResourcesSnapshot?
 }

@@ -137,4 +137,81 @@ struct RateLimitStatusFormatterTests {
         #expect(sections[1].rows.first?.contains("search") == true)
         #expect(sections[2].rows.first?.contains("graphql") == true)
     }
+
+    @Test
+    func `sections render live rate limit endpoint resources`() throws {
+        let now = Date(timeIntervalSinceReferenceDate: 4000)
+        let diagnostics = try DiagnosticsSummary(
+            apiHost: #require(URL(string: "https://api.github.com")),
+            rateLimitReset: nil,
+            lastRateLimitError: nil,
+            etagEntries: 0,
+            backoffEntries: 0,
+            restRateLimit: nil,
+            graphQLRateLimit: nil,
+            rateLimitResources: RateLimitResourcesSnapshot(
+                fetchedAt: now,
+                resources: [
+                    "graphql": RateLimitSnapshot(
+                        resource: "graphql",
+                        limit: 5000,
+                        remaining: 4200,
+                        used: 800,
+                        reset: now.addingTimeInterval(600),
+                        fetchedAt: now
+                    ),
+                    "core": RateLimitSnapshot(
+                        resource: "core",
+                        limit: 5000,
+                        remaining: 3900,
+                        used: 1100,
+                        reset: now.addingTimeInterval(600),
+                        fetchedAt: now
+                    )
+                ]
+            )
+        )
+
+        let sections = RateLimitStatusFormatter.sections(
+            diagnostics: diagnostics,
+            cacheSummary: nil,
+            now: now
+        )
+
+        #expect(sections.map(\.title) == ["REST Core", "GraphQL"])
+        #expect(sections[0].rows[0].contains("core · 3900/5000 · resets in 10 min."))
+        #expect(sections[0].resourceRows[0].quotaText == "3900/5000")
+        #expect(sections[0].resourceRows[0].percentRemaining == 78)
+        #expect(sections[1].rows[0].contains("graphql · 4200/5000 · resets in 10 min."))
+        #expect(sections[1].resourceRows[0].percentRemaining == 84)
+
+        let cachedCore = RepoBarCacheSummary(
+            databasePath: "/tmp/cache.sqlite",
+            exists: true,
+            apiResponseCount: 1,
+            graphQLResponseCount: 0,
+            rateLimitCount: 0,
+            latestResponses: [
+                RepoBarCachedResponseSummary(
+                    method: "GET",
+                    url: "https://api.github.com/user/repos",
+                    hasETag: true,
+                    statusCode: 200,
+                    fetchedAt: now,
+                    rateLimitResource: "core",
+                    rateLimitLimit: 5000,
+                    rateLimitRemaining: 3800,
+                    rateLimitReset: now.addingTimeInterval(600)
+                )
+            ],
+            rateLimits: []
+        )
+
+        let sectionsWithCache = RateLimitStatusFormatter.sections(
+            diagnostics: diagnostics,
+            cacheSummary: cachedCore,
+            now: now
+        )
+        #expect(sectionsWithCache.map(\.title) == ["REST Core", "GraphQL"])
+    }
 }

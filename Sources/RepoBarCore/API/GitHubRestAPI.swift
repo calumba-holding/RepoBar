@@ -82,6 +82,31 @@ struct GitHubRestAPI {
         return try GitHubDecoding.decode(CurrentUser.self, from: data)
     }
 
+    func rateLimitResources() async throws -> RateLimitResourcesSnapshot {
+        let token = try await tokenProvider()
+        let baseURL = await apiHost()
+        let now = Date()
+        let (data, _) = try await authorizedGet(
+            url: baseURL.appending(path: "/rate_limit"),
+            token: token,
+            useETag: false
+        )
+        let decoded = try GitHubDecoding.decode(RateLimitResponse.self, from: data)
+        let resources = decoded.resources.mapValues { resource in
+            RateLimitSnapshot(
+                resource: resource.resource,
+                limit: resource.limit,
+                remaining: resource.remaining,
+                used: resource.used,
+                reset: Date(timeIntervalSince1970: TimeInterval(resource.reset)),
+                fetchedAt: now
+            )
+        }
+        let snapshot = RateLimitResourcesSnapshot(fetchedAt: now, resources: resources)
+        await self.requestRunner.recordRateLimitResources(snapshot)
+        return snapshot
+    }
+
     func searchRepositories(matching query: String) async throws -> [RepoItem] {
         let token = try await tokenProvider()
         let baseURL = await apiHost()
@@ -554,5 +579,33 @@ private struct InstallationReposResponse: Decodable {
     enum CodingKeys: String, CodingKey {
         case totalCount = "total_count"
         case repositories
+    }
+}
+
+private struct RateLimitResponse: Decodable {
+    let resources: [String: RateLimitResourceResponse]
+}
+
+private struct RateLimitResourceResponse: Decodable {
+    let limit: Int?
+    let used: Int?
+    let remaining: Int?
+    let reset: Int
+    let resource: String
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.limit = try container.decodeIfPresent(Int.self, forKey: .limit)
+        self.used = try container.decodeIfPresent(Int.self, forKey: .used)
+        self.remaining = try container.decodeIfPresent(Int.self, forKey: .remaining)
+        self.reset = try container.decode(Int.self, forKey: .reset)
+        self.resource = container.codingPath.last?.stringValue ?? "unknown"
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case limit
+        case used
+        case remaining
+        case reset
     }
 }

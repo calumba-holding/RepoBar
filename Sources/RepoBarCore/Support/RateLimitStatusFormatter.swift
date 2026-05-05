@@ -1,12 +1,42 @@
 import Foundation
 
+public struct RateLimitDisplayRow: Codable, Equatable, Sendable {
+    public let text: String
+    public let resource: String?
+    public let quotaText: String?
+    public let resetText: String?
+    public let percentRemaining: Double?
+
+    public init(
+        text: String,
+        resource: String? = nil,
+        quotaText: String? = nil,
+        resetText: String? = nil,
+        percentRemaining: Double? = nil
+    ) {
+        self.text = text
+        self.resource = resource
+        self.quotaText = quotaText
+        self.resetText = resetText
+        self.percentRemaining = percentRemaining
+    }
+}
+
 public struct RateLimitDisplaySection: Codable, Equatable, Sendable {
     public let title: String?
     public let rows: [String]
+    public let resourceRows: [RateLimitDisplayRow]
 
     public init(title: String?, rows: [String]) {
         self.title = title
         self.rows = rows
+        self.resourceRows = rows.map { RateLimitDisplayRow(text: $0) }
+    }
+
+    public init(title: String?, resourceRows: [RateLimitDisplayRow]) {
+        self.title = title
+        self.rows = resourceRows.map(\.text)
+        self.resourceRows = resourceRows
     }
 }
 
@@ -47,11 +77,13 @@ public enum RateLimitStatusFormatter {
         var sections: [RateLimitDisplaySection] = []
         var currentRows: [String] = []
 
-        if let rest = diagnostics.restRateLimit {
+        if let resources = diagnostics.rateLimitResources {
+            sections.append(contentsOf: Self.liveResourceSections(from: resources, now: now))
+        } else if let rest = diagnostics.restRateLimit {
             currentRows.append(Self.snapshotText(label: "REST", snapshot: rest, now: now))
-        }
-        if let graphQL = diagnostics.graphQLRateLimit {
-            currentRows.append(Self.snapshotText(label: "GraphQL", snapshot: graphQL, now: now))
+            if let graphQL = diagnostics.graphQLRateLimit {
+                currentRows.append(Self.snapshotText(label: "GraphQL", snapshot: graphQL, now: now))
+            }
         }
         if let reset = diagnostics.rateLimitReset {
             currentRows.append("Blocked until \(RelativeFormatter.string(from: reset, relativeTo: now)).")
@@ -64,9 +96,11 @@ public enum RateLimitStatusFormatter {
         }
 
         if let cacheSummary {
-            let observed = Self.observedRateLimitRows(from: cacheSummary)
-            if observed.isEmpty == false {
-                sections.append(contentsOf: Self.observedSections(from: observed, now: now))
+            if diagnostics.rateLimitResources == nil {
+                let observed = Self.observedRateLimitRows(from: cacheSummary)
+                if observed.isEmpty == false {
+                    sections.append(contentsOf: Self.observedSections(from: observed, now: now))
+                }
             }
             if cacheSummary.rateLimits.isEmpty == false {
                 sections.append(RateLimitDisplaySection(
@@ -91,7 +125,31 @@ public enum RateLimitStatusFormatter {
 
             return RateLimitDisplaySection(
                 title: group.title,
-                rows: rows.map { Self.cachedResponseText($0, now: now) }
+                resourceRows: rows.map { Self.cachedResponseRow($0, now: now) }
+            )
+        }
+    }
+
+    private static func liveResourceSections(
+        from snapshot: RateLimitResourcesSnapshot,
+        now: Date
+    ) -> [RateLimitDisplaySection] {
+        let grouped = Dictionary(grouping: Self.sortedResources(snapshot.resources)) { resource, _ in
+            Self.resourceGroup(for: resource)
+        }
+        return ResourceGroup.allCases.compactMap { group in
+            guard let resources = grouped[group], resources.isEmpty == false else { return nil }
+
+            return RateLimitDisplaySection(
+                title: group.title,
+                resourceRows: resources.map { resource, value in
+                    Self.rateLimitRow(RateLimitTextInput(
+                        resource: resource,
+                        remaining: value.remaining,
+                        limit: value.limit,
+                        reset: value.reset
+                    ), now: now, compact: false)
+                }
             )
         }
     }
@@ -106,6 +164,15 @@ public enum RateLimitStatusFormatter {
             rows.append(response)
         }
         return rows
+    }
+
+    private static func sortedResources<T>(_ resources: [String: T]) -> [(String, T)] {
+        resources.sorted { lhs, rhs in
+            let leftGroup = Self.resourceGroup(for: lhs.key).rawValue
+            let rightGroup = Self.resourceGroup(for: rhs.key).rawValue
+            if leftGroup != rightGroup { return leftGroup < rightGroup }
+            return lhs.key < rhs.key
+        }
     }
 
     private static func snapshotText(label: String, snapshot: RateLimitSnapshot, now: Date, compact: Bool = false) -> String {
@@ -125,6 +192,15 @@ public enum RateLimitStatusFormatter {
             limit: row.rateLimitLimit,
             reset: row.rateLimitReset
         ), now: now, compact: compact)
+    }
+
+    private static func cachedResponseRow(_ row: RepoBarCachedResponseSummary, now: Date) -> RateLimitDisplayRow {
+        self.rateLimitRow(RateLimitTextInput(
+            resource: row.rateLimitResource,
+            remaining: row.rateLimitRemaining,
+            limit: row.rateLimitLimit,
+            reset: row.rateLimitReset
+        ), now: now, compact: false)
     }
 
     private static func activeLimitText(_ row: RepoBarRateLimitSummary, now: Date, compact: Bool = false) -> String {
@@ -161,19 +237,43 @@ public enum RateLimitStatusFormatter {
     }
 
     private static func rateLimitText(_ input: RateLimitTextInput, now: Date, compact: Bool) -> String {
+        self.rateLimitRow(input, now: now, compact: compact).text
+    }
+
+    private static func rateLimitRow(
+        _ input: RateLimitTextInput,
+        now: Date,
+        compact: Bool
+    ) -> RateLimitDisplayRow {
         var parts = [input.resource ?? "unknown"]
+        var quotaText: String?
+        var resetText: String?
+        var percentRemaining: Double?
         if let remaining = input.remaining, let limit = input.limit {
             let remainingText = compact ? Self.shortCount(remaining) : "\(remaining)"
             let limitText = compact ? Self.shortCount(limit) : "\(limit)"
-            parts.append("\(remainingText)/\(limitText) left")
+            quotaText = compact ? "\(remainingText)/\(limitText) left" : "\(remainingText)/\(limitText)"
+            parts.append(quotaText ?? "")
+            if limit > 0 {
+                percentRemaining = min(100, max(0, (Double(remaining) / Double(limit)) * 100))
+            }
         } else if let remaining = input.remaining {
             let remainingText = compact ? Self.shortCount(remaining) : "\(remaining)"
-            parts.append("\(remainingText) left")
+            quotaText = compact ? "\(remainingText) left" : remainingText
+            parts.append(quotaText ?? "")
         }
         if let reset = input.reset {
-            parts.append("resets \(RelativeFormatter.string(from: reset, relativeTo: now))")
+            let verb = reset > now ? "resets" : "reset"
+            resetText = "\(verb) \(RelativeFormatter.string(from: reset, relativeTo: now))"
+            parts.append(resetText ?? "")
         }
-        return parts.joined(separator: compact ? " " : " · ")
+        return RateLimitDisplayRow(
+            text: parts.joined(separator: compact ? " " : " · "),
+            resource: input.resource,
+            quotaText: quotaText,
+            resetText: resetText,
+            percentRemaining: percentRemaining
+        )
     }
 
     private static func shortCount(_ value: Int) -> String {
