@@ -86,7 +86,12 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
         let menu = self.mainMenu ?? self.menuBuilder.makeMainMenu()
         self.mainMenu = menu
         self.statusItem = statusItem
+        statusItem.length = NSStatusItem.variableLength
         statusItem.menu = menu
+        self.applyStatusItemAppearance()
+        DispatchQueue.main.async { [weak self] in
+            self?.applyStatusItemAppearance()
+        }
         self.prepareMainMenuIfNeeded(menu)
         self.logMenuEvent("attachMainMenu statusItem=\(self.objectID(statusItem)) menuItems=\(menu.items.count)")
     }
@@ -137,6 +142,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
 
+            self.applyStatusItemAppearance()
             let plan = self.menuBuilder.mainMenuPlan()
             guard self.lastMainMenuSignature != plan.signature else { return }
 
@@ -157,6 +163,75 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
 
     @objc private func recentListFiltersChanged() {
         self.recentListCoordinator.handleFilterChanges()
+    }
+
+    private func applyStatusItemAppearance() {
+        guard let button = self.statusItem?.button else { return }
+
+        let juice = RateLimitJuice(
+            diagnostics: self.appState.session.rateLimitDiagnostics,
+            cacheSummary: self.appState.session.rateLimitCacheSummary
+        )
+        guard self.appState.session.settings.appearance.showRateLimitMeterInMenuBar,
+              juice.hasData,
+              let text = juice.compactRestText
+        else {
+            self.setButtonImage(self.fallbackStatusImage(), for: button)
+            self.setButtonTitle(nil, for: button)
+            button.toolTip = "RepoBar"
+            button.imageScaling = .scaleProportionallyDown
+            return
+        }
+
+        let image = RateLimitStatusIconRenderer.makeIcon(
+            restPercent: juice.displayRestPercent,
+            graphQLPercent: juice.displayGraphQLPercent
+        )
+        self.setButtonImage(image, for: button)
+        self.setButtonTitle(text, for: button)
+        button.toolTip = self.rateLimitTooltip(juice: juice)
+        button.font = .monospacedDigitSystemFont(ofSize: 11, weight: .semibold)
+        button.imageScaling = .scaleNone
+    }
+
+    private func fallbackStatusImage() -> NSImage {
+        let symbolName = self.appState.session.account.isLoggedIn ? "tray.fill" : "tray"
+        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "RepoBar")
+            ?? NSImage(size: NSSize(width: 18, height: 18))
+        image.isTemplate = true
+        return image
+    }
+
+    private func setButtonImage(_ image: NSImage, for button: NSStatusBarButton) {
+        if button.image === image { return }
+        button.image = image
+    }
+
+    private func setButtonTitle(_ title: String?, for button: NSStatusBarButton) {
+        let value = title ?? ""
+        if button.title != value {
+            button.title = value
+        }
+        let position: NSControl.ImagePosition = value.isEmpty ? .imageOnly : .imageLeft
+        if button.imagePosition != position {
+            button.imagePosition = position
+        }
+    }
+
+    private func rateLimitTooltip(juice: RateLimitJuice) -> String {
+        let rest = self.rateLimitTooltipPart(label: "REST", remaining: juice.restRemaining, limit: juice.restLimit)
+        let graphQL = self.rateLimitTooltipPart(label: "GraphQL", remaining: juice.graphQLRemaining, limit: juice.graphQLLimit)
+        return "RepoBar GitHub rate limits: \(rest), \(graphQL)"
+    }
+
+    private func rateLimitTooltipPart(label: String, remaining: Int?, limit: Int?) -> String {
+        if let remaining, let limit {
+            return "\(label) \(remaining)/\(limit)"
+        }
+        if let remaining {
+            return "\(label) \(remaining) left"
+        }
+        return "\(label) unknown"
     }
 
     @objc func toggleIssueLabelFilter(_ sender: NSMenuItem) {
@@ -196,6 +271,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
             )
         }
         if menu === self.mainMenu {
+            self.appState.reloadRateLimitCacheSummary()
             if menu.delegate == nil {
                 menu.delegate = self
             }
@@ -390,6 +466,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
     private func prepareMainMenuIfNeeded(_ menu: NSMenu) {
         let isMenuTooSmall = menu.items.count < Self.minimumMainMenuItems
         if self.lastMainMenuSignature == nil || menu.items.isEmpty || isMenuTooSmall {
+            self.appState.reloadRateLimitCacheSummary()
             let plan = self.menuBuilder.mainMenuPlan()
             self.menuBuilder.populateMainMenu(menu, repos: plan.repos)
             self.lastMainMenuSignature = plan.signature

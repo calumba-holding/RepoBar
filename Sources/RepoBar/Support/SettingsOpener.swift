@@ -13,6 +13,12 @@ final class SettingsOpener {
 
     func open() {
         NSApp.activate(ignoringOtherApps: true)
-        self.openHandler?()
+        if let openHandler {
+            openHandler()
+            return
+        }
+        if !NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil) {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
     }
 }

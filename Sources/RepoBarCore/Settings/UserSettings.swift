@@ -113,11 +113,29 @@ public struct RepoListSettings: Equatable, Codable {
 
 public struct AppearanceSettings: Equatable, Codable {
     public var showContributionHeader = true
+    public var showRateLimitMeterInMenuBar = true
     public var cardDensity: CardDensity = .comfortable
     public var accentTone: AccentTone = .githubGreen
     public var activityScope: GlobalActivityScope = .myActivity
 
     public init() {}
+
+    enum CodingKeys: String, CodingKey {
+        case showContributionHeader
+        case showRateLimitMeterInMenuBar
+        case cardDensity
+        case accentTone
+        case activityScope
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.showContributionHeader = try container.decodeIfPresent(Bool.self, forKey: .showContributionHeader) ?? true
+        self.showRateLimitMeterInMenuBar = try container.decodeIfPresent(Bool.self, forKey: .showRateLimitMeterInMenuBar) ?? true
+        self.cardDensity = try container.decodeIfPresent(CardDensity.self, forKey: .cardDensity) ?? .comfortable
+        self.accentTone = try container.decodeIfPresent(AccentTone.self, forKey: .accentTone) ?? .githubGreen
+        self.activityScope = try container.decodeIfPresent(GlobalActivityScope.self, forKey: .activityScope) ?? .myActivity
+    }
 }
 
 public struct LocalProjectsSettings: Equatable, Codable {

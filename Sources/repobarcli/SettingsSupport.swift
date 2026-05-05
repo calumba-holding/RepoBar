@@ -9,6 +9,7 @@ enum SettingsKey: String, CaseIterable {
     case showArchived = "show-archived"
     case menuSort = "menu-sort"
     case showContributionHeader = "show-contribution-header"
+    case showRateLimitMeter = "show-rate-limit-meter"
     case cardDensity = "card-density"
     case accentTone = "accent-tone"
     case activityScope = "activity-scope"
@@ -38,6 +39,8 @@ enum SettingsKey: String, CaseIterable {
             self = .menuSort
         case "show-contribution-header", "contribution-header":
             self = .showContributionHeader
+        case "show-rate-limit-meter", "rate-limit-meter", "menu-bar-rate-limit-meter":
+            self = .showRateLimitMeter
         case "card-density", "density":
             self = .cardDensity
         case "accent-tone", "accent":
@@ -98,6 +101,10 @@ func applySetting(_ key: SettingsKey, value: String, settings: inout UserSetting
     case .showContributionHeader:
         let flag = try parseBool(value)
         settings.appearance.showContributionHeader = flag
+        return flag ? "on" : "off"
+    case .showRateLimitMeter:
+        let flag = try parseBool(value)
+        settings.appearance.showRateLimitMeterInMenuBar = flag
         return flag ? "on" : "off"
     case .cardDensity:
         guard let density = CardDensity(rawValue: value.lowercased()) else {
@@ -185,6 +192,7 @@ func settingsSummaryLines(settings: UserSettings) -> [String] {
         "Show archived: \(settings.repoList.showArchived ? "on" : "off")",
         "Menu sort: \(settings.repoList.menuSortKey.rawValue)",
         "Contribution header: \(settings.appearance.showContributionHeader ? "on" : "off")",
+        "Rate-limit menu bar meter: \(settings.appearance.showRateLimitMeterInMenuBar ? "on" : "off")",
         "Card density: \(settings.appearance.cardDensity.rawValue)",
         "Accent tone: \(settings.appearance.accentTone.rawValue)",
         "Activity scope: \(settings.appearance.activityScope.rawValue)",

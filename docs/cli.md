@@ -123,6 +123,7 @@ The file store lives under `~/Library/Application Support/RepoBar/DebugAuth`. Se
 - `show-archived` (true|false)
 - `menu-sort` (activity|issues|prs|stars|repo|event)
 - `show-contribution-header` (true|false)
+- `show-rate-limit-meter` (true|false)
 - `card-density` (comfortable|compact)
 - `accent-tone` (system|github-green)
 - `activity-scope` (all|my)

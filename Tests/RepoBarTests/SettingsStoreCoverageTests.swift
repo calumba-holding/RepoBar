@@ -88,4 +88,18 @@ struct SettingsStoreCoverageTests {
         #expect(loaded.repoList.displayLimit == 4)
         #expect(loaded.githubArchives == GitHubArchiveSettings())
     }
+
+    @Test
+    func `load older appearance settings enables rate-limit meter`() throws {
+        let data = try JSONEncoder().encode(UserSettings())
+        var object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        var appearance = try #require(object["appearance"] as? [String: Any])
+        appearance.removeValue(forKey: "showRateLimitMeterInMenuBar")
+        object["appearance"] = appearance
+        let legacyData = try JSONSerialization.data(withJSONObject: object)
+
+        let loaded = try JSONDecoder().decode(UserSettings.self, from: legacyData)
+
+        #expect(loaded.appearance.showRateLimitMeterInMenuBar)
+    }
 }
