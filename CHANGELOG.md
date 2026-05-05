@@ -2,15 +2,13 @@
 
 ## 0.4.1 - 2026-05-04
 
-- Widen and streamline the Repositories settings browser, including cached row filtering and lighter visibility controls.
-- Add the RepoBar traffic-light emoji to the README title.
-- Move GitHub rate-limit status above the repository filter bar, expose it from the profile submenu, and add CLI/debug output for rate-limit state.
-- Keep the menu bar rate-limit meter and GitHub Rate Limits submenu on the same refreshed cache snapshot.
-- Refresh GitHub's `/rate_limit` endpoint so GraphQL and other resource buckets appear in the menu before RepoBar happens to use those APIs.
-- Fix profile-submenu activity by merging cached per-repository `latestActivity` events when full activity arrays are not present.
-- Fix Settings repository browser issue and pull request counts when GitHub's `open_issues_count` includes pull requests.
+- Add a menu bar GitHub rate-limit meter and a detailed GitHub Rate Limits menu with grouped resource buckets, progress bars, reset times, and GraphQL/API bucket data from GitHub's `/rate_limit` endpoint.
+- Move GitHub rate-limit status above the repository filter bar, expose it from the profile submenu, and keep the menu bar meter, main menu row, CLI, and debug output on the same refreshed snapshot.
+- Widen and streamline the Repositories settings browser with cached row filtering, lighter visibility controls, and corrected issue/pull request counts when GitHub's `open_issues_count` includes pull requests.
 - Keep hosted recent-list menu rows visible so the Open Actions submenu no longer opens blank.
+- Fix profile-submenu activity by merging cached per-repository `latestActivity` events when full activity arrays are not present.
 - Clarify endpoint cooldown messages so per-endpoint backoff does not look like a global GitHub rate-limit failure.
+- Add the RepoBar traffic-light emoji to the README title.
 
 ## 0.4.0 - 2026-05-03
 
