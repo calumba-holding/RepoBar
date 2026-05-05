@@ -15,6 +15,7 @@ final class Session {
     var settingsSelectedTab: SettingsTab = .general
     var rateLimitReset: Date?
     var rateLimitDiagnostics: DiagnosticsSummary = .empty
+    var rateLimitCacheSummary: RepoBarCacheSummary?
     var lastError: String?
     var contributionHeatmap: [HeatmapCell] = []
     var contributionUser: String?
@@ -34,6 +35,13 @@ final class Session {
     var localDiscoveredRepoCount = 0
     var localProjectsScanInProgress = false
     var localProjectsAccessDenied = false
+
+    var rateLimitDisplayState: RateLimitDisplayState {
+        RateLimitDisplayState(
+            diagnostics: self.rateLimitDiagnostics,
+            cacheSummary: self.rateLimitCacheSummary
+        )
+    }
 }
 
 enum AccountState: Equatable {

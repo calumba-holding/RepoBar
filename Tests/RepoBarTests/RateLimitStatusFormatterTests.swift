@@ -74,8 +74,67 @@ struct RateLimitStatusFormatterTests {
             now: now
         )
 
-        #expect(sections.map(\.title) == ["Observed REST Resources", "Active Limits"])
+        #expect(sections.map(\.title) == ["REST Search", "Active Limits"])
         #expect(sections[0].rows.first?.contains("search") == true)
         #expect(sections[1].rows.first?.contains("API rate limit exceeded") == true)
+    }
+
+    @Test
+    func `sections group observed resources by github bucket family`() {
+        let now = Date(timeIntervalSinceReferenceDate: 3000)
+        let summary = RepoBarCacheSummary(
+            databasePath: "/tmp/cache.sqlite",
+            exists: true,
+            apiResponseCount: 3,
+            graphQLResponseCount: 0,
+            rateLimitCount: 0,
+            latestResponses: [
+                RepoBarCachedResponseSummary(
+                    method: "GET",
+                    url: "https://api.github.com/repos/owner/name",
+                    hasETag: false,
+                    statusCode: 200,
+                    fetchedAt: now,
+                    rateLimitResource: "core",
+                    rateLimitLimit: 5000,
+                    rateLimitRemaining: 4990,
+                    rateLimitReset: now.addingTimeInterval(600)
+                ),
+                RepoBarCachedResponseSummary(
+                    method: "GET",
+                    url: "https://api.github.com/search/issues",
+                    hasETag: false,
+                    statusCode: 200,
+                    fetchedAt: now,
+                    rateLimitResource: "search",
+                    rateLimitLimit: 30,
+                    rateLimitRemaining: 25,
+                    rateLimitReset: now.addingTimeInterval(600)
+                ),
+                RepoBarCachedResponseSummary(
+                    method: "POST",
+                    url: "https://api.github.com/graphql",
+                    hasETag: false,
+                    statusCode: 200,
+                    fetchedAt: now,
+                    rateLimitResource: "graphql",
+                    rateLimitLimit: 5000,
+                    rateLimitRemaining: 4800,
+                    rateLimitReset: now.addingTimeInterval(600)
+                )
+            ],
+            rateLimits: []
+        )
+
+        let sections = RateLimitStatusFormatter.sections(
+            diagnostics: .empty,
+            cacheSummary: summary,
+            now: now
+        )
+
+        #expect(sections.map(\.title) == ["REST Core", "REST Search", "GraphQL"])
+        #expect(sections[0].rows.first?.contains("core") == true)
+        #expect(sections[1].rows.first?.contains("search") == true)
+        #expect(sections[2].rows.first?.contains("graphql") == true)
     }
 }

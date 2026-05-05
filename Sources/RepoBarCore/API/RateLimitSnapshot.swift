@@ -34,4 +34,8 @@ public struct RateLimitSnapshot: Sendable {
             fetchedAt: now
         )
     }
+
+    public var remainingPercent: Double? {
+        RateLimitJuice.percent(remaining: self.remaining, limit: self.limit)
+    }
 }

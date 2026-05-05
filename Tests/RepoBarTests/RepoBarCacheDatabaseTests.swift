@@ -93,6 +93,35 @@ struct RepoBarCacheDatabaseTests {
     }
 
     @Test
+    func `persistent HTTP cache stores rate-limit limit`() async throws {
+        let path = FileManager.default.temporaryDirectory
+            .appending(path: "RepoBarCacheDatabaseTests.rateLimitLimit.\(UUID().uuidString)")
+            .appending(path: "Cache.sqlite")
+            .path
+        let cache = try ETagCache(maxEntries: 0, persistentStore: HTTPResponseDiskCache(path: path))
+        let url = try #require(URL(string: "https://api.github.com/user/repos"))
+        let reset = Int(Date(timeIntervalSinceReferenceDate: 1000).timeIntervalSince1970)
+        let response = try #require(HTTPURLResponse(
+            url: url,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: [
+                "X-RateLimit-Resource": "core",
+                "X-RateLimit-Limit": "5000",
+                "X-RateLimit-Remaining": "4321",
+                "X-RateLimit-Reset": "\(reset)"
+            ]
+        ))
+
+        await cache.save(url: url, etag: "etag-1", data: Data("payload".utf8), response: response)
+
+        let summary = try HTTPResponseDiskCache(path: path).summary(limit: 1)
+        #expect(summary.latestResponses.first?.rateLimitResource == "core")
+        #expect(summary.latestResponses.first?.rateLimitLimit == 5000)
+        #expect(summary.latestResponses.first?.rateLimitRemaining == 4321)
+    }
+
+    @Test
     func `persistent GraphQL cache round trips responses`() throws {
         let path = FileManager.default.temporaryDirectory
             .appending(path: "RepoBarGraphQLCacheDatabaseTests.\(UUID().uuidString)")

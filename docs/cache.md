@@ -109,6 +109,9 @@ Current behavior:
 - The main menu includes a GitHub Rate Limits submenu that combines live
   in-memory REST/GraphQL snapshots with the latest persisted REST resource
   headers, so rate-budget state is visible before a hard limit is hit.
+- The menu bar rate-limit meter and GitHub Rate Limits submenu share one
+  refreshed display snapshot, so compact and detailed values cannot drift while
+  the menu is open.
 - `repobar cache clear --json` clears persisted REST responses, GraphQL
   responses, and rate limits.
 
@@ -184,7 +187,7 @@ Persist:
 
 - API response ETags and bodies.
 - GraphQL response bodies.
-- `X-RateLimit-Resource`, remaining count, reset time, and last error.
+- `X-RateLimit-Resource`, limit, remaining count, reset time, and last error.
 - Per-request backoff for `403`, secondary rate limits, and `202` stats
   endpoints.
 

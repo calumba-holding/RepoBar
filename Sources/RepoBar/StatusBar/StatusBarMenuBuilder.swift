@@ -37,7 +37,7 @@ final class StatusBarMenuBuilder {
             settings: MenuSettingsSignature(settings: settings, selection: session.menuRepoSelection),
             hasLoadedRepositories: session.hasLoadedRepositories,
             rateLimitReset: session.rateLimitReset,
-            rateLimits: RateLimitMenuSignature(session.rateLimitDiagnostics),
+            rateLimits: RateLimitMenuSignature(session.rateLimitDisplayState),
             lastError: session.lastError,
             contribution: ContributionSignature(
                 user: session.contributionUser,

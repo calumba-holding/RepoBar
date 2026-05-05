@@ -30,8 +30,31 @@ public struct RepoBarCachedResponseSummary: Codable, Equatable, Sendable {
     public let statusCode: Int?
     public let fetchedAt: Date
     public let rateLimitResource: String?
+    public let rateLimitLimit: Int?
     public let rateLimitRemaining: Int?
     public let rateLimitReset: Date?
+
+    public init(
+        method: String,
+        url: String,
+        hasETag: Bool,
+        statusCode: Int?,
+        fetchedAt: Date,
+        rateLimitResource: String?,
+        rateLimitLimit: Int? = nil,
+        rateLimitRemaining: Int?,
+        rateLimitReset: Date?
+    ) {
+        self.method = method
+        self.url = url
+        self.hasETag = hasETag
+        self.statusCode = statusCode
+        self.fetchedAt = fetchedAt
+        self.rateLimitResource = rateLimitResource
+        self.rateLimitLimit = rateLimitLimit
+        self.rateLimitRemaining = rateLimitRemaining
+        self.rateLimitReset = rateLimitReset
+    }
 }
 
 public struct RepoBarRateLimitSummary: Codable, Equatable, Sendable {
@@ -160,6 +183,7 @@ final class HTTPResponseDiskCache {
     func save(url: URL, etag: String, data: Data, response: HTTPURLResponse? = nil) {
         let now = self.clock()
         let reset = response.flatMap(Self.rateLimitReset)
+        let limit = response.flatMap(Self.rateLimitLimit)
         let remaining = response.flatMap(Self.rateLimitRemaining)
         let resource = response?.value(forHTTPHeaderField: "X-RateLimit-Resource")
         let statusCode = response?.statusCode
@@ -172,9 +196,9 @@ final class HTTPResponseDiskCache {
                     sql: """
                     insert into api_responses(
                         key, method, url, etag, status_code, headers_json, body, fetched_at,
-                        rate_limit_resource, rate_limit_remaining, rate_limit_reset, updated_at
+                        rate_limit_resource, rate_limit_limit, rate_limit_remaining, rate_limit_reset, updated_at
                     )
-                    values (?, 'GET', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    values (?, 'GET', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     on conflict(key) do update set
                         etag = excluded.etag,
                         status_code = excluded.status_code,
@@ -182,6 +206,7 @@ final class HTTPResponseDiskCache {
                         body = excluded.body,
                         fetched_at = excluded.fetched_at,
                         rate_limit_resource = excluded.rate_limit_resource,
+                        rate_limit_limit = excluded.rate_limit_limit,
                         rate_limit_remaining = excluded.rate_limit_remaining,
                         rate_limit_reset = excluded.rate_limit_reset,
                         updated_at = excluded.updated_at
@@ -195,6 +220,7 @@ final class HTTPResponseDiskCache {
                         data,
                         now.timeIntervalSinceReferenceDate,
                         resource,
+                        limit,
                         remaining,
                         reset?.timeIntervalSinceReferenceDate,
                         now.timeIntervalSinceReferenceDate
@@ -277,7 +303,7 @@ final class HTTPResponseDiskCache {
                 db,
                 sql: """
                 select method, url, etag, status_code, fetched_at, rate_limit_resource,
-                    rate_limit_remaining, rate_limit_reset
+                    rate_limit_limit, rate_limit_remaining, rate_limit_reset
                 from api_responses
                 order by fetched_at desc
                 limit ?
@@ -294,6 +320,7 @@ final class HTTPResponseDiskCache {
                     statusCode: row["status_code"],
                     fetchedAt: Date(timeIntervalSinceReferenceDate: fetchedAt),
                     rateLimitResource: row["rate_limit_resource"],
+                    rateLimitLimit: row["rate_limit_limit"],
                     rateLimitRemaining: row["rate_limit_remaining"],
                     rateLimitReset: rateLimitReset.map { Date(timeIntervalSinceReferenceDate: $0) }
                 )
@@ -386,6 +413,11 @@ final class HTTPResponseDiskCache {
             }
             try db.create(index: "idx_graphql_responses_fetched_at", on: "graphql_responses", columns: ["fetched_at"], ifNotExists: true)
         }
+        migrator.registerMigration("v3") { db in
+            try db.alter(table: "api_responses") { table in
+                table.add(column: "rate_limit_limit", .integer)
+            }
+        }
         try migrator.migrate(queue)
     }
 
@@ -402,6 +434,12 @@ final class HTTPResponseDiskCache {
 
     private static func rateLimitRemaining(from response: HTTPURLResponse) -> Int? {
         guard let value = response.value(forHTTPHeaderField: "X-RateLimit-Remaining") else { return nil }
+
+        return Int(value)
+    }
+
+    private static func rateLimitLimit(from response: HTTPURLResponse) -> Int? {
+        guard let value = response.value(forHTTPHeaderField: "X-RateLimit-Limit") else { return nil }
 
         return Int(value)
     }

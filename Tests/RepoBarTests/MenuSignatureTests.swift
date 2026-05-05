@@ -1,6 +1,6 @@
 import Foundation
 @testable import RepoBar
-import RepoBarCore
+@testable import RepoBarCore
 import Testing
 
 struct MenuSignatureTests {
@@ -138,5 +138,41 @@ struct MenuSignatureTests {
         )
 
         #expect(signatureA != signatureB)
+    }
+
+    @Test
+    func `rate limit menu signature changes with cached remaining count`() {
+        let now = Date(timeIntervalSinceReferenceDate: 3_000_000)
+        let stale = Self.cacheSummary(remaining: 3700, now: now)
+        let fresh = Self.cacheSummary(remaining: 4948, now: now)
+
+        let signatureA = RateLimitMenuSignature(RateLimitDisplayState(diagnostics: .empty, cacheSummary: stale))
+        let signatureB = RateLimitMenuSignature(RateLimitDisplayState(diagnostics: .empty, cacheSummary: fresh))
+
+        #expect(signatureA != signatureB)
+    }
+
+    private static func cacheSummary(remaining: Int, now: Date) -> RepoBarCacheSummary {
+        RepoBarCacheSummary(
+            databasePath: "/tmp/cache.sqlite",
+            exists: true,
+            apiResponseCount: 1,
+            graphQLResponseCount: 0,
+            rateLimitCount: 0,
+            latestResponses: [
+                RepoBarCachedResponseSummary(
+                    method: "GET",
+                    url: "https://api.github.com/user/repos",
+                    hasETag: true,
+                    statusCode: 200,
+                    fetchedAt: now,
+                    rateLimitResource: "core",
+                    rateLimitLimit: 5000,
+                    rateLimitRemaining: remaining,
+                    rateLimitReset: now.addingTimeInterval(600)
+                )
+            ],
+            rateLimits: []
+        )
     }
 }

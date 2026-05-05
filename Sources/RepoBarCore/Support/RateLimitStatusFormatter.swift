@@ -66,10 +66,7 @@ public enum RateLimitStatusFormatter {
         if let cacheSummary {
             let observed = Self.observedRateLimitRows(from: cacheSummary)
             if observed.isEmpty == false {
-                sections.append(RateLimitDisplaySection(
-                    title: "Observed REST Resources",
-                    rows: observed.map { Self.cachedResponseText($0, now: now) }
-                ))
+                sections.append(contentsOf: Self.observedSections(from: observed, now: now))
             }
             if cacheSummary.rateLimits.isEmpty == false {
                 sections.append(RateLimitDisplaySection(
@@ -82,6 +79,21 @@ public enum RateLimitStatusFormatter {
         return sections.isEmpty
             ? [RateLimitDisplaySection(title: nil, rows: ["No rate-limit data yet"])]
             : sections
+    }
+
+    private static func observedSections(
+        from rows: [RepoBarCachedResponseSummary],
+        now: Date
+    ) -> [RateLimitDisplaySection] {
+        let grouped = Dictionary(grouping: rows) { Self.resourceGroup(for: $0.rateLimitResource) }
+        return ResourceGroup.allCases.compactMap { group in
+            guard let rows = grouped[group], rows.isEmpty == false else { return nil }
+
+            return RateLimitDisplaySection(
+                title: group.title,
+                rows: rows.map { Self.cachedResponseText($0, now: now) }
+            )
+        }
     }
 
     public static func observedRateLimitRows(from summary: RepoBarCacheSummary) -> [RepoBarCachedResponseSummary] {
@@ -110,7 +122,7 @@ public enum RateLimitStatusFormatter {
         self.rateLimitText(RateLimitTextInput(
             resource: row.rateLimitResource,
             remaining: row.rateLimitRemaining,
-            limit: nil,
+            limit: row.rateLimitLimit,
             reset: row.rateLimitReset
         ), now: now, compact: compact)
     }
@@ -123,6 +135,29 @@ public enum RateLimitStatusFormatter {
             return base
         }
         return "\(base) · \(row.lastError ?? "")"
+    }
+
+    private static func resourceGroup(for resource: String?) -> ResourceGroup {
+        switch resource {
+        case "core", "rate":
+            .restCore
+        case "search", "code_search":
+            .restSearch
+        case "graphql":
+            .graphQL
+        case "integration_manifest":
+            .gitHubApp
+        case "dependency_snapshots", "dependency_sbom":
+            .dependencies
+        case "code_scanning_upload", "code_scanning_autofix":
+            .codeScanning
+        case "actions_runner_registration":
+            .actions
+        case "scim", "audit_log", "source_import":
+            .enterpriseAndImport
+        default:
+            .other
+        }
     }
 
     private static func rateLimitText(_ input: RateLimitTextInput, now: Date, compact: Bool) -> String {
@@ -156,5 +191,40 @@ public enum RateLimitStatusFormatter {
         let remaining: Int?
         let limit: Int?
         let reset: Date?
+    }
+
+    private enum ResourceGroup: Int, CaseIterable {
+        case restCore
+        case restSearch
+        case graphQL
+        case gitHubApp
+        case dependencies
+        case codeScanning
+        case actions
+        case enterpriseAndImport
+        case other
+
+        var title: String {
+            switch self {
+            case .restCore:
+                "REST Core"
+            case .restSearch:
+                "REST Search"
+            case .graphQL:
+                "GraphQL"
+            case .gitHubApp:
+                "GitHub App"
+            case .dependencies:
+                "Dependency Metadata"
+            case .codeScanning:
+                "Code Scanning"
+            case .actions:
+                "Actions"
+            case .enterpriseAndImport:
+                "Enterprise / Import"
+            case .other:
+                "Other Resources"
+            }
+        }
     }
 }

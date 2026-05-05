@@ -117,37 +117,29 @@ extension StatusBarMenuBuilder {
     }
 
     func rateLimitsStatusMenuItem(now: Date = Date()) -> NSMenuItem {
-        let summary = try? RepoBarPersistentCache.summary(limit: 100)
+        let state = self.appState.session.rateLimitDisplayState
         let view = RateLimitStatusRowView(
-            summary: RateLimitStatusFormatter.compactSummary(
-                diagnostics: self.appState.session.rateLimitDiagnostics,
-                cacheSummary: summary,
-                now: now
-            ),
-            isLimited: self.appState.session.rateLimitReset != nil || summary?.rateLimits.isEmpty == false
+            summary: state.compactSummary(now: now),
+            isLimited: state.isLimited(now: now)
         )
         return self.viewItem(
             for: view,
             enabled: true,
             highlightable: true,
-            submenu: self.rateLimitsSubmenu(summary: summary, now: now)
+            submenu: self.rateLimitsSubmenu(state: state, now: now)
         )
     }
 
     private func rateLimitsSubmenu(now: Date = Date()) -> NSMenu {
-        self.rateLimitsSubmenu(summary: try? RepoBarPersistentCache.summary(limit: 100), now: now)
+        self.rateLimitsSubmenu(state: self.appState.session.rateLimitDisplayState, now: now)
     }
 
-    private func rateLimitsSubmenu(summary: RepoBarCacheSummary?, now: Date) -> NSMenu {
+    private func rateLimitsSubmenu(state: RateLimitDisplayState, now: Date) -> NSMenu {
         let submenu = NSMenu()
         submenu.autoenablesItems = false
         submenu.delegate = self.target
 
-        let sections = RateLimitStatusFormatter.sections(
-            diagnostics: self.appState.session.rateLimitDiagnostics,
-            cacheSummary: summary,
-            now: now
-        )
+        let sections = state.sections(now: now)
         for (index, section) in sections.enumerated() {
             if index > 0 {
                 submenu.addItem(.separator())

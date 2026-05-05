@@ -33,8 +33,15 @@ struct RateLimitMenuSignature: Hashable {
     let graphQLRemaining: Int?
     let graphQLLimit: Int?
     let graphQLReset: Date?
+    let cachedResponses: [CachedRateLimitSignature]
+    let activeLimits: [ActiveRateLimitSignature]
 
     init(_ diagnostics: DiagnosticsSummary) {
+        self.init(RateLimitDisplayState(diagnostics: diagnostics))
+    }
+
+    init(_ state: RateLimitDisplayState) {
+        let diagnostics = state.diagnostics
         self.reset = diagnostics.rateLimitReset
         self.lastError = diagnostics.lastRateLimitError
         self.restResource = diagnostics.restRateLimit?.resource
@@ -45,6 +52,38 @@ struct RateLimitMenuSignature: Hashable {
         self.graphQLRemaining = diagnostics.graphQLRateLimit?.remaining
         self.graphQLLimit = diagnostics.graphQLRateLimit?.limit
         self.graphQLReset = diagnostics.graphQLRateLimit?.reset
+        self.cachedResponses = state.cacheSummary
+            .map(RateLimitStatusFormatter.observedRateLimitRows(from:))?
+            .map(CachedRateLimitSignature.init) ?? []
+        self.activeLimits = state.cacheSummary?.rateLimits.map(ActiveRateLimitSignature.init) ?? []
+    }
+}
+
+struct CachedRateLimitSignature: Hashable {
+    let resource: String?
+    let remaining: Int?
+    let limit: Int?
+    let reset: Date?
+
+    init(_ row: RepoBarCachedResponseSummary) {
+        self.resource = row.rateLimitResource
+        self.remaining = row.rateLimitRemaining
+        self.limit = row.rateLimitLimit
+        self.reset = row.rateLimitReset
+    }
+}
+
+struct ActiveRateLimitSignature: Hashable {
+    let resource: String
+    let remaining: Int?
+    let reset: Date
+    let lastError: String?
+
+    init(_ row: RepoBarRateLimitSummary) {
+        self.resource = row.resource
+        self.remaining = row.remaining
+        self.reset = row.resetAt
+        self.lastError = row.lastError
     }
 }
 

@@ -19,7 +19,7 @@ _Last updated: 2025-11-24_
 - No Dock icon; single-instance only.
 
 ## User Experience
-- **Menubar icon**: uses menubarextraaccess to differentiate left/right click; icon reflects login/CI aggregate status.
+- **Menubar icon**: uses menubarextraaccess to differentiate left/right click; by default shows a compact GitHub REST/GraphQL rate-limit meter when data is available, with login/CI aggregate status as fallback/overlay.
 - **Left-click window**: grid of repo cards. Each card includes:
   - Repo name + owner, tap to open repo.
   - CI status dot (green/red/yellow) with click-through to Checks/Actions page.

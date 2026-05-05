@@ -35,6 +35,7 @@ final class AppState {
 
     init() {
         self.session.settings = self.settingsStore.load()
+        self.reloadRateLimitCacheSummary()
         RepoBarLogging.bootstrapIfNeeded()
         RepoBarLogging.configure(
             verbosity: self.session.settings.loggingVerbosity,
@@ -88,6 +89,10 @@ final class AppState {
 
     func diagnostics() async -> DiagnosticsSummary {
         await self.github.diagnostics()
+    }
+
+    func reloadRateLimitCacheSummary(limit: Int = 100) {
+        self.session.rateLimitCacheSummary = try? RepoBarPersistentCache.summary(limit: limit)
     }
 
     func clearCaches() async {

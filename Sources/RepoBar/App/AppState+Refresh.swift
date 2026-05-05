@@ -128,9 +128,11 @@ extension AppState {
             let reset = await self.github.rateLimitReset(now: now)
             let message = await self.github.rateLimitMessage(now: now)
             let diagnostics = await self.github.diagnostics()
+            let cacheSummary = try? RepoBarPersistentCache.summary(limit: 100)
             await MainActor.run {
                 self.session.rateLimitReset = reset
                 self.session.rateLimitDiagnostics = diagnostics
+                self.session.rateLimitCacheSummary = cacheSummary
                 self.session.lastError = message
                 NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
             }
@@ -140,10 +142,12 @@ extension AppState {
                 return
             }
             let diagnostics = await self.github.diagnostics()
+            let cacheSummary = try? RepoBarPersistentCache.summary(limit: 100)
             await MainActor.run {
                 self.session.localProjectsScanInProgress = false
                 self.session.rateLimitReset = (error as? GitHubAPIError)?.rateLimitedUntil
                 self.session.rateLimitDiagnostics = diagnostics
+                self.session.rateLimitCacheSummary = cacheSummary
                 self.session.lastError = error.userFacingMessage
                 NotificationCenter.default.post(name: .menuDiagnosticsDidChange, object: nil)
             }
