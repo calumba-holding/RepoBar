@@ -1,29 +1,32 @@
 @testable import RepoBariOS
-import XCTest
+import Foundation
+import Testing
 
-final class RepoWebURLBuilderTests: XCTestCase {
+struct RepoWebURLBuilderTests {
     private func builder(host: String = "https://github.com") throws -> RepoWebURLBuilder {
-        let url = try XCTUnwrap(URL(string: host))
+        let url = try #require(URL(string: host))
         return RepoWebURLBuilder(host: url)
     }
 
-    func testBuildsRepoURL() throws {
+    @Test
+    func test_buildsRepoURL() throws {
         let builder = try self.builder(host: "https://github.example.com")
-        XCTAssertEqual(
-            builder.repoURL(fullName: "acme/widget")?.absoluteString,
-            "https://github.example.com/acme/widget"
+        #expect(
+            builder.repoURL(fullName: "acme/widget")?.absoluteString
+                == "https://github.example.com/acme/widget"
         )
     }
 
-    func testRejectsMalformedRepositoryNames() throws {
+    @Test
+    func test_rejectsMalformedRepositoryNames() throws {
         let builder = try self.builder()
 
-        XCTAssertNil(builder.repoURL(fullName: "widget"))
-        XCTAssertNil(builder.repoURL(fullName: "acme/widget/extra"))
-        XCTAssertNil(builder.repoURL(fullName: "acme//widget"))
-        XCTAssertNil(builder.repoURL(fullName: "acme/widget/"))
-        XCTAssertNil(builder.repoURL(fullName: "acme//"))
-        XCTAssertNil(builder.repoURL(fullName: "/widget"))
-        XCTAssertNil(builder.repoURL(fullName: ""))
+        #expect(builder.repoURL(fullName: "widget") == nil)
+        #expect(builder.repoURL(fullName: "acme/widget/extra") == nil)
+        #expect(builder.repoURL(fullName: "acme//widget") == nil)
+        #expect(builder.repoURL(fullName: "acme/widget/") == nil)
+        #expect(builder.repoURL(fullName: "acme//") == nil)
+        #expect(builder.repoURL(fullName: "/widget") == nil)
+        #expect(builder.repoURL(fullName: "") == nil)
     }
 }
