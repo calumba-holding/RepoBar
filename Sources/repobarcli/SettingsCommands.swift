@@ -9,6 +9,7 @@ struct PinCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -51,6 +52,7 @@ struct UnpinCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -90,6 +92,7 @@ struct HideCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -132,6 +135,7 @@ struct ShowCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -200,7 +204,10 @@ struct SettingsSetCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var key: String?
+
+    @Argument
     private var value: String?
 
     static var commandDescription: CommandDescription {

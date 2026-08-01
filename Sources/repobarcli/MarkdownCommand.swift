@@ -17,6 +17,7 @@ struct MarkdownCommand: CommanderRunnableCommand {
     @Flag(names: [.customLong("no-color")], help: "Disable color output")
     var noColor: Bool = false
 
+    @Argument
     private var path: String?
 
     static var commandDescription: CommandDescription {

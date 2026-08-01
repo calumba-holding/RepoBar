@@ -51,6 +51,7 @@ struct ArchivesStatusCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var name: String?
 
     static var commandDescription: CommandDescription {
@@ -104,6 +105,7 @@ struct ArchivesValidateCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var name: String?
 
     static var commandDescription: CommandDescription {
@@ -147,6 +149,7 @@ struct ArchivesUpdateCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var name: String?
 
     static var commandDescription: CommandDescription {
@@ -212,6 +215,7 @@ struct ArchivesAddCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repository: String?
 
     static var commandDescription: CommandDescription {
@@ -368,6 +372,7 @@ struct ArchivesRemoveCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var name: String?
 
     static var commandDescription: CommandDescription {
@@ -408,6 +413,7 @@ struct ArchivesEnableCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var name: String?
 
     static var commandDescription: CommandDescription {
@@ -451,6 +457,7 @@ struct ArchivesDisableCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var name: String?
 
     static var commandDescription: CommandDescription {

@@ -9,6 +9,7 @@ struct LocalSyncCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -58,6 +59,7 @@ struct LocalRebaseCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -106,6 +108,7 @@ struct LocalResetCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -157,6 +160,7 @@ struct LocalBranchesCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -204,6 +208,7 @@ struct WorktreesCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -247,6 +252,7 @@ struct WorktreesCommand: CommanderRunnableCommand {
 struct OpenFinderCommand: CommanderRunnableCommand {
     nonisolated static let commandName = "open-finder"
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -273,6 +279,7 @@ struct OpenFinderCommand: CommanderRunnableCommand {
 struct OpenTerminalCommand: CommanderRunnableCommand {
     nonisolated static let commandName = "open-terminal"
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -311,6 +318,7 @@ struct CheckoutCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {

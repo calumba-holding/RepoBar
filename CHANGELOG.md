@@ -2,6 +2,7 @@
 
 ## 0.8.7 - Unreleased
 
+- Update Commander to 0.2.4 while preserving declared CLI positional arguments, and update `actions/setup-node` to 6.5.0.
 - Refresh npm and Swift package resolutions, keep Commander pinned to its compatible positional-argument contract, and make SwiftPM tests load Sparkle from the Xcode 26 product layout.
 
 ## 0.8.6 - 2026-07-06

@@ -74,6 +74,7 @@ struct RepoCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -172,6 +173,7 @@ struct IssuesCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -243,6 +245,7 @@ struct PullsCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {

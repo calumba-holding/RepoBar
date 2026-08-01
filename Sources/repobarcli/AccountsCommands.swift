@@ -83,6 +83,7 @@ struct AccountsListCommand: CommanderRunnableCommand {
 struct AccountsUseCommand: CommanderRunnableCommand {
     nonisolated static let commandName = "accounts-use"
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -112,6 +113,7 @@ struct AccountsUseCommand: CommanderRunnableCommand {
 struct AccountsRemoveCommand: CommanderRunnableCommand {
     nonisolated static let commandName = "accounts-remove"
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {

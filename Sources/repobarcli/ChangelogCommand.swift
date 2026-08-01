@@ -28,6 +28,7 @@ struct ChangelogCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var path: String?
 
     static var commandDescription: CommandDescription {
