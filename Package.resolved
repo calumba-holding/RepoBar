@@ -1,5 +1,5 @@
 {
-  "originHash" : "ce363525a7fc2d5df7e60cd885b7aca447defb1fe96b98934bf21490c5eaf9c8",
+  "originHash" : "2a313dba8f5a9e0cba03579cd463dda169608a7496294454be595ff7559c4c81",
   "pins" : [
     {
       "identity" : "apollo-ios",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/steipete/Commander",
       "state" : {
-        "revision" : "ae2ce746b386ff94b26648cfe5625cfa8d02639b",
-        "version" : "0.2.2"
+        "revision" : "bd219c4ee9032fee3e009856f81fcc6ec09a85f4",
+        "version" : "0.2.4"
       }
     },
     {

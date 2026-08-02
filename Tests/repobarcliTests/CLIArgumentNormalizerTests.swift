@@ -154,6 +154,17 @@ struct CLIArgumentNormalizerTests {
     }
 
     @Test
+    @MainActor
+    func `commands without positional arguments reject stray input`() throws {
+        let argv = CLIArgumentNormalizer.normalize(["repobar", "status", "unexpected"])
+        let program = Program(descriptors: [RepoBarRoot.descriptor()])
+
+        #expect(throws: CommanderProgramError.self) {
+            _ = try program.resolve(argv: argv)
+        }
+    }
+
+    @Test
     func `normalizes open subcommands`() {
         let finderArgs = CLIArgumentNormalizer.normalize(["repobar", "open", "finder", "~/Projects"])
         #expect(finderArgs[1] == "open-finder")

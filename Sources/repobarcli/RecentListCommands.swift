@@ -12,6 +12,7 @@ struct ReleasesCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -65,6 +66,7 @@ struct CICommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -118,6 +120,7 @@ struct DiscussionsCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -171,6 +174,7 @@ struct TagsCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -224,6 +228,7 @@ struct BranchesCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -277,6 +282,7 @@ struct ContributorsCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var repoName: String?
 
     static var commandDescription: CommandDescription {
@@ -336,6 +342,7 @@ struct CommitsCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {
@@ -430,6 +437,7 @@ struct ActivityCommand: CommanderRunnableCommand {
     @OptionGroup
     var output: OutputOptions
 
+    @Argument
     private var target: String?
 
     static var commandDescription: CommandDescription {

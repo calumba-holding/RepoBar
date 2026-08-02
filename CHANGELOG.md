@@ -2,6 +2,7 @@
 
 ## 0.8.7 - Unreleased
 
+- Update Commander to 0.2.4 while preserving declared CLI positional arguments, and update `actions/setup-node` to 6.5.0.
 - Refresh npm and Swift package resolutions, keep Commander pinned to its compatible positional-argument contract, and make SwiftPM tests load Sparkle from the Xcode 26 product layout.
 - Reject malformed repository names in the iOS `RepoWebURLBuilder`, which previously accepted values like `acme/widget/extra` and `acme//widget` and built incorrect URLs; the macOS builder already guarded against these (thanks @devYRPauli). (#97)
 
