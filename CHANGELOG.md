@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.8.8 - Unreleased
+
 ## 0.8.7 - 2026-08-02
 
 - Update Commander to 0.2.4 while preserving declared CLI positional arguments, and update `actions/setup-node` to 6.5.0.
