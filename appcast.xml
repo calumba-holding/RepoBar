@@ -3,6 +3,23 @@
     <channel>
         <title>RepoBar</title>
         <item>
+            <title>0.8.7</title>
+            <pubDate>Sun, 02 Aug 2026 11:42:23 -0700</pubDate>
+            <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
+            <sparkle:version>28</sparkle:version>
+            <sparkle:shortVersionString>0.8.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
+            <description><![CDATA[<h2>RepoBar 0.8.7</h2>
+<ul>
+<li>Update Commander to 0.2.4 while preserving declared CLI positional arguments, and update <code>actions/setup-node</code> to 6.5.0.</li>
+<li>Refresh npm and Swift package resolutions, keep Commander pinned to its compatible positional-argument contract, and make SwiftPM tests load Sparkle from the Xcode 26 product layout.</li>
+<li>Reject malformed repository names in the iOS <code>RepoWebURLBuilder</code>, which previously accepted values like <code>acme/widget/extra</code> and <code>acme//widget</code> and built incorrect URLs; the macOS builder already guarded against these (thanks @devYRPauli). (#97)</li>
+</ul>
+<p><a href="https://github.com/steipete/RepoBar/blob/main/CHANGELOG.md">View full changelog</a></p>
+]]></description>
+            <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.8.7/RepoBar-0.8.7.zip" length="26097012" type="application/octet-stream" sparkle:edSignature="vOFOjDjdCG7lAvs8uzHAhi1RQMwhKCOrtvdffNVM3LB1BrIi9of9RbLSBFn86eA8h9W00ElpHo3C4dUt/A7vDw=="/>
+        </item>
+        <item>
             <title>0.8.6</title>
             <pubDate>Mon, 06 Jul 2026 01:16:31 -0700</pubDate>
             <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
@@ -32,26 +49,6 @@
 <p><a href="https://github.com/steipete/RepoBar/blob/main/CHANGELOG.md">View full changelog</a></p>
 ]]></description>
             <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.8.5/RepoBar-0.8.5.zip" length="26005767" type="application/octet-stream" sparkle:edSignature="E2HSNZTIwNlTlJ1++RVhNw+G9Sk2quZ0+BSc8+ke3KV1cKNMWlW81RIjB1pAOKcFKxHkzu7R6LENpbv436P2Bg=="/>
-        </item>
-        <item>
-            <title>0.8.4</title>
-            <pubDate>Thu, 02 Jul 2026 08:43:53 +0100</pubDate>
-            <link>https://raw.githubusercontent.com/steipete/RepoBar/main/appcast.xml</link>
-            <sparkle:version>25</sparkle:version>
-            <sparkle:shortVersionString>0.8.4</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
-            <description><![CDATA[<h2>RepoBar 0.8.4</h2>
-<ul>
-<li>Coalesce concurrent OAuth token refreshes per account so rotating refresh tokens cannot race or overwrite newer credentials.</li>
-<li>Keep repository submenus associated with the correct repository when GitHub&#x27;s opaque node ID differs from its full name.</li>
-<li>Persist the repository display limit from Settings and expose the active heatmap color control in General settings.</li>
-<li>Keep every Settings tab inside the visible display frame, allow bounded manual resizing, and prevent the Repositories table from forcing the window under the Dock (thanks @Yuxin-Qiao). (#84)</li>
-<li>Update Kingfisher to 8.10.0 for safer asynchronous image cancellation and macOS image decoding.</li>
-<li>Update esbuild to 0.28.1 to address upstream development-tool security advisories.</li>
-</ul>
-<p><a href="https://github.com/steipete/RepoBar/blob/main/CHANGELOG.md">View full changelog</a></p>
-]]></description>
-            <enclosure url="https://github.com/steipete/RepoBar/releases/download/v0.8.4/RepoBar-0.8.4.zip" length="26002669" type="application/octet-stream" sparkle:edSignature="gT3YuQR97vjl7Cn+2g7YGplZPutSmrywFgA+v2kHzYtUIH4anEdO7qiclLLDZV6ditDSMdGtdX7Kd0ghIO96CA=="/>
         </item>
     </channel>
 </rss>
