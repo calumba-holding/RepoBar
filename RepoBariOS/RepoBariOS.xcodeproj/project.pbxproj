@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		058B0ED7732E2B4C76CCD0A4 /* GitHubReferenceMatch+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDA676FBF67AB625794875B /* GitHubReferenceMatch+Display.swift */; };
+		08A14ABAC7D8F60F1CECB4F4 /* RepoWebURLBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A70A092BAC0A867A97415D9 /* RepoWebURLBuilderTests.swift */; };
 		0DC367D0B45B1E71D3FF0103 /* AppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DAAD776BCFAD8C0BB42258 /* AppSession.swift */; };
 		15A96DF4CF7EA83F7745A031 /* RepositoryCardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C23DF7BC5FCE3DB16F3D11 /* RepositoryCardModel.swift */; };
 		1843CDC27F756953CBC10286 /* IncomingReferenceURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84059B3F58ED56D01DC050FA /* IncomingReferenceURL.swift */; };
@@ -86,6 +87,7 @@
 		1E1E7701B5D0E364FF641342 /* RepoFilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoFilesView.swift; sourceTree = "<group>"; };
 		22C23DF7BC5FCE3DB16F3D11 /* RepositoryCardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryCardModel.swift; sourceTree = "<group>"; };
 		2540C2570FFCFA055E2A951F /* RepoBariOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RepoBariOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A70A092BAC0A867A97415D9 /* RepoWebURLBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoWebURLBuilderTests.swift; sourceTree = "<group>"; };
 		476C6F1C986C9CC7DF6E8B12 /* AddRepoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRepoSheet.swift; sourceTree = "<group>"; };
 		497C519044532FBA808AFAD6 /* OAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthCoordinator.swift; sourceTree = "<group>"; };
 		4D26FAB33B6A0F5D3125A8DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 			children = (
 				83ACEE3DBA3F2C3F05B624D8 /* IncomingReferenceURLTests.swift */,
 				4D72E27B247AA11DE617F905 /* OwnerFilterParserTests.swift */,
+				3A70A092BAC0A867A97415D9 /* RepoWebURLBuilderTests.swift */,
 			);
 			path = RepoBariOSTests;
 			sourceTree = "<group>";
@@ -429,6 +432,7 @@
 			files = (
 				5FCE45A91ABA50AA40CEB4E4 /* IncomingReferenceURLTests.swift in Sources */,
 				F61F21A79415EE0B0A123D30 /* OwnerFilterParserTests.swift in Sources */,
+				08A14ABAC7D8F60F1CECB4F4 /* RepoWebURLBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
