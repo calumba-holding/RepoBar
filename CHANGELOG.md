@@ -3,6 +3,7 @@
 ## 0.8.8 - Unreleased
 
 - Rewrite the README around installation and first use, with dynamic project badges and tighter links to reference documentation.
+- Update Sparkle, swift-log, Swiftdansi, Octokit request tooling, and tsx to their latest compatible releases.
 
 ## 0.8.7 - 2026-08-02
 

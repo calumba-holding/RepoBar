@@ -28,12 +28,12 @@
     "graphql": "^17.0.2"
   },
   "devDependencies": {
-    "@octokit/request": "^10.0.11",
+    "@octokit/request": "^10.0.13",
     "chalk": "^6.0.0",
     "commander": "^15.0.0",
     "dotenv-cli": "^11.0.0",
     "ora": "^9.4.1",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.7",
     "zod": "^4.4.3"
   }
 }

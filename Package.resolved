@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sparkle-project/Sparkle",
       "state" : {
-        "revision" : "b6496a74a087257ef5e6da1c5b29a447a60f5bd7",
-        "version" : "2.9.4"
+        "revision" : "79bc9e872948e47877e76f194cb0c8e0412b0b90",
+        "version" : "2.9.5"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log",
       "state" : {
-        "revision" : "a878e7f8f46cfc0e1125e565b5c08e7d5272dc9a",
-        "version" : "1.14.0"
+        "revision" : "3ffafb9722d5d918c614feb496c8789a3b59d222",
+        "version" : "1.15.0"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/steipete/Swiftdansi",
       "state" : {
-        "revision" : "66b33f2bb01d0484ede2504f3d89b1941941bf72",
-        "version" : "0.2.2"
+        "revision" : "e5577aacb7c6060861990567c6be01b0d2642fca",
+        "version" : "0.3.0"
       }
     }
   ],
